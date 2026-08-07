@@ -323,6 +323,16 @@ const TRACK_SCHEMA: TuningSchema<typeof TRACK> = {
     group: 'Tricks',
     help: 'How close to the lip the hop has to be, either side. The number Chapter 3 exists to teach — wide enough that Jodi lands it, tight enough that landing it means something.',
   },
+  trickAttemptMs: {
+    kind: 'number',
+    label: 'Counts as trying',
+    min: 100,
+    max: 2000,
+    step: 25,
+    unit: 'ms',
+    group: 'Tricks',
+    help: 'How far off the lip a hop still gets told "too early" or "too late" rather than being ignored.',
+  },
   trickBoost: {
     kind: 'number',
     label: 'Trick boost',
@@ -400,17 +410,23 @@ function update(dt: number): void {
   if (events.padHit) say('BOOST');
   if (events.launchedFromHalfPipe) say('Half-pipe — real boost, wrong line');
 
-  // Confirm the trick in the air, the instant it counts. Waiting for the landing to say so
-  // put the feedback a whole flight away from the input that earned it.
-  if (events.trickRegistered) {
-    const error = events.trickErrorMs ?? 0;
-    say(`TRICK — ${error > 0 ? '+' : ''}${error.toFixed(0)} ms`, 1600);
-    rolling = true;
+  // Judge the hop the moment it can be judged, and always say which way it was wrong. A miss
+  // that says nothing teaches nothing.
+  if (events.trickCall) {
+    const error = Math.abs(events.trickErrorMs ?? 0).toFixed(0);
+    if (events.trickCall === 'got-it') {
+      say(`GOT IT — ${error} ms off`, 1600);
+      rolling = true;
+    } else if (events.trickCall === 'early') {
+      say(`TOO EARLY — ${error} ms before the lip`, 1600);
+    } else {
+      say(`TOO LATE — ${error} ms after the lip`, 1600);
+    }
   }
   if (events.trick === 'landed') {
     say('BOOST', 900);
   } else if (events.trick === 'missed') {
-    say('No trick. Hop at the lip.');
+    say('No hop. Press Space at the lip.');
   }
   if (events.coinsCollected > 0 && run.coins === TRACK.coinTarget) {
     say(`${TRACK.coinTarget} coins!`, 2000);

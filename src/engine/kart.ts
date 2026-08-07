@@ -64,15 +64,16 @@ export type KartConfig = {
 };
 
 /**
- * Tuned by Riggs 2026-08-07 against the 1b2 chase view; see TUNING.md. Still provisional —
- * gate 1b6 is the real sign-off, once ramps, pads and a proper test track exist to drive.
+ * Tuned 2026-08-07 after the first outside playtest; see TUNING.md. Notably slower than the
+ * values Riggs picked driving it himself — a first-time driver needed it slower, and a
+ * first-time driver is the entire audience.
  */
 export const KART_CONFIG: KartConfig = {
-  maxSpeed: 20,
-  acceleration: 16,
+  maxSpeed: 11.5,
+  acceleration: 10,
   drag: 0.35,
 
-  maxYawRate: 2.4,
+  maxYawRate: 2,
   steerRate: 5.5,
   steerReturnRate: 8,
   highSpeedSteerPenalty: 0.3,

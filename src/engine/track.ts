@@ -176,6 +176,12 @@ export type TrackConfig = {
    * to be argued with: too wide and landing it means nothing, too tight and Jodi never does.
    */
   trickWindowMs: number;
+  /**
+   * How far either side of the lip a hop still counts as *trying*, so it can be told "too
+   * early" or "too late" instead of being ignored. A miss that says nothing teaches nothing;
+   * a miss that says which way you were wrong is a lesson.
+   */
+  trickAttemptMs: number;
   /** Seconds of boost for a clean trick. Worth clearly more than a pad, or why bother. */
   trickBoost: number;
   /** Converts speed and ramp steepness into launch speed. */
@@ -195,6 +201,7 @@ export const TRACK_CONFIG: TrackConfig = {
   // Back to 150 once the barrel roll made landings legible — the 500 was measuring "I could
   // not tell it worked", not a genuinely tight window. See TUNING.md.
   trickWindowMs: 150,
+  trickAttemptMs: 750,
   trickBoost: 1.3,
   rampLaunch: 1.6,
   halfPipePush: 7,
@@ -210,6 +217,9 @@ export interface FurnitureContext {
 
 export type TrickOutcome = 'none' | 'landed' | 'missed';
 
+/** The verdict on one hop attempt, delivered the moment it can be known. */
+export type TrickCall = 'got-it' | 'early' | 'late';
+
 export interface FurnitureEvents {
   coinsCollected: number;
   padHit: boolean;
@@ -217,13 +227,13 @@ export interface FurnitureEvents {
   /** The launch came off a half-pipe, so the kart is being thrown off its line. */
   launchedFromHalfPipe: boolean;
   /**
-   * The tick the trick was confirmed, mid-air. Separate from `trick`, which reports the
-   * outcome on landing: the player needs to know it counted the moment it counts, but the
-   * boost still belongs to the landing.
+   * The verdict on a hop, delivered the tick it can be known rather than on landing: the
+   * player needs to know how they did at the moment they did it. The boost still belongs to
+   * the landing.
    */
-  trickRegistered: boolean;
+  trickCall: TrickCall | null;
   trick: TrickOutcome;
-  /** How far the hop was from the lip, in ms. Negative is early. Null when no trick landed. */
+  /** How far the hop was from the lip, in ms. Negative is early. Null when nobody hopped. */
   trickErrorMs: number | null;
 }
 
@@ -232,7 +242,7 @@ const NO_EVENTS: FurnitureEvents = {
   padHit: false,
   launched: false,
   launchedFromHalfPipe: false,
-  trickRegistered: false,
+  trickCall: null,
   trick: 'none',
   trickErrorMs: null,
 };
@@ -250,9 +260,9 @@ export class TrackRun {
   private currentRamp: PlacedFurniture | null = null;
   private lastPadId: number | null = null;
   private launchedAt = 0;
-  private trickArmedUntil = 0;
   private trickLanded = false;
-  private trickErrorMs: number | null = null;
+  /** The verdict already given for this flight, so it is not repeated every hop. */
+  private call: TrickCall | null = null;
 
   constructor(readonly items: PlacedFurniture[]) {}
 
@@ -260,9 +270,8 @@ export class TrackRun {
     this.coins = 0;
     this.currentRamp = null;
     this.lastPadId = null;
-    this.trickArmedUntil = 0;
     this.trickLanded = false;
-    this.trickErrorMs = null;
+    this.call = null;
     for (const item of this.items) item.collected = false;
   }
 
@@ -333,29 +342,45 @@ export class TrackRun {
 
       this.launchedAt = ctx.now;
       this.trickLanded = false;
-      this.trickErrorMs = null;
+      this.call = null;
       events.launched = true;
 
-      // An early hop counts: pressing just before the lip is the same instinct as pressing
-      // just after, and punishing one but not the other would teach nothing useful.
+      // A hop before the lip is judged here, because "too early" only becomes knowable once
+      // the lip arrives. An early hop inside the window still counts: pressing just before is
+      // the same instinct as pressing just after, and rewarding one but not the other would
+      // teach nothing useful.
       const pressed = ctx.hopPressedAt;
-      if (pressed !== null && ctx.now - pressed <= config.trickWindowMs) {
-        this.trickLanded = true;
-        this.trickErrorMs = pressed - ctx.now;
-        this.trickArmedUntil = 0;
-        events.trickRegistered = true;
-      } else {
-        this.trickArmedUntil = ctx.now + config.trickWindowMs;
+      if (pressed !== null) {
+        const error = pressed - ctx.now; // negative: before the lip
+        if (-error <= config.trickWindowMs) {
+          this.trickLanded = true;
+          this.call = 'got-it';
+        } else if (-error <= config.trickAttemptMs) {
+          this.call = 'early';
+        }
+        if (this.call) {
+          events.trickCall = this.call;
+          events.trickErrorMs = error;
+        }
       }
     }
     this.currentRamp = rampUnderKart;
 
-    // A hop after the lip, still inside the window.
-    if (!this.trickLanded && ctx.hopJustPressed && ctx.now <= this.trickArmedUntil) {
-      this.trickLanded = true;
-      this.trickErrorMs = ctx.now - this.launchedAt;
-      this.trickArmedUntil = 0;
-      events.trickRegistered = true;
+    // A hop after the lip. Judged immediately, since the lip is already behind us.
+    if (ctx.hopJustPressed && this.launchedAt > 0 && !this.trickLanded) {
+      const error = ctx.now - this.launchedAt;
+      if (error <= config.trickWindowMs) {
+        // Upgrades an earlier "too early" — hopping again at the right moment should be
+        // rewarded, not locked out by the first attempt.
+        this.trickLanded = true;
+        this.call = 'got-it';
+        events.trickCall = 'got-it';
+        events.trickErrorMs = error;
+      } else if (error <= config.trickAttemptMs && this.call !== 'late') {
+        this.call = 'late';
+        events.trickCall = 'late';
+        events.trickErrorMs = error;
+      }
     }
 
     // --- touchdown ---
@@ -364,13 +389,14 @@ export class TrackRun {
       if (this.trickLanded) {
         kart.boostRemaining = Math.max(kart.boostRemaining, config.trickBoost);
         events.trick = 'landed';
-        events.trickErrorMs = this.trickErrorMs;
-      } else {
+      } else if (this.call === null) {
+        // Only nag about it if they never tried. Someone who was told "too early" a moment
+        // ago does not need telling again that they missed.
         events.trick = 'missed';
       }
       this.launchedAt = 0;
       this.trickLanded = false;
-      this.trickArmedUntil = 0;
+      this.call = null;
     }
 
     return events;

@@ -21,6 +21,39 @@ not just the diff that got there. Those are the numbers the real site ships with
 
 _(newest first)_
 
+### 2026-08-07 — KART_CONFIG (1b1), after the first outside playtest
+
+**Why:** Riggs's girlfriend drove it — the first person who is not the author to touch this
+project. It came back substantially slower.
+
+| Field | Before | After |
+|---|---|---|
+| `maxSpeed` | 20 | 11.5 |
+| `acceleration` | 16 | 10 |
+| `maxYawRate` | 2.4 | 2 |
+
+**This is the most useful data point the project has produced, and it is worth stating plainly:
+it moved the number in the opposite direction from the author's own instinct.**
+
+The history is the argument. My blind guess was 16. Riggs drove it and went up to 20. The first
+person who had not been staring at the code went down to 11.5 — below even the starting value.
+Speed that reads as "responsive" to someone who has driven the same oval two hundred times reads
+as "out of control" to someone seeing it for the first time.
+
+Jodi is a first-time driver. She is closer to this playtester than to Riggs, and every drill she
+meets is one she has never seen before. **Prefer the outside number.** When these two instincts
+disagree again — and they will, on the trick window, on the guardrail, on how punishing grass is
+— the newcomer is the one describing Jodi's experience.
+
+Worth repeating before gate 1b6: get someone who has never seen it to drive it.
+
+### 2026-08-07 — TRACK_CONFIG (1b3), too-early / too-late calls
+
+Added `trickAttemptMs` (750ms). A hop this far either side of the lip is treated as an *attempt*
+and told which way it was wrong, instead of being silently ignored. A miss that says nothing
+teaches nothing; a miss that says "120 ms early" is a lesson, and it is the same lesson she will
+need on the Switch.
+
 ### 2026-08-07 — TRACK_CONFIG (1b3), tuned by Riggs
 
 **Why:** "It's hard to tell when [boosts and tricks] hit."
