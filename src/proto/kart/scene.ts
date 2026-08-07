@@ -321,31 +321,37 @@ function buildKerbs(points: PathPoint[], halfWidth: number): THREE.Group {
   return group;
 }
 
-/** A proper chequered start line rather than a white bar. */
+/**
+ * A proper chequered start line rather than a white bar.
+ *
+ * Built inside a group that carries the track's heading, so each square inherits the rotation
+ * instead of trying to hold it itself. Positioning squares in world space and leaving them
+ * axis-aligned makes them overlap and gap wherever the track is not aligned to world x — which
+ * is everywhere except by luck.
+ */
 function buildStartLine(surface: PathSurface, points: PathPoint[]): THREE.Group {
   const group = new THREE.Group();
   const start = points[0];
   if (!start) return group;
 
-  const squares = 10;
-  const size = (surface.halfWidth * 2) / squares;
+  group.position.set(start.x, 0.06, start.y);
+  group.rotation.y = -Math.atan2(start.ty, start.tx);
+
+  const columns = 10;
+  const size = (surface.halfWidth * 2) / columns;
   const dark = new THREE.MeshLambertMaterial({ color: 0x2b2f38 });
   const light = new THREE.MeshLambertMaterial({ color: 0xf7f7f7 });
 
   for (let row = 0; row < 2; row++) {
-    for (let column = 0; column < squares; column++) {
+    for (let column = 0; column < columns; column++) {
+      // A hair of overlap: abutting planes at exactly the same size leave hairline seams
+      // wherever the edges land on the same pixel.
       const square = new THREE.Mesh(
-        new THREE.PlaneGeometry(size, size),
+        new THREE.PlaneGeometry(size * 1.02, size * 1.02),
         (row + column) % 2 === 0 ? dark : light,
       );
       square.rotation.x = -Math.PI / 2;
-      const across = -surface.halfWidth + size * (column + 0.5);
-      const along = (row - 0.5) * size;
-      square.position.set(
-        start.x + start.nx * across + start.tx * along,
-        0.06,
-        start.y + start.ny * across + start.ty * along,
-      );
+      square.position.set((row - 0.5) * size, 0, -surface.halfWidth + size * (column + 0.5));
       group.add(square);
     }
   }
@@ -377,109 +383,201 @@ function buildBarriers(points: PathPoint[], halfWidth: number): THREE.Group {
 
 // --- kart ------------------------------------------------------------------
 
-function buildKart(): {
+interface KartParts {
   group: THREE.Group;
   chassis: THREE.Group;
   flames: THREE.Group;
   wheels: THREE.Mesh[];
-} {
+  /** Front wheels sit inside these so they can be steered without fighting their spin. */
+  steering: THREE.Group[];
+  /** Turns with the front wheels, because a driver who does not is unsettling. */
+  steeringWheel: THREE.Group;
+}
+
+function buildKart(): KartParts {
   const group = new THREE.Group();
   const chassis = new THREE.Group();
   group.add(chassis);
 
   const bodyMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.kartBody });
+  const trimMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.kartTrim });
+  const darkMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.kartSeat });
 
-  const body = new THREE.Mesh(new THREE.BoxGeometry(3, 0.62, 1.9), bodyMaterial);
-  body.position.y = 0.62;
+  const body = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.55, 1.75), bodyMaterial);
+  body.position.y = 0.66;
   chassis.add(body);
 
+  // A floor pan a little wider than the body. Two stacked slabs of slightly different size
+  // reads as a moulded shell; one box reads as a box.
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.28, 2), darkMaterial);
+  floor.position.y = 0.38;
+  chassis.add(floor);
+
+  // Side pods, tucked between the wheels.
+  for (const z of [1.02, -1.02]) {
+    const pod = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 0.42), bodyMaterial);
+    pod.position.set(0, 0.7, z);
+    chassis.add(pod);
+  }
+
   // A tapered nose. Rounding the front is most of what separates "kart" from "brick".
-  const nose = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.95, 1.5, 10), bodyMaterial);
+  const nose = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.9, 1.4, 12), bodyMaterial);
   nose.rotation.z = Math.PI / 2;
-  nose.position.set(2.05, 0.6, 0);
+  nose.position.set(2, 0.66, 0);
   chassis.add(nose);
 
-  const bumper = new THREE.Mesh(
-    new THREE.BoxGeometry(0.4, 0.4, 1.9),
-    new THREE.MeshLambertMaterial({ color: PALETTE.kartTrim }),
-  );
-  bumper.position.set(-1.55, 0.55, 0);
-  chassis.add(bumper);
+  const noseTrim = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.3, 1.5), trimMaterial);
+  noseTrim.position.set(2.35, 0.62, 0);
+  chassis.add(noseTrim);
 
-  const seat = new THREE.Mesh(
-    new THREE.BoxGeometry(0.9, 0.95, 1.1),
-    new THREE.MeshLambertMaterial({ color: PALETTE.kartSeat }),
-  );
-  seat.position.set(-0.7, 1.2, 0);
+  // Headlights. Tiny, but eyes on the front of a vehicle read as a face, and a face is
+  // friendly — which is the entire brief for this site.
+  const lightMaterial = new THREE.MeshBasicMaterial({ color: 0xfff6cc });
+  for (const z of [0.45, -0.45]) {
+    const light = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.12, 12), lightMaterial);
+    light.rotation.z = Math.PI / 2;
+    light.position.set(2.5, 0.78, z);
+    chassis.add(light);
+  }
+
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1, 1.05), darkMaterial);
+  seat.position.set(-0.85, 1.25, 0);
   chassis.add(seat);
 
-  // A driver — an original round-headed figure, no likeness of anyone. Something person-shaped
-  // in the seat is what stops the kart reading as a remote-control toy.
+  // Rear wing on two posts.
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.14, 1.7), trimMaterial);
+  wing.position.set(-1.75, 1.5, 0);
+  chassis.add(wing);
+  for (const z of [0.6, -0.6]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.6, 0.16), darkMaterial);
+    post.position.set(-1.75, 1.18, z);
+    chassis.add(post);
+  }
+
+  // Exhaust pipes, so the boost flames come out of something.
+  for (const z of [0.55, -0.55]) {
+    const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.9, 10), darkMaterial);
+    pipe.rotation.z = Math.PI / 2;
+    pipe.position.set(-1.9, 0.62, z);
+    chassis.add(pipe);
+  }
+
+  // --- the driver: an original round-headed figure, no likeness of anyone ---
+
   const torso = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.42, 0.5, 0.95, 10),
+    new THREE.CylinderGeometry(0.44, 0.54, 0.9, 12),
     new THREE.MeshLambertMaterial({ color: PALETTE.driverShirt }),
   );
-  torso.position.set(-0.25, 1.35, 0);
+  torso.position.set(-0.4, 1.5, 0);
   chassis.add(torso);
 
   const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.42, 12, 10),
+    new THREE.SphereGeometry(0.4, 14, 12),
     new THREE.MeshLambertMaterial({ color: PALETTE.driverSkin }),
   );
-  head.position.set(-0.25, 2.05, 0);
+  head.position.set(-0.4, 2.18, 0);
   chassis.add(head);
 
   const helmet = new THREE.Mesh(
-    new THREE.SphereGeometry(0.47, 12, 10, 0, Math.PI * 2, 0, Math.PI / 1.8),
+    new THREE.SphereGeometry(0.46, 14, 12, 0, Math.PI * 2, 0, Math.PI / 1.7),
     new THREE.MeshLambertMaterial({ color: PALETTE.helmet }),
   );
-  helmet.position.set(-0.25, 2.06, 0);
+  helmet.position.set(-0.4, 2.19, 0);
   chassis.add(helmet);
 
-  const wheelGeometry = new THREE.CylinderGeometry(0.55, 0.55, 0.5, 14);
+  // A visor band. One dark stripe is all it takes for a sphere to read as looking forward.
+  const visor = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.47, 0.47, 0.24, 14, 1, true, -Math.PI / 2.6, Math.PI / 1.3),
+    new THREE.MeshLambertMaterial({ color: 0x2b3550, side: THREE.DoubleSide }),
+  );
+  visor.position.set(-0.4, 2.16, 0);
+  chassis.add(visor);
+
+  // Steering wheel and the arms holding it. The arms are what make the driver look like they
+  // are driving rather than being carried.
+  const steeringWheel = new THREE.Group();
+  steeringWheel.position.set(0.35, 1.5, 0);
+  steeringWheel.rotation.set(0, Math.PI / 2, -0.5);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.06, 8, 18), darkMaterial);
+  steeringWheel.add(rim);
+  chassis.add(steeringWheel);
+
+  const armMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.driverShirt });
+  const handMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.driverSkin });
+  for (const z of [0.3, -0.3]) {
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.85, 8), armMaterial);
+    arm.position.set(-0.05, 1.6, z);
+    arm.rotation.z = Math.PI / 2.4;
+    chassis.add(arm);
+
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), handMaterial);
+    hand.position.set(0.35, 1.48, z * 0.8);
+    chassis.add(hand);
+  }
+
+  // --- wheels ---
+
   const tyreMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.tyre });
-  const rimGeometry = new THREE.CylinderGeometry(0.28, 0.28, 0.54, 10);
   const rimMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.rim });
   const wheels: THREE.Mesh[] = [];
+  const steering: THREE.Group[] = [];
 
-  for (const [x, z] of [
-    [1.1, 1.05],
-    [1.1, -1.05],
-    [-1.1, 1.05],
-    [-1.1, -1.05],
+  for (const [x, z, front] of [
+    [1.15, 1.02, true],
+    [1.15, -1.02, true],
+    [-1.15, 1.05, false],
+    [-1.15, -1.05, false],
   ] as const) {
-    const wheel = new THREE.Mesh(wheelGeometry, tyreMaterial);
+    // Rear wheels are fatter than the front. Real karts do it, and it makes the back end look
+    // planted, which is what you want when the whole model is this simple.
+    const radius = front ? 0.52 : 0.62;
+    const width = front ? 0.44 : 0.58;
+
+    const wheel = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius, radius, width, 16),
+      tyreMaterial,
+    );
     wheel.rotation.x = Math.PI / 2; // roll axis across the kart
-    wheel.position.set(x, 0.55, z);
-    const rim = new THREE.Mesh(rimGeometry, rimMaterial);
-    wheel.add(rim);
-    chassis.add(wheel);
+
+    const hub = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius * 0.5, radius * 0.5, width * 1.05, 10),
+      rimMaterial,
+    );
+    wheel.add(hub);
+
+    // Front wheels hang inside a pivot so steering rotates them without disturbing their spin.
+    const pivot = new THREE.Group();
+    pivot.position.set(x, radius, z);
+    pivot.add(wheel);
+    chassis.add(pivot);
+
     wheels.push(wheel);
+    if (front) steering.push(pivot);
   }
 
   // Exhaust flames, shown only while boosting. On the chassis so they roll with a trick.
   const flames = new THREE.Group();
   for (const z of [-0.55, 0.55]) {
     const flame = new THREE.Mesh(
-      new THREE.ConeGeometry(0.36, 1.7, 8),
+      new THREE.ConeGeometry(0.34, 1.7, 8),
       new THREE.MeshBasicMaterial({ color: PALETTE.flame }),
     );
     flame.rotation.z = Math.PI / 2;
-    flame.position.set(-2.5, 0.6, z);
+    flame.position.set(-3.1, 0.62, z);
     flames.add(flame);
 
     const core = new THREE.Mesh(
-      new THREE.ConeGeometry(0.17, 0.9, 8),
+      new THREE.ConeGeometry(0.16, 0.9, 8),
       new THREE.MeshBasicMaterial({ color: PALETTE.flameCore }),
     );
     core.rotation.z = Math.PI / 2;
-    core.position.set(-2, 0.6, z);
+    core.position.set(-2.65, 0.62, z);
     flames.add(core);
   }
   flames.visible = false;
   chassis.add(flames);
 
-  return { group, chassis, flames, wheels };
+  return { group, chassis, flames, wheels, steering, steeringWheel };
 }
 
 /**
@@ -585,8 +683,8 @@ export interface KartScene {
   setRoll(radians: number): void;
   /** Show or hide the exhaust flames. `time` drives their flicker. */
   setBoosting(on: boolean, time: number): void;
-  /** Spin the wheels and drop the shadow to the ground under the kart. */
-  syncKart(speed: number, altitude: number, dt: number): void;
+  /** Spin the wheels, steer the front axle, lean into the turn, and place the shadow. */
+  syncKart(speed: number, altitude: number, steerAmount: number, dt: number): void;
   /** Hide collected coins, and animate coins and pads. */
   syncFurniture(items: PlacedFurniture[], time: number): void;
   resize(width: number, height: number): void;
@@ -664,8 +762,13 @@ export function createKartScene(
   const furniture = buildFurniture(items);
   scene.add(furniture.group);
 
-  const { group: kart, chassis, flames, wheels } = buildKart();
+  const { group: kart, chassis, flames, wheels, steering, steeringWheel } = buildKart();
   scene.add(kart);
+
+  // Barrel roll and cornering lean both roll the chassis about its nose-to-tail axis, so they
+  // are tracked separately and summed rather than fighting over one rotation.
+  let barrelRoll = 0;
+  let lean = 0;
 
   const shadow = buildShadow();
   scene.add(shadow);
@@ -677,7 +780,8 @@ export function createKartScene(
     camera,
     kart,
     setRoll(radians) {
-      chassis.rotation.x = radians;
+      barrelRoll = radians;
+      chassis.rotation.x = barrelRoll + lean;
     },
     setBoosting(on, time) {
       flames.visible = on;
@@ -685,8 +789,19 @@ export function createKartScene(
       const pulse = 0.8 + Math.sin(time * 40) * 0.25;
       flames.scale.set(pulse, 1, 1);
     },
-    syncKart(speed, altitude, dt) {
+    syncKart(speed, altitude, steerAmount, dt) {
       for (const wheel of wheels) wheel.rotation.y -= speed * dt * 1.6;
+
+      // Turn the front wheels, and the steering wheel with them. A driver whose hands stay
+      // straight through a corner is the sort of thing you notice without knowing why.
+      const angle = -steerAmount * 0.5;
+      for (const pivot of steering) pivot.rotation.y = angle;
+      steeringWheel.rotation.x = steerAmount * 0.8;
+
+      // A small lean into the corner. Karts do not really roll much, but a few degrees is the
+      // difference between a model that is being moved and one that is being driven.
+      lean = steerAmount * 0.07;
+      chassis.rotation.x = barrelRoll + lean;
 
       // The shadow stays on the ground and shrinks with height, which is the only readable
       // cue for how high a jump actually went.

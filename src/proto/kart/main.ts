@@ -499,7 +499,7 @@ function renderChase(
   view.kart.position.set(poseX, poseAltitude, poseY);
   view.syncFurniture(items, now / 1000);
   view.setBoosting(boosting, now / 1000);
-  view.syncKart(last.speed, poseAltitude, dt);
+  view.syncKart(last.speed, poseAltitude, kart.steerAmount, dt);
 
   // Edge glow over the canvas while boosting. Peripheral rather than central, so it says
   // "you are going fast" without hiding the road you are meant to be reading. Set here rather
