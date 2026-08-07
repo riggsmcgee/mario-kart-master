@@ -174,12 +174,7 @@ export function projectToPath(
 
 // --- furniture -------------------------------------------------------------
 
-/**
- * `halfpipe` is a real ramp with a real trick boost — not a fake pad. Corrected by Riggs
- * 2026-08-07: Mario Kart has no decoy pads. What a half-pipe actually costs you is your
- * racing line, and deciding whether the boost is worth the detour is the real skill.
- */
-export type FurnitureKind = 'pad' | 'ramp' | 'halfpipe' | 'coin';
+export type FurnitureKind = 'pad' | 'ramp' | 'coin';
 
 /** One authored item. The only thing anyone writes by hand. */
 export interface FurnitureSpec {
@@ -203,9 +198,6 @@ export interface PlacedFurniture {
   y: number;
   /** Direction of travel at this point on the lap. */
   heading: number;
-  /** Outward track normal here. Half-pipes throw the kart along it. */
-  nx: number;
-  ny: number;
   halfLength: number;
   halfWidth: number;
   height: number;
@@ -216,7 +208,6 @@ export interface PlacedFurniture {
 const DEFAULT_SIZE: Record<FurnitureKind, { length: number; width: number; height: number }> = {
   pad: { length: 7, width: 5, height: 0 },
   ramp: { length: 9, width: 8, height: 1.8 },
-  halfpipe: { length: 8, width: 6, height: 2.4 },
   coin: { length: 1.6, width: 1.6, height: 0 },
 };
 
@@ -231,8 +222,6 @@ export function placeFurniture(path: TrackPath, specs: FurnitureSpec[]): PlacedF
       x: point.x + point.nx * offset,
       y: point.y + point.ny * offset,
       heading: Math.atan2(point.ty, point.tx),
-      nx: point.nx,
-      ny: point.ny,
       halfLength: (spec.length ?? size.length) / 2,
       halfWidth: (spec.width ?? size.width) / 2,
       height: spec.height ?? size.height,
@@ -291,12 +280,6 @@ export type TrackConfig = {
   trickBoost: number;
   /** Converts speed and ramp steepness into launch speed. */
   rampLaunch: number;
-  /**
-   * Sideways speed a half-pipe throws you outward with, units/s. This is the entire cost of
-   * taking one: the boost is real, but you land wide and have to steer back. Chapter 4 is the
-   * judgement call about whether that trade is worth it on a given corner.
-   */
-  halfPipePush: number;
   coinTarget: number;
 };
 
@@ -312,7 +295,6 @@ export const TRACK_CONFIG: TrackConfig = {
   // ramp, so dropping top speed 20 → 11.5 had quietly cut airtime by ~40% and left the hop
   // nowhere to live. This restores roughly the old hang time at the new speed.
   rampLaunch: 3.2,
-  halfPipePush: 7,
   coinTarget: 10,
 };
 
@@ -338,8 +320,6 @@ export interface FurnitureEvents {
   coinsCollected: number;
   padHit: boolean;
   launched: boolean;
-  /** The launch came off a half-pipe, so the kart is being thrown off its line. */
-  launchedFromHalfPipe: boolean;
   /**
    * The verdict on a hop, delivered the tick it can be known rather than on landing: the
    * player needs to know how they did at the moment they did it. The boost still belongs to
@@ -355,7 +335,6 @@ const NO_EVENTS: FurnitureEvents = {
   coinsCollected: 0,
   padHit: false,
   launched: false,
-  launchedFromHalfPipe: false,
   trickCall: null,
   trick: 'none',
   trickErrorMs: null,
@@ -396,7 +375,7 @@ export class TrackRun {
   groundHeightAt = (x: number, y: number): number => {
     let height = 0;
     for (const item of this.items) {
-      if (item.kind !== 'ramp' && item.kind !== 'halfpipe') continue;
+      if (item.kind !== 'ramp') continue;
       if (!isOver(item, x, y)) continue;
       height = Math.max(height, rampHeightAt(item, x, y));
     }
@@ -436,10 +415,10 @@ export class TrackRun {
     }
     this.lastPadId = padUnderKart?.id ?? null;
 
-    // --- ramps, including half-pipes ---
+    // --- ramps ---
     let rampUnderKart: PlacedFurniture | null = null;
     for (const item of this.items) {
-      if (item.kind !== 'ramp' && item.kind !== 'halfpipe') continue;
+      if (item.kind !== 'ramp') continue;
       if (isOver(item, kart.x, kart.y)) rampUnderKart = item;
     }
 
@@ -448,14 +427,6 @@ export class TrackRun {
       const ramp = this.currentRamp;
       const slope = ramp.height / (ramp.halfLength * 2);
       kart.vAltitude = Math.max(kart.vAltitude, stepped.speed * slope * config.rampLaunch);
-
-      if (ramp.kind === 'halfpipe') {
-        // Thrown outward, off the racing line. The boost is real and so is the detour —
-        // that trade is the whole of Chapter 4.
-        kart.vx += ramp.nx * config.halfPipePush;
-        kart.vy += ramp.ny * config.halfPipePush;
-        events.launchedFromHalfPipe = true;
-      }
 
       this.launchedAt = ctx.now;
       this.trickLanded = false;

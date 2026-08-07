@@ -28,9 +28,6 @@ const PALETTE = {
   pad: 0xff8a1f,
   padChevron: 0xfff3d6,
   ramp: 0xb98cff,
-  // Half-pipes are blue in the real game, and they are real ramps with real boosts. The cost
-  // is the line, not a trick.
-  halfpipe: 0x3fa9ff,
   coin: 0xffd23f,
   flame: 0xffb020,
   flameCore: 0xfff3d6,
@@ -207,12 +204,6 @@ function buildFurniture(items: PlacedFurniture[]): {
         }
         break;
       }
-      case 'halfpipe':
-        mesh = new THREE.Mesh(
-          wedgeGeometry(item.halfLength, item.halfWidth, item.height),
-          new THREE.MeshBasicMaterial({ color: PALETTE.halfpipe, side: THREE.DoubleSide }),
-        );
-        break;
       case 'ramp':
         mesh = new THREE.Mesh(
           wedgeGeometry(item.halfLength, item.halfWidth, item.height),

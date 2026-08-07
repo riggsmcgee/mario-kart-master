@@ -68,9 +68,11 @@ export const TEST_TRACK_LAYOUT: FurnitureSpec[] = [
   { kind: 'ramp', t: 0.24 },
   { kind: 'ramp', t: 0.61, offset: -2 },
 
-  // Half-pipe on the outside of the U-turn: taking it is a genuine boost and a genuine detour,
-  // in the one place on the circuit where going wide costs the most.
-  { kind: 'halfpipe', t: 0.42, offset: 9 },
+  // A pad on the outside of the U-turn exit, off the line you would naturally take. This is
+  // the real Chapter 4 lesson and it is straight out of Mario Kart Stadium, where the dash
+  // panels live in the wide outer lane: sometimes the fast way round is not the tight way
+  // round, and the only way to know is to know the track.
+  { kind: 'pad', t: 0.5, offset: 6 },
 
   // Coins on the inside of the chicane and the hairpin — the two places where the tidy line
   // and the fast line are the same line.

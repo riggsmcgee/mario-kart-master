@@ -328,16 +328,6 @@ const TRACK_SCHEMA: TuningSchema<typeof TRACK> = {
     unit: 's',
     group: 'Pads',
   },
-  halfPipePush: {
-    kind: 'number',
-    label: 'Half-pipe throw',
-    min: 0,
-    max: 25,
-    step: 0.5,
-    unit: 'u/s',
-    group: 'Pads',
-    help: 'How far outward a half-pipe throws you. This is its whole cost — the boost is real, the line is not.',
-  },
   coinTarget: { kind: 'number', label: 'Coin target', min: 1, max: 30, step: 1, group: 'Coins' },
 };
 
@@ -417,7 +407,6 @@ function update(dt: number): void {
   const events = run.update(kart, TRACK, { now, hopJustPressed, lastHopAt }, last);
 
   if (events.padHit) say('BOOST');
-  if (events.launchedFromHalfPipe) say('Half-pipe — real boost, wrong line');
 
   // Judge the hop the moment it can be judged, and always say which way it was wrong. A miss
   // that says nothing teaches nothing.
@@ -606,7 +595,7 @@ function renderTopDown(poseX: number, poseY: number, poseHeading: number): void 
     ctx.save();
     ctx.translate(toScreenX(item.x), toScreenY(item.y));
     ctx.rotate(item.heading);
-    ctx.fillStyle = item.kind === 'pad' ? '#ff8a1f' : item.kind === 'ramp' ? '#b98cff' : '#3fa9ff';
+    ctx.fillStyle = item.kind === 'pad' ? '#ff8a1f' : '#b98cff';
     ctx.fillRect(
       -item.halfLength * scale,
       -item.halfWidth * scale,
