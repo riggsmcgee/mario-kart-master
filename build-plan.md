@@ -114,12 +114,13 @@ The first version of the site is a bare lab, deliberately nothing like the final
 
 ### 1a. Foundation
 
-- [ ] **1a1** Scaffold Vite + TS, ESLint/Prettier, folder layout (`src/engine`, `src/proto`, `src/ui`, `src/data`), GitHub Pages deploy action, bare testbed index page. Set Vite `base` to `/mario-kart-master/` so assets resolve on GitHub Pages. *(Sonnet)*
+- [x] **1a1** Scaffold Vite + TS, ESLint/Prettier, folder layout (`src/engine`, `src/proto`, `src/ui`, `src/data`), bare testbed index page. Vite `base` is `/mario-kart-master/` on build and `/` in dev, so switching Pages on later is one step. *(Sonnet)* — done 2026-08-06. GitHub Pages deploy action split out to 1a5 (deferred by Riggs, local dev for now).
 - [ ] **1a2** Keyboard input layer: action map (`steer`, `hop`, `item`, `uiConfirm`), rebindable, with a live input readout widget for the testbed. *(Opus)*
 - [ ] **1a3** Game loop: fixed-timestep sim (120Hz), interpolated render, pause on tab blur, FPS readout. *(Opus)*
 - [ ] **1a4** Tuning panel framework: live sliders bound to any config object, copy-config-to-clipboard, and a `TUNING.md` log (what changed, why, before/after). *(Sonnet)*
+- [ ] **1a5** GitHub Pages deploy action (Actions workflow on push to `main`). **Deferred by Riggs 2026-08-06** — testbed runs on localhost for now. Pick this up whenever a live URL is wanted; `base` is already configured. *(Sonnet)*
 
-**Acceptance:** deployed URL loads on Mac Chrome; input readout responds; loop holds 60fps idle.
+**Acceptance:** `npm run dev` loads on Mac Chrome; input readout responds; loop holds 60fps idle. (Deployed-URL check moves to 1a5.)
 
 ### 1b. Kart piece (chase view)
 
@@ -146,6 +147,8 @@ The first version of the site is a bare lab, deliberately nothing like the final
 - [ ] **1e2 GATE (Riggs):** is the threat legible? Is the hold-to-shield habit forming after 2 minutes of play?
 
 ### 1f. Backend piece (Supabase)
+
+**DEFERRED (Riggs, 2026-08-06).** No Supabase project exists yet. Build 1a through 1e first; this section is a hard pause point until Riggs creates the project. Until then the testbed persists nothing beyond localStorage, and 2a1's sync dependency stays unmet.
 
 - [ ] **1f1** Supabase setup. Human prerequisite first: Riggs creates the Supabase project (free tier) and puts the project URL + anon key in `.env.local` (gitignored) and in the repo's Actions secrets for the Pages build. Then: schema from Tech decisions as SQL migrations checked into `supabase/migrations`, RLS policies, seed a test user. *(Opus)*
 - [ ] **1f2** Auth prototype on the testbed: magic-link sign-in page, session persistence, signed-in state readout, sign-out. *(Opus)*
@@ -388,3 +391,7 @@ Raw material for steps 4c1/4c2. Everything below is filtered for Jodi's settings
 - **2026-08-06** (Claude): Time Trial ghost tracks = Mario Kart Stadium + Water Park.
 - **2026-08-06** (Riggs): The doorman added (4e): "Who's training?" role select. Jodi default, Bill name-swap + masculine kart reskin, Kayla deadpan lockout with change-user as the only way out, Other gets name input + full combo browser. Implemented among the last features.
 - **2026-08-06** (Riggs): Kendahl (older sister) added as the Ch5 case study: no drifting, no item defense, no risks, great lines, often beats Kayla. She is the family's existence proof for the strategic thesis.
+- **2026-08-06** (Riggs): Supabase deferred. Phase 1 builds 1a–1e first; 1f is a hard pause until the project exists. Consequence to watch: 2a1 ("persisted via the 1f3 sync module") cannot complete until 1f does.
+- **2026-08-06** (Riggs): Local development only for now; GitHub Pages deploy split out to new step 1a5 and deferred. Vite `base` is already Pages-correct on build, so enabling it later is one workflow file.
+- **2026-08-06** (Riggs): Toolchain = Node 24 LTS + npm, Vite 7 + TypeScript 5.9 (strict), ESLint 9 flat config + Prettier. Testbed is a Vite multi-page app: each prototype is `src/proto/<id>/index.html`, auto-discovered by `vite.config.ts`, listed on the index from `src/data/protos.ts`.
+- **2026-08-06** (Riggs): Key bindings ship as defaults (arrows / A-D steer, Space hop, Shift item) plus a rebind widget in 1a2; the final binding choice still belongs to gate 1g1.

@@ -1,0 +1,126 @@
+/* Testbed styling. (1a1)
+   Deliberately plain: this is the lab, not the site. The arcade look lands in Phase 3.
+   Goal here is only legibility while measuring things. */
+
+:root {
+  color-scheme: light dark;
+  --fg: #111;
+  --muted: #666;
+  --line: #ccc;
+  --bg: #fff;
+  --accent: #0b57d0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e8e8e8;
+    --muted: #9a9a9a;
+    --line: #3a3a3a;
+    --bg: #16181a;
+    --accent: #7cb0ff;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 2rem 1.25rem 4rem;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    16px/1.55 ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
+main {
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.4rem;
+}
+
+.lede {
+  color: var(--muted);
+  margin: 0 0 2rem;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.protos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.protos li {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr auto;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.protos .step {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.protos .title {
+  font-weight: 600;
+}
+
+.protos .blurb {
+  grid-column: 2 / -1;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.protos a {
+  color: var(--accent);
+}
+
+.status {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  white-space: nowrap;
+}
+
+.status[data-status='built'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.status[data-status='signed-off'] {
+  color: #1a7f37;
+  border-color: #1a7f37;
+}
+
+footer {
+  margin-top: 2.5rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}

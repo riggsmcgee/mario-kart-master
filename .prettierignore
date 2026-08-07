@@ -1,0 +1,10 @@
+dist
+node_modules
+package-lock.json
+
+# Human-authored project docs. Prettier reflows tables and lists, which makes
+# noisy diffs on files Riggs edits by hand.
+build-plan.md
+WORKLOG.md
+TUNING.md
+README.md
