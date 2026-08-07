@@ -3,35 +3,71 @@ import type { PathSurface } from '../../engine/path-surface';
 import type { PathPoint, PlacedFurniture, TrackPath } from '../../engine/track';
 
 /**
- * Three.js scene for the kart harness. (1b2 world, 1b3 furniture)
+ * Three.js scene for the kart harness. (1b2 world, 1b3 furniture, 3b2 art pass)
  *
- * Flat and unlit on purpose — the plan calls for stylized original art, lighting a scene this
- * simple only muddies it, and it keeps the frame budget clear for gate 1b6's 60fps check.
+ * **All original.** No Nintendo assets, names, shapes or characters — that is design principle
+ * 5 and it is not negotiable. What makes a scene read as a kart racer is not their art anyway;
+ * it is four things, and all four are ours to make:
  *
- * Provisional, like `surface.ts`: this builds the stadium test oval specifically.
+ *  1. **Saturated colour with a light sky.** Racers are cheerful. Grey is for simulators.
+ *  2. **Round, chunky forms.** Cylindrical wheels instead of boxes does more for "this is a
+ *     kart" than any amount of detail elsewhere.
+ *  3. **Soft directional light.** Flat unlit shapes read as a diagram; one warm key light and
+ *     a sky-coloured fill give form without going anywhere near realism.
+ *  4. **A horizon with things on it.** Hills, trees and clouds are what make a track feel like
+ *     a place rather than a ribbon in a void — and they are most of the sense of speed.
  *
- * Sim (x, y) maps to world (x, z); world y is up.
+ * Still provisional: the real style guide is 3a1, and this pass runs ahead of it while gate
+ * 1b6 waits on a driver. Treat the palette as a proposal.
  */
 
 const PALETTE = {
-  sky: 0x8fd3ff,
-  grass: 0x6fbf5f,
-  road: 0x5a5f6a,
-  roadEdge: 0xf2f2f2,
-  wall: 0xd94f4f,
-  postA: 0xffffff,
-  postB: 0xd94f4f,
-  kartBody: 0x2f6fd0,
-  kartNose: 0xffd23f,
-  kartWheel: 0x22252b,
-  startLine: 0xf2f2f2,
+  skyTop: 0x2e8ce6,
+  skyHorizon: 0xc7ecff,
+  cloud: 0xfdfeff,
+  grass: 0x5cc24e,
+  grassDark: 0x46a83c,
+  hill: 0x74cf63,
+  road: 0x6e7480,
+  roadEdge: 0xf4f6f8,
+  kerbRed: 0xe8453c,
+  kerbWhite: 0xf7f7f7,
+  barrier: 0xf2f3f5,
+  barrierAccent: 0xe8453c,
+  trunk: 0x8a5a3b,
+  leaves: 0x3fa346,
+  leavesDark: 0x2f8438,
+  kartBody: 0xe8453c,
+  kartTrim: 0xffd23f,
+  kartSeat: 0x2b2f38,
+  tyre: 0x23262d,
+  rim: 0xf2f3f5,
+  driverSkin: 0xf6c99a,
+  driverShirt: 0x3b7de0,
+  helmet: 0xffd23f,
   pad: 0xff8a1f,
-  padChevron: 0xfff3d6,
-  ramp: 0xb98cff,
-  coin: 0xffd23f,
+  padChevron: 0xfff6de,
+  ramp: 0x9b6cff,
+  rampStripe: 0xffd23f,
+  coin: 0xffcf33,
   flame: 0xffb020,
   flameCore: 0xfff3d6,
+  shadow: 0x0a2a12,
 };
+
+/** Deterministic scatter, so the scenery is in the same place every reload while tuning. */
+function makeRandom(seed: number): () => number {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// --- geometry helpers ------------------------------------------------------
 
 function ribbonGeometry(
   points: PathPoint[],
@@ -61,6 +97,20 @@ function ribbonGeometry(
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+/** Merge a pile of quads into one mesh, so hundreds of kerb stripes cost one draw call. */
+function quadsGeometry(quads: Array<[number, number, number][]>): THREE.BufferGeometry {
+  const positions: number[] = [];
+  for (const [a, b, c, d] of quads) {
+    if (!a || !b || !c || !d) continue;
+    positions.push(...a, ...b, ...c, ...a, ...c, ...d);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.computeVertexNormals();
   return geometry;
 }
 
@@ -77,108 +127,386 @@ function wedgeGeometry(
   const e: [number, number, number] = [halfLength, height, -halfWidth];
   const f: [number, number, number] = [halfLength, height, halfWidth];
 
-  const tris = [
-    a,
-    e,
-    f,
-    a,
-    f,
-    d, // the slope you drive up
-    b,
-    c,
-    f,
-    b,
-    f,
-    e, // vertical face at the lip
-    a,
-    b,
-    e, // side
-    d,
-    f,
-    c, // side
-    a,
-    d,
-    c,
-    a,
-    c,
-    b, // underside
-  ];
-
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(tris.flat(), 3));
+  geometry.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute(
+      [a, e, f, a, f, d, b, c, f, b, f, e, a, b, e, d, f, c, a, d, c, a, c, b].flat(),
+      3,
+    ),
+  );
   geometry.computeVertexNormals();
   return geometry;
 }
 
+// --- world -----------------------------------------------------------------
+
 /**
- * The kart, split into an outer group (position and heading) and an inner chassis (roll).
- * Keeping them separate means a trick barrel-roll cannot fight with the heading rotation.
+ * Sky as a vertex-coloured dome. A flat background colour is the single biggest thing that
+ * makes a 3D scene look unfinished; a gradient costs one sphere and no shader.
  */
-function buildKart(): { group: THREE.Group; chassis: THREE.Group; flames: THREE.Group } {
+function buildSky(radius: number): THREE.Mesh {
+  const geometry = new THREE.SphereGeometry(radius, 24, 16);
+  const top = new THREE.Color(PALETTE.skyTop);
+  const horizon = new THREE.Color(PALETTE.skyHorizon);
+  const colors: number[] = [];
+  const position = geometry.attributes.position;
+
+  if (position) {
+    for (let i = 0; i < position.count; i++) {
+      const height = Math.max(0, position.getY(i) / radius);
+      const colour = horizon.clone().lerp(top, Math.pow(height, 0.6));
+      colors.push(colour.r, colour.g, colour.b);
+    }
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  }
+
+  return new THREE.Mesh(
+    geometry,
+    new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false }),
+  );
+}
+
+function buildClouds(random: () => number, radius: number): THREE.Group {
+  const clouds = new THREE.Group();
+  const material = new THREE.MeshBasicMaterial({ color: PALETTE.cloud, fog: false });
+
+  for (let i = 0; i < 14; i++) {
+    const cloud = new THREE.Group();
+    const puffs = 3 + Math.floor(random() * 3);
+    for (let j = 0; j < puffs; j++) {
+      const size = 6 + random() * 7;
+      const puff = new THREE.Mesh(new THREE.SphereGeometry(size, 10, 8), material);
+      puff.position.set((j - puffs / 2) * 7 + random() * 3, random() * 3, random() * 4);
+      puff.scale.y = 0.55;
+      cloud.add(puff);
+    }
+    const angle = random() * Math.PI * 2;
+    const distance = radius * (0.55 + random() * 0.3);
+    cloud.position.set(Math.cos(angle) * distance, 45 + random() * 40, Math.sin(angle) * distance);
+    clouds.add(cloud);
+  }
+  return clouds;
+}
+
+/** Rolling hills on the horizon. Cheap, and they turn a flat plane into somewhere. */
+function buildHills(random: () => number, radius: number): THREE.Group {
+  const hills = new THREE.Group();
+  const material = new THREE.MeshLambertMaterial({ color: PALETTE.hill });
+
+  for (let i = 0; i < 22; i++) {
+    const size = 26 + random() * 34;
+    const hill = new THREE.Mesh(new THREE.SphereGeometry(size, 12, 8), material);
+    const angle = (i / 22) * Math.PI * 2 + random() * 0.2;
+    const distance = radius * (0.62 + random() * 0.16);
+    hill.position.set(Math.cos(angle) * distance, -size * 0.45, Math.sin(angle) * distance);
+    hill.scale.y = 0.5 + random() * 0.35;
+    hills.add(hill);
+  }
+  return hills;
+}
+
+function buildTree(random: () => number): THREE.Group {
+  const tree = new THREE.Group();
+
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.32, 0.42, 2.6, 7),
+    new THREE.MeshLambertMaterial({ color: PALETTE.trunk }),
+  );
+  trunk.position.y = 1.3;
+  tree.add(trunk);
+
+  // Stacked cones: the cheapest shape that reads unmistakably as a tree.
+  const tiers = 3;
+  for (let i = 0; i < tiers; i++) {
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(2.6 - i * 0.6, 2.6, 8),
+      new THREE.MeshLambertMaterial({ color: i % 2 === 0 ? PALETTE.leaves : PALETTE.leavesDark }),
+    );
+    cone.position.y = 2.9 + i * 1.4;
+    tree.add(cone);
+  }
+
+  const scale = 0.8 + random() * 0.7;
+  tree.scale.setScalar(scale);
+  tree.rotation.y = random() * Math.PI * 2;
+  return tree;
+}
+
+function buildBush(random: () => number): THREE.Mesh {
+  const bush = new THREE.Mesh(
+    new THREE.SphereGeometry(1.1 + random() * 0.8, 8, 6),
+    new THREE.MeshLambertMaterial({ color: PALETTE.leaves }),
+  );
+  bush.scale.y = 0.75;
+  bush.position.y = 0.6;
+  return bush;
+}
+
+/**
+ * Scenery, placed relative to the centreline rather than scattered at random. Offsetting along
+ * the track normal guarantees nothing ever lands on the road, without needing a single
+ * collision check.
+ */
+function buildScenery(points: PathPoint[], halfWidth: number, random: () => number): THREE.Group {
+  const scenery = new THREE.Group();
+
+  for (let i = 0; i < points.length; i += 7) {
+    const p = points[i];
+    if (!p) continue;
+
+    for (const side of [1, -1]) {
+      if (random() < 0.45) continue;
+      const distance = halfWidth + 6 + random() * 22;
+      const object = random() < 0.62 ? buildTree(random) : buildBush(random);
+      object.position.set(
+        p.x + p.nx * distance * side,
+        object.position.y,
+        p.y + p.ny * distance * side,
+      );
+      scenery.add(object);
+    }
+  }
+  return scenery;
+}
+
+/**
+ * Red-and-white kerbs, on the corners only.
+ *
+ * Curvature decides where they go: a kerb on a straight means nothing, but on a corner it is
+ * the clearest possible "the road bends here", readable from much further away than the edge
+ * line. Every kart racer marks its corners this way for exactly that reason.
+ */
+function buildKerbs(points: PathPoint[], halfWidth: number): THREE.Group {
+  const group = new THREE.Group();
+  const count = points.length;
+  const width = 1.6;
+  const red: Array<[number, number, number][]> = [];
+  const white: Array<[number, number, number][]> = [];
+
+  for (let i = 0; i < count; i++) {
+    const previous = points[(i - 2 + count) % count];
+    const current = points[i];
+    const next = points[(i + 2) % count];
+    const after = points[(i + 1) % count];
+    if (!previous || !current || !next || !after) continue;
+
+    // Angle between the tangent before and after this point: how hard the road is turning.
+    const bend = Math.abs(Math.atan2(next.ty, next.tx) - Math.atan2(previous.ty, previous.tx));
+    const turning = Math.min(bend, Math.PI * 2 - bend);
+    if (turning < 0.05) continue;
+
+    const target = Math.floor(i / 3) % 2 === 0 ? red : white;
+    for (const side of [1, -1]) {
+      const innerA = halfWidth * side;
+      const outerA = (halfWidth + width) * side;
+      target.push([
+        [current.x + current.nx * innerA, 0.05, current.y + current.ny * innerA],
+        [current.x + current.nx * outerA, 0.05, current.y + current.ny * outerA],
+        [after.x + after.nx * outerA, 0.05, after.y + after.ny * outerA],
+        [after.x + after.nx * innerA, 0.05, after.y + after.ny * innerA],
+      ]);
+    }
+  }
+
+  group.add(
+    new THREE.Mesh(quadsGeometry(red), new THREE.MeshLambertMaterial({ color: PALETTE.kerbRed })),
+  );
+  group.add(
+    new THREE.Mesh(
+      quadsGeometry(white),
+      new THREE.MeshLambertMaterial({ color: PALETTE.kerbWhite }),
+    ),
+  );
+  return group;
+}
+
+/** A proper chequered start line rather than a white bar. */
+function buildStartLine(surface: PathSurface, points: PathPoint[]): THREE.Group {
+  const group = new THREE.Group();
+  const start = points[0];
+  if (!start) return group;
+
+  const squares = 10;
+  const size = (surface.halfWidth * 2) / squares;
+  const dark = new THREE.MeshLambertMaterial({ color: 0x2b2f38 });
+  const light = new THREE.MeshLambertMaterial({ color: 0xf7f7f7 });
+
+  for (let row = 0; row < 2; row++) {
+    for (let column = 0; column < squares; column++) {
+      const square = new THREE.Mesh(
+        new THREE.PlaneGeometry(size, size),
+        (row + column) % 2 === 0 ? dark : light,
+      );
+      square.rotation.x = -Math.PI / 2;
+      const across = -surface.halfWidth + size * (column + 0.5);
+      const along = (row - 0.5) * size;
+      square.position.set(
+        start.x + start.nx * across + start.tx * along,
+        0.06,
+        start.y + start.ny * across + start.ty * along,
+      );
+      group.add(square);
+    }
+  }
+  return group;
+}
+
+function buildBarriers(points: PathPoint[], halfWidth: number): THREE.Group {
+  const group = new THREE.Group();
+  const distance = halfWidth + 3.5;
+  const postGeometry = new THREE.BoxGeometry(1.2, 1.5, 0.5);
+  const materials = [
+    new THREE.MeshLambertMaterial({ color: PALETTE.barrier }),
+    new THREE.MeshLambertMaterial({ color: PALETTE.barrierAccent }),
+  ];
+
+  points.forEach((p, i) => {
+    if (i % 5 !== 0) return;
+    const material = materials[(i / 5) % 2 === 0 ? 0 : 1];
+    if (!material) return;
+    for (const side of [1, -1]) {
+      const post = new THREE.Mesh(postGeometry, material);
+      post.position.set(p.x + p.nx * distance * side, 0.75, p.y + p.ny * distance * side);
+      post.rotation.y = -Math.atan2(p.ty, p.tx);
+      group.add(post);
+    }
+  });
+  return group;
+}
+
+// --- kart ------------------------------------------------------------------
+
+function buildKart(): {
+  group: THREE.Group;
+  chassis: THREE.Group;
+  flames: THREE.Group;
+  wheels: THREE.Mesh[];
+} {
   const group = new THREE.Group();
   const chassis = new THREE.Group();
   group.add(chassis);
 
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(2.4, 0.7, 1.6),
-    new THREE.MeshBasicMaterial({ color: PALETTE.kartBody }),
-  );
-  body.position.y = 0.55;
+  const bodyMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.kartBody });
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(3, 0.62, 1.9), bodyMaterial);
+  body.position.y = 0.62;
   chassis.add(body);
 
-  // A nose, so which way the kart faces is unmistakable even at a glance.
-  const nose = new THREE.Mesh(
-    new THREE.BoxGeometry(0.7, 0.4, 1.1),
-    new THREE.MeshBasicMaterial({ color: PALETTE.kartNose }),
-  );
-  nose.position.set(1.4, 0.45, 0);
+  // A tapered nose. Rounding the front is most of what separates "kart" from "brick".
+  const nose = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.95, 1.5, 10), bodyMaterial);
+  nose.rotation.z = Math.PI / 2;
+  nose.position.set(2.05, 0.6, 0);
   chassis.add(nose);
 
-  const wheelGeometry = new THREE.BoxGeometry(0.7, 0.6, 0.35);
-  const wheelMaterial = new THREE.MeshBasicMaterial({ color: PALETTE.kartWheel });
+  const bumper = new THREE.Mesh(
+    new THREE.BoxGeometry(0.4, 0.4, 1.9),
+    new THREE.MeshLambertMaterial({ color: PALETTE.kartTrim }),
+  );
+  bumper.position.set(-1.55, 0.55, 0);
+  chassis.add(bumper);
+
+  const seat = new THREE.Mesh(
+    new THREE.BoxGeometry(0.9, 0.95, 1.1),
+    new THREE.MeshLambertMaterial({ color: PALETTE.kartSeat }),
+  );
+  seat.position.set(-0.7, 1.2, 0);
+  chassis.add(seat);
+
+  // A driver — an original round-headed figure, no likeness of anyone. Something person-shaped
+  // in the seat is what stops the kart reading as a remote-control toy.
+  const torso = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.42, 0.5, 0.95, 10),
+    new THREE.MeshLambertMaterial({ color: PALETTE.driverShirt }),
+  );
+  torso.position.set(-0.25, 1.35, 0);
+  chassis.add(torso);
+
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.42, 12, 10),
+    new THREE.MeshLambertMaterial({ color: PALETTE.driverSkin }),
+  );
+  head.position.set(-0.25, 2.05, 0);
+  chassis.add(head);
+
+  const helmet = new THREE.Mesh(
+    new THREE.SphereGeometry(0.47, 12, 10, 0, Math.PI * 2, 0, Math.PI / 1.8),
+    new THREE.MeshLambertMaterial({ color: PALETTE.helmet }),
+  );
+  helmet.position.set(-0.25, 2.06, 0);
+  chassis.add(helmet);
+
+  const wheelGeometry = new THREE.CylinderGeometry(0.55, 0.55, 0.5, 14);
+  const tyreMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.tyre });
+  const rimGeometry = new THREE.CylinderGeometry(0.28, 0.28, 0.54, 10);
+  const rimMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.rim });
+  const wheels: THREE.Mesh[] = [];
+
   for (const [x, z] of [
-    [0.9, 0.85],
-    [0.9, -0.85],
-    [-0.9, 0.85],
-    [-0.9, -0.85],
+    [1.1, 1.05],
+    [1.1, -1.05],
+    [-1.1, 1.05],
+    [-1.1, -1.05],
   ] as const) {
-    const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
-    wheel.position.set(x, 0.3, z);
+    const wheel = new THREE.Mesh(wheelGeometry, tyreMaterial);
+    wheel.rotation.x = Math.PI / 2; // roll axis across the kart
+    wheel.position.set(x, 0.55, z);
+    const rim = new THREE.Mesh(rimGeometry, rimMaterial);
+    wheel.add(rim);
     chassis.add(wheel);
+    wheels.push(wheel);
   }
 
-  // Exhaust flames, shown only while boosting. Attached to the chassis so they roll with it
-  // during a trick, which is half the fun of landing one.
+  // Exhaust flames, shown only while boosting. On the chassis so they roll with a trick.
   const flames = new THREE.Group();
-  for (const z of [-0.5, 0.5]) {
+  for (const z of [-0.55, 0.55]) {
     const flame = new THREE.Mesh(
-      new THREE.ConeGeometry(0.34, 1.5, 8),
+      new THREE.ConeGeometry(0.36, 1.7, 8),
       new THREE.MeshBasicMaterial({ color: PALETTE.flame }),
     );
-    flame.rotation.z = Math.PI / 2; // point the tip backwards
-    flame.position.set(-1.9, 0.45, z);
+    flame.rotation.z = Math.PI / 2;
+    flame.position.set(-2.5, 0.6, z);
     flames.add(flame);
 
     const core = new THREE.Mesh(
-      new THREE.ConeGeometry(0.16, 0.8, 8),
+      new THREE.ConeGeometry(0.17, 0.9, 8),
       new THREE.MeshBasicMaterial({ color: PALETTE.flameCore }),
     );
     core.rotation.z = Math.PI / 2;
-    core.position.set(-1.5, 0.45, z);
+    core.position.set(-2, 0.6, z);
     flames.add(core);
   }
   flames.visible = false;
   chassis.add(flames);
 
-  return { group, chassis, flames };
+  return { group, chassis, flames, wheels };
 }
 
-function buildFurniture(items: PlacedFurniture[]): {
+/**
+ * A soft blob under the kart. Cheaper than a shadow map and better for this look — and while
+ * airborne it is the only cue for how high the kart actually is.
+ */
+function buildShadow(): THREE.Mesh {
+  const shadow = new THREE.Mesh(
+    new THREE.CircleGeometry(1.9, 20),
+    new THREE.MeshBasicMaterial({ color: PALETTE.shadow, transparent: true, opacity: 0.28 }),
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  return shadow;
+}
+
+// --- furniture -------------------------------------------------------------
+
+interface FurnitureHandles {
   group: THREE.Group;
-  coinMeshes: Map<number, THREE.Object3D>;
-} {
+  coins: Map<number, THREE.Object3D>;
+  chevrons: Array<{ mesh: THREE.Object3D; span: number; base: number }>;
+}
+
+function buildFurniture(items: PlacedFurniture[]): FurnitureHandles {
   const group = new THREE.Group();
-  const coinMeshes = new Map<number, THREE.Object3D>();
+  const coins = new Map<number, THREE.Object3D>();
+  const chevrons: Array<{ mesh: THREE.Object3D; span: number; base: number }> = [];
 
   for (const item of items) {
     let mesh: THREE.Object3D;
@@ -187,40 +515,53 @@ function buildFurniture(items: PlacedFurniture[]): {
       case 'pad': {
         mesh = new THREE.Group();
         const slab = new THREE.Mesh(
-          new THREE.BoxGeometry(item.halfLength * 2, 0.12, item.halfWidth * 2),
-          new THREE.MeshBasicMaterial({ color: PALETTE.pad }),
+          new THREE.BoxGeometry(item.halfLength * 2, 0.14, item.halfWidth * 2),
+          new THREE.MeshLambertMaterial({ color: PALETTE.pad }),
         );
-        slab.position.y = 0.06;
+        slab.position.y = 0.07;
         mesh.add(slab);
-        // Chevrons pointing the way you should be going: the pad reads as directional from a
-        // distance, which is how you spot it in time to line up.
-        for (let i = -1; i <= 1; i++) {
+
+        // Chevrons that scroll toward the exit. Movement is what makes a pad look like it
+        // does something, and it reads from far enough away to line up for.
+        const span = item.halfLength * 2;
+        for (let i = 0; i < 4; i++) {
           const chevron = new THREE.Mesh(
-            new THREE.BoxGeometry(0.5, 0.05, item.halfWidth * 1.4),
+            new THREE.BoxGeometry(0.55, 0.06, item.halfWidth * 1.5),
             new THREE.MeshBasicMaterial({ color: PALETTE.padChevron }),
           );
-          chevron.position.set(i * 1.8, 0.14, 0);
+          const base = -item.halfLength + (span / 4) * i;
+          chevron.position.set(base, 0.16, 0);
           mesh.add(chevron);
+          chevrons.push({ mesh: chevron, span, base });
         }
         break;
       }
-      case 'ramp':
-        mesh = new THREE.Mesh(
+      case 'ramp': {
+        mesh = new THREE.Group();
+        const wedge = new THREE.Mesh(
           wedgeGeometry(item.halfLength, item.halfWidth, item.height),
-          new THREE.MeshBasicMaterial({ color: PALETTE.ramp, side: THREE.DoubleSide }),
+          new THREE.MeshLambertMaterial({ color: PALETTE.ramp, side: THREE.DoubleSide }),
         );
+        mesh.add(wedge);
+        // A bright lip, because the lip is the thing you are being asked to time.
+        const lip = new THREE.Mesh(
+          new THREE.BoxGeometry(0.5, 0.28, item.halfWidth * 2),
+          new THREE.MeshLambertMaterial({ color: PALETTE.rampStripe }),
+        );
+        lip.position.set(item.halfLength - 0.1, item.height, 0);
+        mesh.add(lip);
         break;
+      }
       case 'coin': {
         const coin = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.8, 0.8, 0.16, 14),
-          new THREE.MeshBasicMaterial({ color: PALETTE.coin }),
+          new THREE.CylinderGeometry(0.85, 0.85, 0.14, 16),
+          new THREE.MeshLambertMaterial({ color: PALETTE.coin, emissive: 0x6b4a00 }),
         );
-        // Stand it up and face it down the track, so you drive through it rather than over it.
         coin.rotation.z = Math.PI / 2;
-        coin.position.y = 1.2;
         mesh = new THREE.Group();
         mesh.add(coin);
-        coinMeshes.set(item.id, mesh);
+        mesh.position.y = 1.3;
+        coins.set(item.id, mesh);
         break;
       }
     }
@@ -231,8 +572,10 @@ function buildFurniture(items: PlacedFurniture[]): {
     group.add(mesh);
   }
 
-  return { group, coinMeshes };
+  return { group, coins, chevrons };
 }
+
+// --- scene -----------------------------------------------------------------
 
 export interface KartScene {
   scene: THREE.Scene;
@@ -242,7 +585,9 @@ export interface KartScene {
   setRoll(radians: number): void;
   /** Show or hide the exhaust flames. `time` drives their flicker. */
   setBoosting(on: boolean, time: number): void;
-  /** Hide collected coins and spin the rest. */
+  /** Spin the wheels and drop the shadow to the ground under the kart. */
+  syncKart(speed: number, altitude: number, dt: number): void;
+  /** Hide collected coins, and animate coins and pads. */
   syncFurniture(items: PlacedFurniture[], time: number): void;
   resize(width: number, height: number): void;
   render(): void;
@@ -258,89 +603,74 @@ export function createKartScene(
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+  const random = makeRandom(0x5eed);
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(PALETTE.sky);
-  // Fog hides the ground plane's far edge, so the world reads as continuous rather than as a
-  // tabletop that stops.
-  scene.fog = new THREE.Fog(PALETTE.sky, 60, 220);
-
-  const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 400);
-
   const { bounds } = surface;
   const arenaWidth = bounds.maxX - bounds.minX;
   const arenaDepth = bounds.maxY - bounds.minY;
+  const skyRadius = Math.max(arenaWidth, arenaDepth) * 2.2;
+
+  scene.fog = new THREE.Fog(PALETTE.skyHorizon, 120, skyRadius * 0.85);
+
+  // A warm key from one side plus a sky-to-ground fill. Two lights, no shadow maps: enough to
+  // give every surface a light and a dark face, which is all a cartoon look needs.
+  scene.add(new THREE.HemisphereLight(PALETTE.skyHorizon, PALETTE.grassDark, 1.5));
+  const sun = new THREE.DirectionalLight(0xfff3e0, 1.5);
+  sun.position.set(-60, 90, 40);
+  scene.add(sun);
+
+  scene.add(buildSky(skyRadius));
+  scene.add(buildClouds(random, skyRadius));
+  scene.add(buildHills(random, skyRadius));
 
   const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(arenaWidth * 3, arenaDepth * 3),
-    new THREE.MeshBasicMaterial({ color: PALETTE.grass }),
+    new THREE.PlaneGeometry(skyRadius * 2, skyRadius * 2),
+    new THREE.MeshLambertMaterial({ color: PALETTE.grass }),
   );
   ground.rotation.x = -Math.PI / 2;
-  ground.position.set((bounds.minX + bounds.maxX) / 2, 0, (bounds.minY + bounds.maxY) / 2);
+  ground.position.set((bounds.minX + bounds.maxX) / 2, -0.02, (bounds.minY + bounds.maxY) / 2);
   scene.add(ground);
 
   const points = path.points;
   const halfWidth = surface.halfWidth;
 
-  // Road sits a hair above the grass to avoid z-fighting between coplanar surfaces.
+  // A darker apron just off the road, so the driveable width still reads at speed now that
+  // the surrounding grass runs to the horizon.
   scene.add(
     new THREE.Mesh(
-      ribbonGeometry(points, -halfWidth, halfWidth, 0.02),
-      new THREE.MeshBasicMaterial({ color: PALETTE.road }),
+      ribbonGeometry(points, -(halfWidth + 5), halfWidth + 5, 0.005),
+      new THREE.MeshLambertMaterial({ color: PALETTE.grassDark }),
     ),
   );
 
-  // White edge lines. Without them the road boundary is invisible at speed, and knowing exactly
-  // where the grass starts is the entire point of Chapter 5.
-  const edgeMaterial = new THREE.MeshBasicMaterial({ color: PALETTE.roadEdge });
+  scene.add(
+    new THREE.Mesh(
+      ribbonGeometry(points, -halfWidth, halfWidth, 0.02),
+      new THREE.MeshLambertMaterial({ color: PALETTE.road }),
+    ),
+  );
+
+  const edgeMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.roadEdge });
   scene.add(new THREE.Mesh(ribbonGeometry(points, halfWidth - 0.5, halfWidth, 0.04), edgeMaterial));
   scene.add(
     new THREE.Mesh(ribbonGeometry(points, -halfWidth, -halfWidth + 0.5, 0.04), edgeMaterial),
   );
 
-  // Roadside posts. A flat plane gives the eye nothing to measure motion against; vertical
-  // objects streaming past are most of what "fast" actually looks like.
-  const postGeometry = new THREE.BoxGeometry(0.4, 2.2, 0.4);
-  const postMaterials = [
-    new THREE.MeshBasicMaterial({ color: PALETTE.postA }),
-    new THREE.MeshBasicMaterial({ color: PALETTE.postB }),
-  ];
-  points.forEach((p, i) => {
-    if (i % 8 !== 0) return;
-    const material = postMaterials[(i / 8) % 2 === 0 ? 0 : 1];
-    if (!material) return;
-    const post = new THREE.Mesh(postGeometry, material);
-    post.position.set(p.x + p.nx * (halfWidth + 2.2), 1.1, p.y + p.ny * (halfWidth + 2.2));
-    scene.add(post);
-  });
+  scene.add(buildKerbs(points, halfWidth));
+  scene.add(buildStartLine(surface, points));
+  scene.add(buildBarriers(points, halfWidth));
+  scene.add(buildScenery(points, halfWidth, random));
 
-  const startLine = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.2, halfWidth * 2),
-    new THREE.MeshBasicMaterial({ color: PALETTE.startLine }),
-  );
-  startLine.rotation.x = -Math.PI / 2;
-  startLine.rotation.z = Math.PI / 2;
-  startLine.position.set(surface.startPose.x, 0.05, surface.startPose.y);
-  scene.add(startLine);
+  const furniture = buildFurniture(items);
+  scene.add(furniture.group);
 
-  // Arena walls, matching the collision bounds in the physics exactly.
-  const wallMaterial = new THREE.MeshBasicMaterial({ color: PALETTE.wall });
-  const wallHeight = 2.5;
-  for (const [x, z, w, d] of [
-    [(bounds.minX + bounds.maxX) / 2, bounds.minY, arenaWidth, 1],
-    [(bounds.minX + bounds.maxX) / 2, bounds.maxY, arenaWidth, 1],
-    [bounds.minX, (bounds.minY + bounds.maxY) / 2, 1, arenaDepth],
-    [bounds.maxX, (bounds.minY + bounds.maxY) / 2, 1, arenaDepth],
-  ] as Array<[number, number, number, number]>) {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(w, wallHeight, d), wallMaterial);
-    wall.position.set(x, wallHeight / 2, z);
-    scene.add(wall);
-  }
-
-  const { group: furniture, coinMeshes } = buildFurniture(items);
-  scene.add(furniture);
-
-  const { group: kart, chassis, flames } = buildKart();
+  const { group: kart, chassis, flames, wheels } = buildKart();
   scene.add(kart);
+
+  const shadow = buildShadow();
+  scene.add(shadow);
+
+  const camera = new THREE.PerspectiveCamera(62, 1, 0.1, skyRadius * 2.5);
 
   return {
     scene,
@@ -352,18 +682,35 @@ export function createKartScene(
     setBoosting(on, time) {
       flames.visible = on;
       if (!on) return;
-      // Flicker, so a boost reads as alive rather than as a decal stuck to the bumper.
       const pulse = 0.8 + Math.sin(time * 40) * 0.25;
       flames.scale.set(pulse, 1, 1);
+    },
+    syncKart(speed, altitude, dt) {
+      for (const wheel of wheels) wheel.rotation.y -= speed * dt * 1.6;
+
+      // The shadow stays on the ground and shrinks with height, which is the only readable
+      // cue for how high a jump actually went.
+      shadow.position.set(kart.position.x, 0.03, kart.position.z);
+      const lift = Math.min(1, altitude / 6);
+      shadow.scale.setScalar(1 - lift * 0.45);
+      const material = shadow.material as THREE.MeshBasicMaterial;
+      material.opacity = 0.28 * (1 - lift * 0.6);
     },
     syncFurniture(currentItems, time) {
       for (const item of currentItems) {
         if (item.kind !== 'coin') continue;
-        const mesh = coinMeshes.get(item.id);
+        const mesh = furniture.coins.get(item.id);
         if (!mesh) continue;
         mesh.visible = !item.collected;
-        // A spinning coin catches the eye from much further away than a static one.
-        mesh.rotation.y = -item.heading + time * 2;
+        // Spinning and bobbing: a moving coin catches the eye far sooner than a static one.
+        mesh.rotation.y = -item.heading + time * 2.4;
+        mesh.position.y = 1.3 + Math.sin(time * 2.6 + item.id) * 0.22;
+      }
+
+      for (const chevron of furniture.chevrons) {
+        const travel = (time * 9) % chevron.span;
+        chevron.mesh.position.x =
+          ((chevron.base + travel + chevron.span * 1.5) % chevron.span) - chevron.span / 2;
       }
     },
     resize(width, height) {
