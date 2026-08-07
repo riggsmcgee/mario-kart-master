@@ -418,6 +418,9 @@ const ASSIST_SCHEMA: TuningSchema<typeof ASSIST> = {
 
 let assist: SteerAssistResult = { yawRate: 0, lateral: 0, active: false };
 
+/** When the hop key was last pressed, surviving the key coming back up. */
+let lastHopAt: number | null = null;
+
 /** Transient on-screen feedback: what just happened, and when it should fade. */
 let flash = '';
 let flashUntil = 0;
@@ -442,16 +445,13 @@ function update(dt: number): void {
   assist = computeSteerAssist(kart, path, surface.options.roadHalfWidth, ASSIST);
   last = stepKart(kart, CONFIG, input.steer(), surface, dt, assist.yawRate);
 
-  const events = run.update(
-    kart,
-    TRACK,
-    {
-      now: performance.now(),
-      hopJustPressed: input.justPressed('hop'),
-      hopPressedAt: input.pressedAt('hop'),
-    },
-    last,
-  );
+  const now = performance.now();
+  const hopJustPressed = input.justPressed('hop');
+  // Remember the press itself, not whether the key is still down. A hop is a tap, so by the
+  // time the kart reaches the lip the key is long since released.
+  if (hopJustPressed) lastHopAt = now;
+
+  const events = run.update(kart, TRACK, { now, hopJustPressed, lastHopAt }, last);
 
   if (events.padHit) say('BOOST');
   if (events.launchedFromHalfPipe) say('Half-pipe — real boost, wrong line');

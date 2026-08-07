@@ -239,8 +239,14 @@ export const TRACK_CONFIG: TrackConfig = {
 export interface FurnitureContext {
   now: number;
   hopJustPressed: boolean;
-  /** Timestamp of the current hop press, or null. Lets an early hop still count. */
-  hopPressedAt: number | null;
+  /**
+   * When the hop key was **last pressed**, whether or not it is still held.
+   *
+   * Must not be the input layer's `pressedAt`, which goes null the moment the key comes back
+   * up. A hop is a tap: by the time the kart reaches the lip the key is long released, so
+   * reading the live press state means every early hop looks like no hop at all.
+   */
+  lastHopAt: number | null;
 }
 
 export type TrickOutcome = 'none' | 'landed' | 'missed';
@@ -289,6 +295,7 @@ export class TrackRun {
   private lastPadId: number | null = null;
   private launchedAt = 0;
   private trickLanded = false;
+  private boostGiven = false;
   /** The verdict already given for this flight, so it is not repeated every hop. */
   private call: TrickCall | null = null;
 
@@ -298,7 +305,9 @@ export class TrackRun {
     this.coins = 0;
     this.currentRamp = null;
     this.lastPadId = null;
+    this.launchedAt = 0;
     this.trickLanded = false;
+    this.boostGiven = false;
     this.call = null;
     for (const item of this.items) item.collected = false;
   }
@@ -370,6 +379,7 @@ export class TrackRun {
 
       this.launchedAt = ctx.now;
       this.trickLanded = false;
+      this.boostGiven = false;
       this.call = null;
       events.launched = true;
 
@@ -377,7 +387,7 @@ export class TrackRun {
       // the lip arrives. An early hop inside the window still counts: pressing just before is
       // the same instinct as pressing just after, and rewarding one but not the other would
       // teach nothing useful.
-      const pressed = ctx.hopPressedAt;
+      const pressed = ctx.lastHopAt;
       if (pressed !== null) {
         const error = pressed - ctx.now; // negative: before the lip
         if (-error <= config.trickWindowMs) {
@@ -394,17 +404,24 @@ export class TrackRun {
     }
     this.currentRamp = rampUnderKart;
 
-    // A hop after the lip. Judged immediately, since the lip is already behind us.
-    if (ctx.hopJustPressed && this.launchedAt > 0 && !this.trickLanded) {
+    // Judging runs for the whole attempt window, which deliberately outlives the flight. Jumps
+    // are short — a couple of hundred milliseconds — so closing the books on touchdown means a
+    // hop a moment too late gets silence instead of "too late", which is the one thing it most
+    // needs to hear.
+    const judging = this.launchedAt > 0 && ctx.now - this.launchedAt <= config.trickAttemptMs;
+
+    if (judging && ctx.hopJustPressed && !this.trickLanded) {
       const error = ctx.now - this.launchedAt;
-      if (error <= config.trickWindowMs) {
+      // A trick has to happen in the air. Inside the window but already back on the ground is
+      // still late, however narrowly.
+      if (error <= config.trickWindowMs && stepped.airborne) {
         // Upgrades an earlier "too early" — hopping again at the right moment should be
         // rewarded, not locked out by the first attempt.
         this.trickLanded = true;
         this.call = 'got-it';
         events.trickCall = 'got-it';
         events.trickErrorMs = error;
-      } else if (error <= config.trickAttemptMs && this.call !== 'late') {
+      } else if (this.call !== 'late') {
         this.call = 'late';
         events.trickCall = 'late';
         events.trickErrorMs = error;
@@ -413,17 +430,20 @@ export class TrackRun {
 
     // --- touchdown ---
     // The boost arrives on landing, not at the lip, so the reward reads as "you stuck it".
-    if (stepped.landed && this.launchedAt > 0) {
-      if (this.trickLanded) {
-        kart.boostRemaining = Math.max(kart.boostRemaining, config.trickBoost);
-        events.trick = 'landed';
-      } else if (this.call === null) {
-        // Only nag about it if they never tried. Someone who was told "too early" a moment
-        // ago does not need telling again that they missed.
-        events.trick = 'missed';
-      }
+    if (stepped.landed && this.trickLanded && !this.boostGiven) {
+      kart.boostRemaining = Math.max(kart.boostRemaining, config.trickBoost);
+      this.boostGiven = true;
+      events.trick = 'landed';
+    }
+
+    // Close the books once the attempt window is spent, not on touchdown.
+    if (this.launchedAt > 0 && ctx.now - this.launchedAt > config.trickAttemptMs) {
+      // Only nag if they never tried at all. Someone already told "too early" does not need
+      // telling again that they missed.
+      if (this.call === null) events.trick = 'missed';
       this.launchedAt = 0;
       this.trickLanded = false;
+      this.boostGiven = false;
       this.call = null;
     }
 
