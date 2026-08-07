@@ -28,10 +28,12 @@ const PALETTE = {
   pad: 0xff8a1f,
   padChevron: 0xfff3d6,
   ramp: 0xb98cff,
-  // Deliberately close to the pad. Chapter 4 is about telling these apart, so making the decoy
-  // obviously different in the drill would teach the wrong lesson.
-  decoy: 0xff9a3d,
+  // Half-pipes are blue in the real game, and they are real ramps with real boosts. The cost
+  // is the line, not a trick.
+  halfpipe: 0x3fa9ff,
   coin: 0xffd23f,
+  flame: 0xffb020,
+  flameCore: 0xfff3d6,
 };
 
 function ribbonGeometry(
@@ -111,15 +113,21 @@ function wedgeGeometry(
   return geometry;
 }
 
-function buildKart(): THREE.Group {
-  const kart = new THREE.Group();
+/**
+ * The kart, split into an outer group (position and heading) and an inner chassis (roll).
+ * Keeping them separate means a trick barrel-roll cannot fight with the heading rotation.
+ */
+function buildKart(): { group: THREE.Group; chassis: THREE.Group; flames: THREE.Group } {
+  const group = new THREE.Group();
+  const chassis = new THREE.Group();
+  group.add(chassis);
 
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(2.4, 0.7, 1.6),
     new THREE.MeshBasicMaterial({ color: PALETTE.kartBody }),
   );
   body.position.y = 0.55;
-  kart.add(body);
+  chassis.add(body);
 
   // A nose, so which way the kart faces is unmistakable even at a glance.
   const nose = new THREE.Mesh(
@@ -127,7 +135,7 @@ function buildKart(): THREE.Group {
     new THREE.MeshBasicMaterial({ color: PALETTE.kartNose }),
   );
   nose.position.set(1.4, 0.45, 0);
-  kart.add(nose);
+  chassis.add(nose);
 
   const wheelGeometry = new THREE.BoxGeometry(0.7, 0.6, 0.35);
   const wheelMaterial = new THREE.MeshBasicMaterial({ color: PALETTE.kartWheel });
@@ -139,10 +147,33 @@ function buildKart(): THREE.Group {
   ] as const) {
     const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
     wheel.position.set(x, 0.3, z);
-    kart.add(wheel);
+    chassis.add(wheel);
   }
 
-  return kart;
+  // Exhaust flames, shown only while boosting. Attached to the chassis so they roll with it
+  // during a trick, which is half the fun of landing one.
+  const flames = new THREE.Group();
+  for (const z of [-0.5, 0.5]) {
+    const flame = new THREE.Mesh(
+      new THREE.ConeGeometry(0.34, 1.5, 8),
+      new THREE.MeshBasicMaterial({ color: PALETTE.flame }),
+    );
+    flame.rotation.z = Math.PI / 2; // point the tip backwards
+    flame.position.set(-1.9, 0.45, z);
+    flames.add(flame);
+
+    const core = new THREE.Mesh(
+      new THREE.ConeGeometry(0.16, 0.8, 8),
+      new THREE.MeshBasicMaterial({ color: PALETTE.flameCore }),
+    );
+    core.rotation.z = Math.PI / 2;
+    core.position.set(-1.5, 0.45, z);
+    flames.add(core);
+  }
+  flames.visible = false;
+  chassis.add(flames);
+
+  return { group, chassis, flames };
 }
 
 function buildFurniture(items: PlacedFurniture[]): {
@@ -176,10 +207,10 @@ function buildFurniture(items: PlacedFurniture[]): {
         }
         break;
       }
-      case 'decoy':
+      case 'halfpipe':
         mesh = new THREE.Mesh(
           wedgeGeometry(item.halfLength, item.halfWidth, item.height),
-          new THREE.MeshBasicMaterial({ color: PALETTE.decoy, side: THREE.DoubleSide }),
+          new THREE.MeshBasicMaterial({ color: PALETTE.halfpipe, side: THREE.DoubleSide }),
         );
         break;
       case 'ramp':
@@ -216,6 +247,10 @@ export interface KartScene {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   kart: THREE.Group;
+  /** Roll the kart around its nose-to-tail axis, for trick barrel rolls. */
+  setRoll(radians: number): void;
+  /** Show or hide the exhaust flames. `time` drives their flicker. */
+  setBoosting(on: boolean, time: number): void;
   /** Hide collected coins and spin the rest. */
   syncFurniture(items: PlacedFurniture[], time: number): void;
   resize(width: number, height: number): void;
@@ -313,13 +348,23 @@ export function createKartScene(
   const { group: furniture, coinMeshes } = buildFurniture(items);
   scene.add(furniture);
 
-  const kart = buildKart();
+  const { group: kart, chassis, flames } = buildKart();
   scene.add(kart);
 
   return {
     scene,
     camera,
     kart,
+    setRoll(radians) {
+      chassis.rotation.x = radians;
+    },
+    setBoosting(on, time) {
+      flames.visible = on;
+      if (!on) return;
+      // Flicker, so a boost reads as alive rather than as a decal stuck to the bumper.
+      const pulse = 0.8 + Math.sin(time * 40) * 0.25;
+      flames.scale.set(pulse, 1, 1);
+    },
     syncFurniture(currentItems, time) {
       for (const item of currentItems) {
         if (item.kind !== 'coin') continue;

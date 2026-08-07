@@ -165,14 +165,17 @@ function coinLine(fromT: number, toT: number, count: number, offset: number): Fu
 }
 
 const LAYOUT: FurnitureSpec[] = [
-  // Straights: a real pad you can line up for, and a decoy shortly after it.
+  // Straights: real pads you can line up for.
   { kind: 'pad', t: 0.05 },
-  { kind: 'decoy', t: 0.14, offset: 3.5 },
   { kind: 'pad', t: 0.56, offset: -3 },
 
   // A ramp in each corner, so tricks have to be taken mid-turn rather than on a straight.
   { kind: 'ramp', t: 0.33 },
   { kind: 'ramp', t: 0.84, offset: 2 },
+
+  // Half-pipe out near the edge, exactly where taking it costs you the corner. A real boost
+  // for a real detour — the trade Chapter 4 is about.
+  { kind: 'halfpipe', t: 0.14, offset: 7 },
 
   // Coins reward the inside line through the top straight and the left corner.
   ...coinLine(0.6, 0.68, 6, -4),
@@ -301,6 +304,7 @@ const CAMERA_SCHEMA: TuningSchema<typeof CAMERA> = {
 };
 
 const canvas3d = document.querySelector<HTMLCanvasElement>('#stage3d');
+const boostGlow = document.querySelector<HTMLDivElement>('#boost-glow');
 const view = canvas3d ? createKartScene(canvas3d, surface, path, items) : null;
 const chase = new ChaseCamera();
 
@@ -346,14 +350,15 @@ const TRACK_SCHEMA: TuningSchema<typeof TRACK> = {
     unit: 's',
     group: 'Pads',
   },
-  decoySpeedKeep: {
+  halfPipePush: {
     kind: 'number',
-    label: 'Decoy speed kept',
-    min: 0.1,
-    max: 1,
-    step: 0.02,
+    label: 'Half-pipe throw',
+    min: 0,
+    max: 25,
+    step: 0.5,
+    unit: 'u/s',
     group: 'Pads',
-    help: 'What driving onto a fake pad costs you. Low enough to notice, high enough not to feel unfair.',
+    help: 'How far outward a half-pipe throws you. This is its whole cost — the boost is real, the line is not.',
   },
   coinTarget: { kind: 'number', label: 'Coin target', min: 1, max: 30, step: 1, group: 'Coins' },
 };
@@ -361,6 +366,10 @@ const TRACK_SCHEMA: TuningSchema<typeof TRACK> = {
 /** Transient on-screen feedback: what just happened, and when it should fade. */
 let flash = '';
 let flashUntil = 0;
+
+/** Barrel-roll animation start time, or 0 when not rolling. */
+let rollStart = 0;
+const ROLL_MS = 520;
 
 function say(message: string, ms = 1200): void {
   flash = message;
@@ -383,10 +392,11 @@ function update(dt: number): void {
   );
 
   if (events.padHit) say('BOOST');
-  if (events.decoyHit) say('Not a boost pad.');
+  if (events.launchedFromHalfPipe) say('Half-pipe — real boost, wrong line');
   if (events.trick === 'landed') {
     const error = events.trickErrorMs ?? 0;
     say(`TRICK — ${error > 0 ? '+' : ''}${error.toFixed(0)} ms`);
+    rollStart = performance.now();
   } else if (events.trick === 'missed') {
     say('No trick. Hop at the lip.');
   }
@@ -456,8 +466,29 @@ function renderChase(
 ): void {
   if (!view) return;
 
+  const now = performance.now();
+  const boosting = kart.boostRemaining > 0;
+
   view.kart.position.set(poseX, poseAltitude, poseY);
-  view.syncFurniture(items, performance.now() / 1000);
+  view.syncFurniture(items, now / 1000);
+  view.setBoosting(boosting, now / 1000);
+
+  // Edge glow over the canvas while boosting. Peripheral rather than central, so it says
+  // "you are going fast" without hiding the road you are meant to be reading. Set here rather
+  // than on the stats timer so it appears on the frame the boost starts.
+  if (boostGlow) boostGlow.dataset.on = String(boosting);
+
+  // A landed trick spins the kart through a full barrel roll and stops level. Nothing else
+  // signals "that counted" as immediately, which is why the real game does it too.
+  if (rollStart > 0) {
+    const progress = (now - rollStart) / ROLL_MS;
+    if (progress >= 1) {
+      rollStart = 0;
+      view.setRoll(0);
+    } else {
+      view.setRoll(progress * Math.PI * 2);
+    }
+  }
   // Sim heading 0 points along +x; a Three.js Y-rotation of θ sends +x to (cosθ, 0, -sinθ),
   // so the mesh needs the negated angle to face where the physics says it faces.
   view.kart.rotation.y = -poseHeading;
@@ -538,23 +569,13 @@ function renderTopDown(poseX: number, poseY: number, poseHeading: number): void 
     ctx.save();
     ctx.translate(toScreenX(item.x), toScreenY(item.y));
     ctx.rotate(item.heading);
-    ctx.fillStyle = item.kind === 'pad' ? '#ff8a1f' : item.kind === 'ramp' ? '#b98cff' : '#ff9a3d';
+    ctx.fillStyle = item.kind === 'pad' ? '#ff8a1f' : item.kind === 'ramp' ? '#b98cff' : '#3fa9ff';
     ctx.fillRect(
       -item.halfLength * scale,
       -item.halfWidth * scale,
       item.halfLength * 2 * scale,
       item.halfWidth * 2 * scale,
     );
-    // Decoys are drawn with a slash so the instrument view can tell them apart even though
-    // the chase view deliberately makes them hard to spot.
-    if (item.kind === 'decoy') {
-      ctx.strokeStyle = '#7a2f00';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(-item.halfLength * scale, -item.halfWidth * scale);
-      ctx.lineTo(item.halfLength * scale, item.halfWidth * scale);
-      ctx.stroke();
-    }
     ctx.restore();
   }
 

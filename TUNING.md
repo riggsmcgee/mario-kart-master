@@ -21,6 +21,27 @@ not just the diff that got there. Those are the numbers the real site ships with
 
 _(newest first)_
 
+### 2026-08-07 — TRACK_CONFIG (1b3), tuned by Riggs
+
+**Why:** "It's hard to tell when [boosts and tricks] hit."
+
+| Field | Before | After |
+|---|---|---|
+| `trickWindowMs` | 150 | 500 |
+| `padBoost` | 0.9 | 1 |
+| `decoySpeedKeep` | 0.62 | *(removed — see below)* |
+
+**Read this before trusting the 500.** The window was widened while there was no visual signal
+that a trick had landed — only a line of HUD text. So 500ms may be measuring "I couldn't tell"
+rather than "the window is too tight." The kart now barrel-rolls on a landed trick and the
+boost shows flames and an edge glow, so **the window is worth re-testing from a lower value**.
+My guess is the honest number is nearer 200–250, but that is a guess and the drive decides it.
+
+`decoySpeedKeep` was set to 1, zeroing the penalty entirely — consistent with Riggs's correction
+that decoy pads are not a real Mario Kart mechanic. Replaced by `halfPipePush` (7 u/s), which
+throws the kart outward off its line instead of slowing it down. The boost is real; the cost is
+the corner.
+
 ### 2026-08-07 — CHASE_CAMERA_CONFIG (1b2), tuned by Riggs
 
 **Why:** Riggs drove the stadium oval and pulled the camera much further back and higher, dropped

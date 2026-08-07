@@ -204,6 +204,38 @@ canvas {
   accent-color: var(--accent);
 }
 
+/* --- boost feedback --- */
+
+.stage-wrap {
+  position: relative;
+  line-height: 0;
+}
+
+/* Peripheral, not central: it should say "you are going fast" without covering the road
+   the drill is asking you to read. */
+.boost-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 176, 32, 0) 42%, rgba(255, 138, 31, 0.55) 100%),
+    linear-gradient(to right, rgba(255, 240, 200, 0.35), rgba(255, 240, 200, 0) 12%),
+    linear-gradient(to left, rgba(255, 240, 200, 0.35), rgba(255, 240, 200, 0) 12%);
+}
+
+.boost-glow[data-on='true'] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boost-glow {
+    transition: none;
+  }
+}
+
 /* --- drill HUD --- */
 
 .hud {

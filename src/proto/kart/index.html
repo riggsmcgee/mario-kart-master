@@ -19,7 +19,10 @@
 
       <section class="panel">
         <h2>Drive</h2>
-        <canvas id="stage3d" height="440"></canvas>
+        <div class="stage-wrap">
+          <canvas id="stage3d" height="440"></canvas>
+          <div class="boost-glow" id="boost-glow" data-on="false"></div>
+        </div>
         <p class="hud" id="hud" data-live="false">0 / 10 coins</p>
         <p class="hint">
           <strong>&larr; &rarr;</strong> or <strong>A</strong>/<strong>D</strong> to steer.
@@ -27,10 +30,11 @@
           &mdash; the kart always drives forward, exactly like Jodi's auto-accelerate setting.
         </p>
         <p class="hint">
-          Orange with chevrons is a real boost pad. Purple ramps launch you &mdash; hop right at the
-          lip and you land with a bigger boost than any pad gives. There is also one thing out there
-          that looks like a pad and is not; driving over it costs you speed. That is Chapter 4's
-          entire lesson, and you should get caught by it at least once.
+          Orange with chevrons is a boost pad. Purple ramps launch you &mdash; hop near the lip and
+          you land with a bigger boost than any pad gives, and the kart barrel-rolls to tell you it
+          counted. The blue half-pipe out by the edge is also a real ramp with a real boost, but it
+          throws you off your line: worth it on a straight, expensive in a corner. That judgement
+          call is Chapter 4.
         </p>
       </section>
 
