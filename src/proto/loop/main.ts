@@ -1,6 +1,9 @@
 import '../../ui/testbed.css';
 import '../../ui/proto.css';
+import { installErrorBanner } from '../../ui/error-banner';
 import { Loop, lerp, type LoopStats } from '../../engine/loop';
+
+installErrorBanner();
 
 /**
  * Game loop harness. (1a3)

@@ -1,6 +1,9 @@
 import '../../ui/testbed.css';
 import '../../ui/proto.css';
+import { installErrorBanner } from '../../ui/error-banner';
 import { Input, SLOTS, SLOT_LABELS, keyLabel, type Slot } from '../../engine/input';
+
+installErrorBanner();
 
 /**
  * Input readout harness. (1a2)

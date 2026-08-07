@@ -1,5 +1,8 @@
 import './ui/testbed.css';
+import { installErrorBanner } from './ui/error-banner';
 import { PROTOS, type Proto } from './data/protos';
+
+installErrorBanner();
 
 /** Testbed index. Lists every Lego piece and links to the ones that exist yet. (1a1) */
 
@@ -22,8 +25,10 @@ function render(proto: Proto): HTMLLIElement {
     title.textContent = proto.title;
   } else {
     const link = document.createElement('a');
-    // Vite resolves this against `base`, so it works on localhost and on Pages later.
-    link.href = new URL(`src/proto/${proto.id}/index.html`, import.meta.env.BASE_URL).pathname;
+    // BASE_URL is '/' in dev and '/mario-kart-master/' in a build, always with a trailing
+    // slash. Concatenate it — do not feed it to `new URL()` as a base, which requires an
+    // absolute URL and throws on both of those values.
+    link.href = `${import.meta.env.BASE_URL}src/proto/${proto.id}/index.html`;
     link.textContent = proto.title;
     title.append(link);
   }

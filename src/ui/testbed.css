@@ -21,6 +21,28 @@
   }
 }
 
+.error-banner {
+  background: #b3261e;
+  color: #fff;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.error-banner pre {
+  margin: 0.4rem 0 0;
+  white-space: pre-wrap;
+  font-size: 0.78rem;
+  opacity: 0.85;
+  overflow-x: auto;
+}
+
+.error-banner div + div {
+  margin-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 0.75rem;
+}
+
 body {
   margin: 0;
   padding: 2rem 1.25rem 4rem;
