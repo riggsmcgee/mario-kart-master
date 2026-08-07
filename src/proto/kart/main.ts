@@ -2,7 +2,7 @@ import '../../ui/testbed.css';
 import '../../ui/proto.css';
 import { installErrorBanner } from '../../ui/error-banner';
 import { Input } from '../../engine/input';
-import { Loop, lerp, lerpAngle } from '../../engine/loop';
+import { Loop, lerp, lerpAngle, type LoopStats } from '../../engine/loop';
 import {
   KART_CONFIG,
   createKart,
@@ -12,14 +12,18 @@ import {
 } from '../../engine/kart';
 import { createStadiumSurface } from '../../engine/surface';
 import { TuningPanel, type TuningSchema } from '../../engine/tuning';
+import { ChaseCamera, CHASE_CAMERA_CONFIG } from '../../engine/chase-camera';
+import { createKartScene } from './scene';
 
 installErrorBanner();
 
 /**
- * Kart physics harness. (1b1)
+ * Kart harness. (1b1 physics, 1b2 chase camera)
  *
- * Top-down on purpose: the chase camera (1b2) hides the slip angle, and the slip angle is the
- * thing being tuned here.
+ * Two views of one simulation. The chase view is the product — what Jodi sees. The top-down
+ * view is the instrument, kept because a chase camera hides the slip angle and the slip angle
+ * is what gets tuned. Both read the same interpolated pose each frame, so they can never
+ * disagree about where the kart is.
  */
 
 const CONFIG = { ...KART_CONFIG };
@@ -152,6 +156,102 @@ let trailCounter = 0;
 const canvas = document.querySelector<HTMLCanvasElement>('#stage');
 const ctx = canvas?.getContext('2d') ?? null;
 
+// --- the chase view: what Jodi actually sees (1b2) ---
+
+const CAMERA = { ...CHASE_CAMERA_CONFIG };
+
+const CAMERA_SCHEMA: TuningSchema<typeof CAMERA> = {
+  distance: {
+    kind: 'number',
+    label: 'Distance back',
+    min: 3,
+    max: 25,
+    step: 0.5,
+    unit: 'u',
+    group: 'Placement',
+  },
+  height: {
+    kind: 'number',
+    label: 'Height',
+    min: 0.5,
+    max: 15,
+    step: 0.2,
+    unit: 'u',
+    group: 'Placement',
+  },
+  lookAhead: {
+    kind: 'number',
+    label: 'Look ahead',
+    min: 0,
+    max: 30,
+    step: 0.5,
+    unit: 'u',
+    group: 'Placement',
+    help: 'How far up the road the camera aims. Higher reads as more committed to the corner.',
+  },
+  lookHeight: {
+    kind: 'number',
+    label: 'Look height',
+    min: 0,
+    max: 6,
+    step: 0.1,
+    unit: 'u',
+    group: 'Placement',
+  },
+  positionLag: {
+    kind: 'number',
+    label: 'Position lag',
+    min: 0.5,
+    max: 30,
+    step: 0.5,
+    unit: '/s',
+    group: 'Lag',
+    help: 'How fast the camera catches its ideal spot. Lower swings wider in corners.',
+  },
+  headingLag: {
+    kind: 'number',
+    label: 'Heading lag',
+    min: 0.5,
+    max: 30,
+    step: 0.5,
+    unit: '/s',
+    group: 'Lag',
+    help: 'The big one. Lower lets the camera trail the turn so you see the kart’s flank.',
+  },
+  lean: {
+    kind: 'number',
+    label: 'Lean into turns',
+    min: 0,
+    max: 0.5,
+    step: 0.01,
+    unit: 'rad',
+    group: 'Lag',
+  },
+  fovBase: {
+    kind: 'number',
+    label: 'Field of view',
+    min: 30,
+    max: 110,
+    step: 1,
+    unit: '°',
+    group: 'Speed feel',
+  },
+  fovSpeedGain: {
+    kind: 'number',
+    label: 'FOV gain at speed',
+    min: 0,
+    max: 45,
+    step: 1,
+    unit: '°',
+    group: 'Speed feel',
+    help: 'Widening the view with speed is the cheapest possible sense of velocity. Zero it to hear the difference.',
+  },
+};
+
+const canvas3d = document.querySelector<HTMLCanvasElement>('#stage3d');
+const view = canvas3d ? createKartScene(canvas3d, surface) : null;
+const chase = new ChaseCamera();
+
 function update(dt: number): void {
   input.sample();
   last = stepKart(kart, CONFIG, input.steer(), surface, dt);
@@ -197,7 +297,43 @@ function stadiumPath(radius: number, scale: number, offsetX: number, offsetY: nu
   return path;
 }
 
-function render(alpha: number): void {
+function render(alpha: number, stats: LoopStats): void {
+  // One interpolated pose, shared by both views, so the instrument never disagrees with the
+  // chase view about where the kart is.
+  const poseX = lerp(kart.prevX, kart.x, alpha);
+  const poseY = lerp(kart.prevY, kart.y, alpha);
+  const poseHeading = lerpAngle(kart.prevHeading, kart.heading, alpha);
+
+  renderChase(poseX, poseY, poseHeading, stats.frameMs / 1000);
+  renderTopDown(poseX, poseY, poseHeading);
+}
+
+function renderChase(poseX: number, poseY: number, poseHeading: number, dt: number): void {
+  if (!view) return;
+
+  view.kart.position.set(poseX, 0, poseY);
+  // Sim heading 0 points along +x; a Three.js Y-rotation of θ sends +x to (cosθ, 0, -sinθ),
+  // so the mesh needs the negated angle to face where the physics says it faces.
+  view.kart.rotation.y = -poseHeading;
+
+  chase.update(
+    view.camera,
+    {
+      x: poseX,
+      y: poseY,
+      heading: poseHeading,
+      steerAmount: kart.steerAmount,
+      speed: last.speed,
+      maxSpeed: CONFIG.maxSpeed,
+    },
+    CAMERA,
+    dt,
+  );
+
+  view.render();
+}
+
+function renderTopDown(poseX: number, poseY: number, poseHeading: number): void {
   if (!ctx || !canvas) return;
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
@@ -257,10 +393,9 @@ function render(alpha: number): void {
     ctx.globalAlpha = 1;
   }
 
-  // The kart, interpolated between sim states so it moves smoothly at any sim rate.
-  const x = toScreenX(lerp(kart.prevX, kart.x, alpha));
-  const y = toScreenY(lerp(kart.prevY, kart.y, alpha));
-  const heading = lerpAngle(kart.prevHeading, kart.heading, alpha);
+  const x = toScreenX(poseX);
+  const y = toScreenY(poseY);
+  const heading = poseHeading;
 
   // Where it is actually going, which is the whole point of the top-down view.
   if (last.speed > 0.5) {
@@ -287,11 +422,14 @@ function render(alpha: number): void {
 }
 
 function sizeCanvas(): void {
-  if (!canvas) return;
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.round(canvas.clientWidth * dpr);
-  canvas.height = Math.round(canvas.clientHeight * dpr);
-  ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (canvas) {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(canvas.clientWidth * dpr);
+    canvas.height = Math.round(canvas.clientHeight * dpr);
+    ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  // Three.js owns the backing-store size of its own canvas; hand it CSS pixels.
+  if (canvas3d && view) view.resize(canvas3d.clientWidth, canvas3d.clientHeight);
 }
 
 // --- telemetry -------------------------------------------------------------
@@ -340,6 +478,18 @@ window.addEventListener('keydown', (event) => {
   if (event.code !== 'KeyR') return;
   resetKart(kart, surface.startPose.x, surface.startPose.y, surface.startPose.heading);
   trail.length = 0;
+  // Snap the camera too, or it swoops across the arena to catch up with the reset kart.
+  chase.reset(
+    {
+      x: kart.x,
+      y: kart.y,
+      heading: kart.heading,
+      steerAmount: 0,
+      speed: 0,
+      maxSpeed: CONFIG.maxSpeed,
+    },
+    CAMERA,
+  );
 });
 
 new TuningPanel({
@@ -349,6 +499,15 @@ new TuningPanel({
   exportName: 'KART_CONFIG',
   storageKey: 'mkm.tuning.kart.v1',
   mount: document.querySelector<HTMLElement>('#tuning-mount') ?? undefined,
+});
+
+new TuningPanel({
+  config: CAMERA,
+  schema: CAMERA_SCHEMA,
+  title: 'Camera config',
+  exportName: 'CHASE_CAMERA_CONFIG',
+  storageKey: 'mkm.tuning.camera.v1',
+  mount: document.querySelector<HTMLElement>('#camera-mount') ?? undefined,
 });
 
 setInterval(pumpStats, 100);

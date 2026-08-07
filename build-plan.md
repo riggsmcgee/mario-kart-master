@@ -124,7 +124,7 @@ The first version of the site is a bare lab, deliberately nothing like the final
 
 ### 1b. Kart piece (chase view)
 
-- [ ] **1b1** Kart physics core on a 2D plane: auto-forward always on, speed-sensitive steering, slight slide, off-road slowdown, wall bounce. All constants on the tuning panel. *(Opus)*
+- [x] **1b1** Kart physics core on a 2D plane: auto-forward always on, speed-sensitive steering, slight slide, off-road slowdown, wall bounce. All constants on the tuning panel. *(Opus)* — done 2026-08-07, confirmed drivable by Riggs. Not yet tuned; the numbers are a starting point for 1b6.
 - [ ] **1b2** Three.js presentation: stylized flat track, placeholder kart, behind-the-kart chase camera with slight lag and lean. This is the step that makes the view mimic the real game. *(Opus)*
 - [ ] **1b3** Track furniture: real boost pads, ramps with height and a trick-timing window at the lip (hop key at the right moment = landing boost), decoy elements that resemble pads but behave differently (half-pipe style ramps), collectible coins with counter to 10. *(Opus)*
 - [ ] **1b4** Steer-assist guardrail: soft force near track edges mimicking smart steering, toggleable. *(Opus)*

@@ -9,22 +9,27 @@
     <main>
       <a class="backlink" href="../../../index.html">&larr; Testing Ground</a>
       <header>
-        <h1>Kart physics</h1>
+        <h1>Kart physics and chase camera</h1>
         <p class="lede">
-          Step 1b1. Top-down, because you need to see the slide to tune it. The chase camera that
-          makes this look like Mario Kart is the next step (1b2) and sits on top of this same
-          physics.
+          Steps 1b1 and 1b2. The chase view is what Jodi will actually see. The top-down view below
+          it is an instrument, not the product &mdash; a chase camera hides the slip angle, and the
+          slip angle is the thing being tuned.
         </p>
       </header>
 
       <section class="panel">
         <h2>Drive</h2>
-        <canvas id="stage" height="420"></canvas>
+        <canvas id="stage3d" height="440"></canvas>
         <p class="hint">
           <strong>&larr; &rarr;</strong> or <strong>A</strong>/<strong>D</strong> to steer.
           <strong>R</strong> to reset. There is no accelerator &mdash; the kart always drives
           forward, exactly like Jodi's auto-accelerate setting.
         </p>
+      </section>
+
+      <section class="panel">
+        <h2>Instrument view</h2>
+        <canvas id="stage" height="320"></canvas>
         <p class="hint">
           The blue nose is where the kart points. The grey line is where it is actually
           <em>going</em>. When those two disagree, that gap is the drift.
@@ -39,15 +44,24 @@
       </section>
 
       <div class="panel" id="tuning-mount"></div>
+      <div class="panel" id="camera-mount"></div>
 
       <section class="panel">
         <h2>What to feel for</h2>
         <p class="hint">
-          This is a rehearsal for gate 1b6, so the questions are the same. Is the steering
-          responsive without being twitchy &mdash; can you hold a smooth line through the corner, or
-          does it snap? Does the back end stepping out feel like a kart or like ice? Does grass feel
-          like a real penalty without feeling like a punishment? Does hitting the wall cost you
-          something?
+          This is a rehearsal for gate 1b6, so the questions are the same. Does the view read as
+          &ldquo;Mario Kart-ish&rdquo; instantly? Is the steering responsive without being twitchy
+          &mdash; can you hold a smooth line through the corner, or does it snap? Does the back end
+          stepping out feel like a kart or like ice? Does grass feel like a real penalty without
+          feeling like a punishment? Does hitting the wall cost you something?
+        </p>
+        <p class="hint">
+          The camera is a feel system, not plumbing. Almost all of it is lag: a camera welded
+          rigidly behind the kart looks correct and feels dead.
+          <strong>Camera heading lag</strong> is the biggest single contributor to &ldquo;that looks
+          like Mario Kart&rdquo; &mdash; it lets you see the kart's flank as it turns.
+          <strong>Speed FOV</strong> is what makes fast feel fast. Try both at zero to hear the
+          difference.
         </p>
         <p class="hint">
           Every number below the canvas is live. When something feels wrong, move the slider until
