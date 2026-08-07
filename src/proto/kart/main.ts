@@ -19,6 +19,11 @@ import {
   type FurnitureSpec,
 } from '../../engine/track';
 import { TuningPanel, type TuningSchema } from '../../engine/tuning';
+import {
+  STEER_ASSIST_CONFIG,
+  computeSteerAssist,
+  type SteerAssistResult,
+} from '../../engine/steer-assist';
 import { ChaseCamera, CHASE_CAMERA_CONFIG } from '../../engine/chase-camera';
 import { createKartScene } from './scene';
 
@@ -373,6 +378,46 @@ const TRACK_SCHEMA: TuningSchema<typeof TRACK> = {
   coinTarget: { kind: 'number', label: 'Coin target', min: 1, max: 30, step: 1, group: 'Coins' },
 };
 
+// --- steer assist (1b4) ---
+
+const ASSIST = { ...STEER_ASSIST_CONFIG };
+
+const ASSIST_SCHEMA: TuningSchema<typeof ASSIST> = {
+  enabled: {
+    kind: 'boolean',
+    label: 'Smart steering',
+    help: 'Jodi drives with this on. Toggle with G and drive a lap each way — the difference is what her setting is actually doing for her.',
+  },
+  startFraction: {
+    kind: 'number',
+    label: 'Starts at',
+    min: 0.1,
+    max: 1,
+    step: 0.05,
+    help: 'How far toward the edge you get before it objects, as a fraction of the road half-width.',
+  },
+  lookAheadSeconds: {
+    kind: 'number',
+    label: 'Looks ahead',
+    min: 0,
+    max: 1.5,
+    step: 0.05,
+    unit: 's',
+    help: 'The anticipation constant, and the one that decides whether this feels like steering or like being rescued.',
+  },
+  maxCorrectionAngle: {
+    kind: 'number',
+    label: 'Correction angle',
+    min: 0,
+    max: 1.6,
+    step: 0.05,
+    unit: 'rad',
+  },
+  strength: { kind: 'number', label: 'Strength', min: 0, max: 8, step: 0.1, unit: 'rad/s' },
+};
+
+let assist: SteerAssistResult = { yawRate: 0, lateral: 0, active: false };
+
 /** Transient on-screen feedback: what just happened, and when it should fade. */
 let flash = '';
 let flashUntil = 0;
@@ -394,7 +439,8 @@ function say(message: string, ms = 1200): void {
 
 function update(dt: number): void {
   input.sample();
-  last = stepKart(kart, CONFIG, input.steer(), surface, dt);
+  assist = computeSteerAssist(kart, path, surface.options.roadHalfWidth, ASSIST);
+  last = stepKart(kart, CONFIG, input.steer(), surface, dt, assist.yawRate);
 
   const events = run.update(
     kart,
@@ -669,6 +715,12 @@ const STAT_ROWS = [
   ['slip angle', () => `${((last.slipAngle * 180) / Math.PI).toFixed(1)}°`],
   ['steering', () => kart.steerAmount.toFixed(2)],
   ['surface', () => (last.airborne ? 'AIR' : last.onRoad ? 'road' : 'GRASS')],
+  [
+    'assist',
+    () =>
+      !ASSIST.enabled ? 'off' : assist.active ? `correcting ${assist.yawRate.toFixed(2)}` : 'idle',
+  ],
+  ['across road', () => assist.lateral.toFixed(2)],
   ['altitude', () => `${kart.altitude.toFixed(2)} u`],
   ['boost', () => (kart.boostRemaining > 0 ? `${kart.boostRemaining.toFixed(2)} s` : '—')],
   ['coins', () => `${run.coins} / ${TRACK.coinTarget}`],
@@ -714,6 +766,11 @@ sizeCanvas();
 window.addEventListener('resize', sizeCanvas);
 
 window.addEventListener('keydown', (event) => {
+  if (event.code === 'KeyG') {
+    ASSIST.enabled = !ASSIST.enabled;
+    say(ASSIST.enabled ? 'Smart steering ON' : 'Smart steering OFF', 1400);
+    return;
+  }
   if (event.code !== 'KeyR') return;
   resetKart(kart, surface.startPose.x, surface.startPose.y, surface.startPose.heading);
   run.reset();
@@ -761,6 +818,15 @@ new TuningPanel({
   exportName: 'TRACK_CONFIG',
   storageKey: 'mkm.tuning.track.v1',
   mount: document.querySelector<HTMLElement>('#track-mount') ?? undefined,
+});
+
+new TuningPanel({
+  config: ASSIST,
+  schema: ASSIST_SCHEMA,
+  title: 'Steer assist config',
+  exportName: 'STEER_ASSIST_CONFIG',
+  storageKey: 'mkm.tuning.assist.v1',
+  mount: document.querySelector<HTMLElement>('#assist-mount') ?? undefined,
 });
 
 setInterval(pumpStats, 100);

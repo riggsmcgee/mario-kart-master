@@ -195,6 +195,8 @@ export function stepKart(
   steerInput: number,
   surface: Surface,
   dt: number,
+  /** Corrective yaw from the steer assist (1b4), rad/s. Added on top of the player's input. */
+  assistYaw = 0,
 ): KartStepResult {
   kart.prevX = kart.x;
   kart.prevY = kart.y;
@@ -281,8 +283,12 @@ export function stepKart(
   const air = airborne ? config.airSteerFactor : 1;
   const yawRate = config.maxYawRate * kart.steerAmount * authority * penalty * air;
 
+  // The assist gets the same speed authority as the player: it should not rotate a parked
+  // kart, and with the wheels off the ground it has nothing to steer with either.
+  const assist = assistYaw * authority * air;
+
   // Reverse would need the yaw sign flipped; auto-forward means it cannot happen.
-  kart.heading = wrapAngle(kart.heading + yawRate * dt);
+  kart.heading = wrapAngle(kart.heading + (yawRate + assist) * dt);
 
   kart.x += kart.vx * dt;
   kart.y += kart.vy * dt;

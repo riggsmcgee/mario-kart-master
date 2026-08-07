@@ -67,6 +67,34 @@ export function buildTrackPath(samples: Array<{ x: number; y: number }>): TrackP
   };
 }
 
+/**
+ * Nearest point on the centreline, and how far off it the query point sits — positive to the
+ * outside of the lap, negative to the infield.
+ *
+ * A plain scan of every sample. At 240 samples and 120Hz that is ~29k distance checks a
+ * second, which is nothing, and it cannot get the wrong answer near a corner the way a cached
+ * local search can.
+ */
+export function projectToPath(
+  path: TrackPath,
+  x: number,
+  y: number,
+): { point: PathPoint; offset: number } | null {
+  let best: PathPoint | null = null;
+  let bestDistance = Infinity;
+
+  for (const p of path.points) {
+    const distance = (p.x - x) ** 2 + (p.y - y) ** 2;
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      best = p;
+    }
+  }
+  if (!best) return null;
+
+  return { point: best, offset: (x - best.x) * best.nx + (y - best.y) * best.ny };
+}
+
 // --- furniture -------------------------------------------------------------
 
 /**
