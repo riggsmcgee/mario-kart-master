@@ -367,9 +367,15 @@ const TRACK_SCHEMA: TuningSchema<typeof TRACK> = {
 let flash = '';
 let flashUntil = 0;
 
-/** Barrel-roll animation start time, or 0 when not rolling. */
-let rollStart = 0;
-const ROLL_MS = 520;
+/**
+ * Barrel roll. Runs from the moment the trick is confirmed until the kart touches down, so the
+ * confirmation is immediate and the roll length matches the actual airtime rather than a fixed
+ * animation. The boost still waits for the landing.
+ */
+let rolling = false;
+let rollAngle = 0;
+/** Full turns per second while airborne. */
+const ROLL_RATE = Math.PI * 2 * 1.9;
 
 function say(message: string, ms = 1200): void {
   flash = message;
@@ -393,10 +399,16 @@ function update(dt: number): void {
 
   if (events.padHit) say('BOOST');
   if (events.launchedFromHalfPipe) say('Half-pipe — real boost, wrong line');
-  if (events.trick === 'landed') {
+
+  // Confirm the trick in the air, the instant it counts. Waiting for the landing to say so
+  // put the feedback a whole flight away from the input that earned it.
+  if (events.trickRegistered) {
     const error = events.trickErrorMs ?? 0;
-    say(`TRICK — ${error > 0 ? '+' : ''}${error.toFixed(0)} ms`);
-    rollStart = performance.now();
+    say(`TRICK — ${error > 0 ? '+' : ''}${error.toFixed(0)} ms`, 1600);
+    rolling = true;
+  }
+  if (events.trick === 'landed') {
+    say('BOOST', 900);
   } else if (events.trick === 'missed') {
     say('No trick. Hop at the lip.');
   }
@@ -478,16 +490,15 @@ function renderChase(
   // than on the stats timer so it appears on the frame the boost starts.
   if (boostGlow) boostGlow.dataset.on = String(boosting);
 
-  // A landed trick spins the kart through a full barrel roll and stops level. Nothing else
-  // signals "that counted" as immediately, which is why the real game does it too.
-  if (rollStart > 0) {
-    const progress = (now - rollStart) / ROLL_MS;
-    if (progress >= 1) {
-      rollStart = 0;
-      view.setRoll(0);
-    } else {
-      view.setRoll(progress * Math.PI * 2);
-    }
+  // Spin for as long as the kart is in the air, then land level — which is both what the real
+  // game does and the clearest possible "that counted", delivered at the moment it counts.
+  if (rolling && last.airborne) {
+    rollAngle += ROLL_RATE * dt;
+    view.setRoll(rollAngle);
+  } else if (rollAngle !== 0) {
+    rolling = false;
+    rollAngle = 0;
+    view.setRoll(0);
   }
   // Sim heading 0 points along +x; a Three.js Y-rotation of θ sends +x to (cosθ, 0, -sinθ),
   // so the mesh needs the negated angle to face where the physics says it faces.
@@ -691,6 +702,9 @@ window.addEventListener('keydown', (event) => {
   resetKart(kart, surface.startPose.x, surface.startPose.y, surface.startPose.heading);
   run.reset();
   trail.length = 0;
+  rolling = false;
+  rollAngle = 0;
+  view?.setRoll(0);
   say('Reset', 700);
   // Snap the camera too, or it swoops across the arena to catch up with the reset kart.
   chase.reset(

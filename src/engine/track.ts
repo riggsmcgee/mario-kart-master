@@ -192,7 +192,9 @@ export type TrackConfig = {
 /** Tuned by Riggs 2026-08-07; see TUNING.md. */
 export const TRACK_CONFIG: TrackConfig = {
   padBoost: 1,
-  trickWindowMs: 500,
+  // Back to 150 once the barrel roll made landings legible — the 500 was measuring "I could
+  // not tell it worked", not a genuinely tight window. See TUNING.md.
+  trickWindowMs: 150,
   trickBoost: 1.3,
   rampLaunch: 1.6,
   halfPipePush: 7,
@@ -214,6 +216,12 @@ export interface FurnitureEvents {
   launched: boolean;
   /** The launch came off a half-pipe, so the kart is being thrown off its line. */
   launchedFromHalfPipe: boolean;
+  /**
+   * The tick the trick was confirmed, mid-air. Separate from `trick`, which reports the
+   * outcome on landing: the player needs to know it counted the moment it counts, but the
+   * boost still belongs to the landing.
+   */
+  trickRegistered: boolean;
   trick: TrickOutcome;
   /** How far the hop was from the lip, in ms. Negative is early. Null when no trick landed. */
   trickErrorMs: number | null;
@@ -224,6 +232,7 @@ const NO_EVENTS: FurnitureEvents = {
   padHit: false,
   launched: false,
   launchedFromHalfPipe: false,
+  trickRegistered: false,
   trick: 'none',
   trickErrorMs: null,
 };
@@ -334,6 +343,7 @@ export class TrackRun {
         this.trickLanded = true;
         this.trickErrorMs = pressed - ctx.now;
         this.trickArmedUntil = 0;
+        events.trickRegistered = true;
       } else {
         this.trickArmedUntil = ctx.now + config.trickWindowMs;
       }
@@ -345,6 +355,7 @@ export class TrackRun {
       this.trickLanded = true;
       this.trickErrorMs = ctx.now - this.launchedAt;
       this.trickArmedUntil = 0;
+      events.trickRegistered = true;
     }
 
     // --- touchdown ---

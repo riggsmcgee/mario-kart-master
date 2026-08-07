@@ -31,11 +31,12 @@ _(newest first)_
 | `padBoost` | 0.9 | 1 |
 | `decoySpeedKeep` | 0.62 | *(removed — see below)* |
 
-**Read this before trusting the 500.** The window was widened while there was no visual signal
-that a trick had landed — only a line of HUD text. So 500ms may be measuring "I couldn't tell"
-rather than "the window is too tight." The kart now barrel-rolls on a landed trick and the
-boost shows flames and an edge glow, so **the window is worth re-testing from a lower value**.
-My guess is the honest number is nearer 200–250, but that is a guess and the drive decides it.
+**Resolved same day: back to 150.** The 500 was measuring "I couldn't tell it worked", not a
+genuinely tight window — exactly as suspected above. Once the trick confirmed itself visibly
+(barrel roll starting at the lip, flames and edge glow on the boost), Riggs put it straight back
+to 150 and it reads fine. Worth remembering as a pattern: **a timing complaint is a feedback
+complaint until proven otherwise.** The instinct to widen the window would have made Chapter 3
+teach nothing, and the fix was never in the number.
 
 `decoySpeedKeep` was set to 1, zeroing the penalty entirely — consistent with Riggs's correction
 that decoy pads are not a real Mario Kart mechanic. Replaced by `halfPipePush` (7 u/s), which
