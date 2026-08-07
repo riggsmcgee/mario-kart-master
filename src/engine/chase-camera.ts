@@ -43,15 +43,18 @@ export type ChaseCameraConfig = {
   fovSpeedGain: number;
 };
 
+/** Tuned by Riggs 2026-08-07 against the stadium test oval; see TUNING.md. */
 export const CHASE_CAMERA_CONFIG: ChaseCameraConfig = {
-  distance: 9,
-  height: 3.6,
+  distance: 17.5,
+  height: 7.5,
   lookAhead: 7,
   lookHeight: 1.1,
   positionLag: 7,
   headingLag: 5,
-  lean: 0.09,
-  fovBase: 62,
+  // Zeroed deliberately, not left unset — Riggs tried the roll and did not want it.
+  // Do not reintroduce without asking.
+  lean: 0,
+  fovBase: 56,
   fovSpeedGain: 12,
 };
 

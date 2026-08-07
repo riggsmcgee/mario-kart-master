@@ -21,6 +21,51 @@ not just the diff that got there. Those are the numbers the real site ships with
 
 _(newest first)_
 
+### 2026-08-07 — CHASE_CAMERA_CONFIG (1b2), tuned by Riggs
+
+**Why:** Riggs drove the stadium oval and pulled the camera much further back and higher, dropped
+the lean to zero, and narrowed the FOV slightly. Verdict: "looks good."
+
+_Reason recorded by Claude from the numbers, not stated by Riggs — correct this if it is wrong._
+The change is from a close, low, over-the-shoulder camera to a high, far one. The close version
+frames the kart; this one frames the **road ahead**. That fits what the site is for: every drill
+from Chapter 3 on is about seeing a ramp, a boost pad, or a line early enough to do something about
+it. A camera tucked in behind the kart looks more dramatic and shows you less.
+
+| Field | Before | After |
+|---|---|---|
+| `distance` | 9 | 17.5 |
+| `height` | 3.6 | 7.5 |
+| `lean` | 0.09 | 0 |
+| `fovBase` | 62 | 56 |
+
+Lean going to zero is a deliberate rejection, not a default left alone — noted in the source so a
+later session does not helpfully put it back. The narrower FOV also partly offsets the extra
+distance, keeping the kart from shrinking too far into the frame.
+
+Unchanged and still doing the heavy lifting: `headingLag` 5 and `fovSpeedGain` 12.
+
+### 2026-08-07 — KART_CONFIG (1b1), tuned by Riggs
+
+**Why:** Faster and punchier. Top speed up 25%, acceleration up ~45%, everything else untouched.
+
+_Reason recorded by Claude from the numbers._ Acceleration moved proportionally more than top
+speed, which means the change is mostly about **how quickly the kart recovers**, not how fast it
+ultimately goes. That is the right instinct for this project: Jodi gets knocked around by items and
+by Kayla, and the whole Chapter 7 kart recommendation rests on acceleration and handling beating
+top speed at 100cc. The drill now rewards the same thing the real game will.
+
+| Field | Before | After |
+|---|---|---|
+| `maxSpeed` | 16 | 20 |
+| `acceleration` | 11 | 16 |
+
+Notably untouched: every steering and grip constant. `steerRate` 5.5 survived first contact, which
+is the "responsive, not twitchy" number I expected to move most.
+
+**Not signed off yet.** Gate 1b6 is the real test, once ramps, boost pads and a proper test track
+exist to drive. These are good working values, not final ones.
+
 ### 2026-08-07 — baseline
 
 No feel constants exist yet. Section 1a built the tools: the input layer (1a2), the fixed-timestep

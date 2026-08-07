@@ -54,10 +54,13 @@ export type KartConfig = {
   wallBounce: number;
 };
 
-/** Starting point for tuning. Every one of these is expected to move before gate 1b6. */
+/**
+ * Tuned by Riggs 2026-08-07 against the 1b2 chase view; see TUNING.md. Still provisional —
+ * gate 1b6 is the real sign-off, once ramps, pads and a proper test track exist to drive.
+ */
 export const KART_CONFIG: KartConfig = {
-  maxSpeed: 16,
-  acceleration: 11,
+  maxSpeed: 20,
+  acceleration: 16,
   drag: 0.35,
 
   maxYawRate: 2.4,

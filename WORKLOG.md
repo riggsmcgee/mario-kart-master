@@ -18,16 +18,68 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 | | |
 |---|---|
 | Current phase | Phase 1: The Testing Ground |
-| Current step | **1b1** — kart physics core. Section 1a Foundation is complete. |
+| Current step | **1b3** — track furniture: pads, ramps with trick windows, decoys, coins |
 | Last gate passed | none yet (1a carries an acceptance check, not a gate — met 2026-08-07) |
 | Next gate | **1b6** (drive the kart prototype for 5 minutes) |
-| Repo state | 1a1–1a4 done; three prototypes run under `npm run dev` |
+| Repo state | 1a1–1a4, 1b1–1b2 done; four prototypes run under `npm run dev` |
 | Deferred | **1f** Supabase (no project yet) · **1a5** GitHub Pages deploy |
 | Needs an answer | **Q6** track format, before 1b5 |
 
 ---
 
 ## Log
+
+### 2026-08-07 — Session 4 (Opus 5)
+
+**Steps touched:** **1b1**, **1b2** (both done and confirmed by Riggs)
+
+**Did:**
+
+- **1b1 kart physics** (`src/engine/kart.ts`). Auto-forward always on, no throttle and no brake,
+  because Jodi plays with auto-accelerate and steering is therefore the entire interface. The slide
+  comes from tracking velocity as a vector independently of heading and letting `grip` pull them
+  together — turn the nose and the kart keeps travelling the old way for a moment, and that gap is
+  the drift. Yaw carries two speed terms pulling opposite ways: authority fades to zero at a
+  standstill (a parked kart pirouetting breaks the illusion instantly) while the high-speed penalty
+  widens the turn at top speed (which makes a fast lap feel committed rather than remote-controlled).
+- **1b2 chase camera** (`src/engine/chase-camera.ts`, scene in `src/proto/kart/scene.ts`). Three.js
+  over the same 2D physics. Almost the entire camera is lag — position, heading, lean, and speed
+  FOV — because a rigidly-mounted camera looks correct and feels dead. The ideal camera position is
+  computed along the *camera's* lagging heading, not the kart's; using the kart's would cancel the
+  lag out entirely, which is the easy mistake here.
+- Harness shows both views: chase view as the stage, top-down retained below as the instrument,
+  both rendering from one interpolated pose per frame so they cannot disagree.
+- **Riggs tuned and signed off both configs.** Applied as the new defaults; full before/after and
+  reasoning in `TUNING.md`.
+
+**What the tuning told us:**
+
+- Camera went from close-and-low to **far-and-high** (distance 9 → 17.5, height 3.6 → 7.5). That is
+  a shift from framing the kart to framing the road ahead — which suits a site where every drill
+  from Ch3 on is about seeing a ramp or a pad early enough to react.
+- **Lean rejected outright** (0.09 → 0). Recorded in the source as deliberate so a later session
+  does not helpfully restore it.
+- Kart got faster and much punchier (maxSpeed 16 → 20, acceleration 11 → 16). Acceleration moved
+  proportionally more, so the real change is recovery speed — which happens to be exactly the trait
+  Ch7's kart recommendation is built around.
+- Every steering and grip constant survived untouched, including `steerRate`, the number I most
+  expected to move.
+
+**Notes:**
+
+- Three.js adds ~132KB gzipped to the kart page. Fine for a driving drill; worth revisiting in
+  Phase 2 so the concept-only chapters do not drag it in.
+- Riggs pasted back the **Copy config** output rather than the **Copy TUNING.md entry** output. Both
+  work — the second one just carries the before/after and a Why prompt, so it costs me less
+  guessing. The Why lines in this round's TUNING.md entries are my reading of the numbers, labelled
+  as such, and should be corrected if wrong.
+- Eight commits ahead of `origin/main`; still nothing pushed.
+
+**Next:** 1b3 track furniture — boost pads, ramps with a trick-timing window at the lip, decoys that
+resemble pads but punish blind commitment, and coins. This is the first step where the answer is a
+tuned number in milliseconds rather than a shape on screen.
+
+---
 
 ### 2026-08-07 — Session 3 (Opus 5)
 
