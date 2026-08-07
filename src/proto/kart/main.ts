@@ -10,14 +10,13 @@ import {
   stepKart,
   type KartStepResult,
 } from '../../engine/kart';
-import { createStadiumSurface, stadiumCentreline } from '../../engine/surface';
+import { createPathSurface } from '../../engine/path-surface';
+import { TRACK_CONFIG, TrackRun, buildLoopPath, placeFurniture } from '../../engine/track';
 import {
-  TRACK_CONFIG,
-  TrackRun,
-  buildTrackPath,
-  placeFurniture,
-  type FurnitureSpec,
-} from '../../engine/track';
+  TEST_TRACK_CONTROL,
+  TEST_TRACK_HALF_WIDTH,
+  TEST_TRACK_LAYOUT,
+} from '../../data/test-track';
 import { TuningPanel, type TuningSchema } from '../../engine/tuning';
 import {
   STEER_ASSIST_CONFIG,
@@ -148,46 +147,10 @@ const SCHEMA: TuningSchema<typeof CONFIG> = {
   wallBounce: { kind: 'number', label: 'Wall bounce', min: 0, max: 1, step: 0.05, group: 'Walls' },
 };
 
-const surface = createStadiumSurface();
-const path = buildTrackPath(stadiumCentreline());
-
-/**
- * The whole test layout. (1b3)
- *
- * This is the Q6 answer in practice: `t` is how far around the lap, `offset` is how far off
- * the centre line. Nothing here refers to a coordinate, so the oval could change shape and
- * every item would still be where it belongs.
- *
- * On this oval, t 0–0.2 is the bottom straight, 0.2–0.5 the right corner, 0.5–0.7 the top
- * straight, 0.7–1.0 the left corner.
- */
-function coinLine(fromT: number, toT: number, count: number, offset: number): FurnitureSpec[] {
-  return Array.from({ length: count }, (_, i) => ({
-    kind: 'coin' as const,
-    t: fromT + ((toT - fromT) * i) / Math.max(1, count - 1),
-    offset,
-  }));
-}
-
-const LAYOUT: FurnitureSpec[] = [
-  // Straights: real pads you can line up for.
-  { kind: 'pad', t: 0.05 },
-  { kind: 'pad', t: 0.56, offset: -3 },
-
-  // A ramp in each corner, so tricks have to be taken mid-turn rather than on a straight.
-  { kind: 'ramp', t: 0.33 },
-  { kind: 'ramp', t: 0.84, offset: 2 },
-
-  // Half-pipe out near the edge, exactly where taking it costs you the corner. A real boost
-  // for a real detour — the trade Chapter 4 is about.
-  { kind: 'halfpipe', t: 0.14, offset: 7 },
-
-  // Coins reward the inside line through the top straight and the left corner.
-  ...coinLine(0.6, 0.68, 6, -4),
-  ...coinLine(0.9, 0.97, 6, -5),
-];
-
-const items = placeFurniture(path, LAYOUT);
+// The whole circuit — shape, width and furniture — lives in src/data/test-track.ts. (1b5)
+const path = buildLoopPath(TEST_TRACK_CONTROL);
+const surface = createPathSurface(path, TEST_TRACK_HALF_WIDTH);
+const items = placeFurniture(path, TEST_TRACK_LAYOUT);
 const run = new TrackRun(items);
 
 // Ramps are the only thing on this track with height, and the physics asks the surface how
@@ -442,7 +405,7 @@ function say(message: string, ms = 1200): void {
 
 function update(dt: number): void {
   input.sample();
-  assist = computeSteerAssist(kart, path, surface.options.roadHalfWidth, ASSIST);
+  assist = computeSteerAssist(kart, path, surface.halfWidth, ASSIST);
   last = stepKart(kart, CONFIG, input.steer(), surface, dt, assist.yawRate);
 
   const now = performance.now();
@@ -507,16 +470,17 @@ function viewTransform(): { scale: number; offsetX: number; offsetY: number } {
   };
 }
 
-/** A stadium of the given centreline radius, as a rounded rect. */
-function stadiumPath(radius: number, scale: number, offsetX: number, offsetY: number): Path2D {
-  const { straightHalfLength, centerX, centerY } = surface.options;
-  const path = new Path2D();
-  const w = (straightHalfLength * 2 + radius * 2) * scale;
-  const h = radius * 2 * scale;
-  const x = offsetX + (centerX - straightHalfLength - radius) * scale;
-  const y = offsetY + (centerY - radius) * scale;
-  path.roundRect(x, y, w, h, radius * scale);
-  return path;
+/** One edge of the road, traced at a fixed offset from the centreline. */
+function edgePath(offset: number, scale: number, offsetX: number, offsetY: number): Path2D {
+  const shape = new Path2D();
+  path.points.forEach((p, i) => {
+    const x = offsetX + (p.x + p.nx * offset) * scale;
+    const y = offsetY + (p.y + p.ny * offset) * scale;
+    if (i === 0) shape.moveTo(x, y);
+    else shape.lineTo(x, y);
+  });
+  shape.closePath();
+  return shape;
 }
 
 function render(alpha: number, stats: LoopStats): void {
@@ -590,7 +554,7 @@ function renderTopDown(poseX: number, poseY: number, poseHeading: number): void 
   ctx.clearRect(0, 0, width, height);
 
   const { scale, offsetX, offsetY } = viewTransform();
-  const { cornerRadius, roadHalfWidth } = surface.options;
+  const halfWidth = surface.halfWidth;
   const toScreenX = (x: number): number => offsetX + x * scale;
   const toScreenY = (y: number): number => offsetY + y * scale;
 
@@ -598,7 +562,7 @@ function renderTopDown(poseX: number, poseY: number, poseHeading: number): void 
   const muted = readCssVar('--muted', '#666');
   const accent = readCssVar('--accent', '#0b57d0');
 
-  // Grass, then road, then the inside of the oval punched back out to grass.
+  // Grass first, then the road laid over it.
   const { bounds } = surface;
   ctx.fillStyle = line;
   ctx.globalAlpha = 0.25;
@@ -614,8 +578,8 @@ function renderTopDown(poseX: number, poseY: number, poseHeading: number): void 
   // infield is never painted. Punching it out with compositing instead would erase the grass
   // underneath it too.
   const road = new Path2D();
-  road.addPath(stadiumPath(cornerRadius + roadHalfWidth, scale, offsetX, offsetY));
-  road.addPath(stadiumPath(cornerRadius - roadHalfWidth, scale, offsetX, offsetY));
+  road.addPath(edgePath(halfWidth, scale, offsetX, offsetY));
+  road.addPath(edgePath(-halfWidth, scale, offsetX, offsetY));
   ctx.fillStyle = line;
   ctx.fill(road, 'evenodd');
 
@@ -623,7 +587,7 @@ function renderTopDown(poseX: number, poseY: number, poseHeading: number): void 
   ctx.globalAlpha = 0.5;
   ctx.setLineDash([6, 8]);
   ctx.lineWidth = 1;
-  ctx.stroke(stadiumPath(cornerRadius, scale, offsetX, offsetY));
+  ctx.stroke(edgePath(0, scale, offsetX, offsetY));
   ctx.setLineDash([]);
   ctx.globalAlpha = 1;
 

@@ -51,8 +51,8 @@ export const PROTOS: Proto[] = [
     step: '1b1–1b5',
     gate: '1b6',
     blurb:
-      'Hand-rolled 2D physics under a Three.js chase camera. Pads, ramps, decoys, coins. ' +
-      '1b1 physics is drivable now, top-down; the chase camera lands in 1b2.',
+      'Hand-rolled 2D physics under a Three.js chase camera. Pads, ramps with trick timing, ' +
+      'half-pipes, coins, smart-steering guardrail, and a real circuit. Ready for gate 1b6.',
     status: 'built',
   },
   {

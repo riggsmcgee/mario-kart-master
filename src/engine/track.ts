@@ -50,9 +50,8 @@ export function buildTrackPath(samples: Array<{ x: number; y: number }>): TrackP
     const len = Math.hypot(dx, dy) || 1;
     const tx = dx / len;
     const ty = dy / len;
-    // Normal is the tangent rotated 90°, chosen so it points to the OUTSIDE of the lap for
-    // samples ordered the way `stadiumCentreline` orders them. Positive `offset` is therefore
-    // outward, negative is toward the infield.
+    // Normal is the tangent rotated 90°, pointing to the OUTSIDE of the lap when samples run
+    // in lap order. Positive `offset` is therefore outward, negative toward the infield.
     return { x: p.x, y: p.y, tx, ty, nx: -ty, ny: tx };
   });
 
@@ -67,13 +66,91 @@ export function buildTrackPath(samples: Array<{ x: number; y: number }>): TrackP
   };
 }
 
+/** One Catmull-Rom span. Passes exactly through p1 and p2, curving to meet its neighbours. */
+function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return (
+    0.5 *
+    (2 * p1 +
+      (-p0 + p2) * t +
+      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+      (-p0 + 3 * p1 - 3 * p2 + p3) * t3)
+  );
+}
+
+/**
+ * Build a closed circuit from a handful of control points. (1b5)
+ *
+ * A Catmull-Rom loop passes through every point you give it, so authoring a track is placing
+ * corners by eye rather than solving for tangents — and unlike stitching arcs and straights
+ * together, it cannot fail to close.
+ *
+ * The result is resampled to even spacing by arc length. That matters for authoring: it makes
+ * `t` mean "this far around the lap by distance", so a pad at t = 0.25 really is a quarter of
+ * the way round, rather than a quarter of the way through the control points.
+ */
+export function buildLoopPath(control: Array<{ x: number; y: number }>, samples = 300): TrackPath {
+  const n = control.length;
+  const SUBDIVISIONS = 24;
+
+  const dense: Array<{ x: number; y: number }> = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = control[(i - 1 + n) % n];
+    const p1 = control[i];
+    const p2 = control[(i + 1) % n];
+    const p3 = control[(i + 2) % n];
+    if (!p0 || !p1 || !p2 || !p3) continue;
+    for (let j = 0; j < SUBDIVISIONS; j++) {
+      const t = j / SUBDIVISIONS;
+      dense.push({
+        x: catmullRom(p0.x, p1.x, p2.x, p3.x, t),
+        y: catmullRom(p0.y, p1.y, p2.y, p3.y, t),
+      });
+    }
+  }
+
+  // Walk the dense curve, dropping a point every `spacing` units of travel.
+  const cumulative: number[] = [0];
+  for (let i = 1; i <= dense.length; i++) {
+    const a = dense[i - 1];
+    const b = dense[i % dense.length];
+    if (!a || !b) break;
+    cumulative.push((cumulative[i - 1] ?? 0) + Math.hypot(b.x - a.x, b.y - a.y));
+  }
+  const total = cumulative[cumulative.length - 1] ?? 0;
+  const spacing = total / samples;
+
+  const even: Array<{ x: number; y: number }> = [];
+  let cursor = 0;
+  for (let i = 0; i < samples; i++) {
+    const target = i * spacing;
+    while (cursor < cumulative.length - 2 && (cumulative[cursor + 1] ?? 0) < target) cursor++;
+
+    const from = dense[cursor];
+    const to = dense[(cursor + 1) % dense.length];
+    const spanStart = cumulative[cursor] ?? 0;
+    const spanEnd = cumulative[cursor + 1] ?? spanStart;
+    if (!from || !to) break;
+
+    const span = spanEnd - spanStart;
+    const fraction = span > 0 ? (target - spanStart) / span : 0;
+    even.push({
+      x: from.x + (to.x - from.x) * fraction,
+      y: from.y + (to.y - from.y) * fraction,
+    });
+  }
+
+  return buildTrackPath(even);
+}
+
 /**
  * Nearest point on the centreline, and how far off it the query point sits — positive to the
  * outside of the lap, negative to the infield.
  *
- * A plain scan of every sample. At 240 samples and 120Hz that is ~29k distance checks a
- * second, which is nothing, and it cannot get the wrong answer near a corner the way a cached
- * local search can.
+ * A plain scan of every sample. At 300 samples, twice a tick, at 120Hz, that is ~72k distance
+ * checks a second — nothing — and unlike a cached local search it cannot get the wrong answer
+ * where the track doubles back on itself, which this circuit's hairpin does.
  */
 export function projectToPath(
   path: TrackPath,
@@ -231,7 +308,10 @@ export const TRACK_CONFIG: TrackConfig = {
   trickWindowMs: 150,
   trickAttemptMs: 750,
   trickBoost: 1.3,
-  rampLaunch: 1.6,
+  // Raised from 1.6 after the playtest slowdown. Launch speed scales with how fast you hit the
+  // ramp, so dropping top speed 20 → 11.5 had quietly cut airtime by ~40% and left the hop
+  // nowhere to live. This restores roughly the old hang time at the new speed.
+  rampLaunch: 3.2,
   halfPipePush: 7,
   coinTarget: 10,
 };

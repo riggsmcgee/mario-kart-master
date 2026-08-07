@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { StadiumSurface } from '../../engine/surface';
+import type { PathSurface } from '../../engine/path-surface';
 import type { PathPoint, PlacedFurniture, TrackPath } from '../../engine/track';
 
 /**
@@ -260,7 +260,7 @@ export interface KartScene {
 
 export function createKartScene(
   canvas: HTMLCanvasElement,
-  surface: StadiumSurface,
+  surface: PathSurface,
   path: TrackPath,
   items: PlacedFurniture[],
 ): KartScene {
@@ -288,7 +288,7 @@ export function createKartScene(
   scene.add(ground);
 
   const points = path.points;
-  const halfWidth = surface.options.roadHalfWidth;
+  const halfWidth = surface.halfWidth;
 
   // Road sits a hair above the grass to avoid z-fighting between coplanar surfaces.
   scene.add(
