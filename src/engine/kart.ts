@@ -52,6 +52,15 @@ export type KartConfig = {
   wallSpeedKeep: number;
   /** How much the kart rebounds off a wall, 0 slides along it, 1 mirrors. */
   wallBounce: number;
+
+  /** Downward pull while airborne, units/s². Higher makes jumps shorter and snappier. */
+  gravity: number;
+  /** Steering authority in the air, as a fraction of ground steering. */
+  airSteerFactor: number;
+  /** Top-speed multiplier while boosting. */
+  boostSpeedFactor: number;
+  /** How hard a boost pushes, units/s². Much higher than normal, so a boost feels instant. */
+  boostAcceleration: number;
 };
 
 /**
@@ -76,6 +85,11 @@ export const KART_CONFIG: KartConfig = {
 
   wallSpeedKeep: 0.5,
   wallBounce: 0.3,
+
+  gravity: 34,
+  airSteerFactor: 0.35,
+  boostSpeedFactor: 1.5,
+  boostAcceleration: 70,
 };
 
 export interface KartState {
@@ -87,10 +101,19 @@ export interface KartState {
   vy: number;
   /** Smoothed steering, -1..1. The analog value the digital keys are turned into. */
   steerAmount: number;
+
+  /** Height above the ground. 0 while driving; positive on a ramp or in the air. */
+  altitude: number;
+  /** Vertical speed. Only meaningful while airborne. */
+  vAltitude: number;
+  /** Seconds of boost left. Set by pads and successful tricks. */
+  boostRemaining: number;
+
   /** Previous-tick pose, for the renderer to interpolate from. */
   prevX: number;
   prevY: number;
   prevHeading: number;
+  prevAltitude: number;
 }
 
 export interface Bounds {
@@ -105,6 +128,8 @@ export interface Surface {
   isRoad(x: number, y: number): boolean;
   /** Hard walls. The kart cannot leave these. */
   bounds: Bounds;
+  /** Height of solid ground here — a ramp's slope. Absent means flat. */
+  groundHeightAt?(x: number, y: number): number;
 }
 
 export interface KartStepResult {
@@ -116,6 +141,10 @@ export interface KartStepResult {
   hitWall: boolean;
   /** Impact speed when hitting a wall, for SFX and camera shake later. */
   impactSpeed: number;
+  airborne: boolean;
+  /** True on the single tick the kart touches down. Drives the trick-landing boost. */
+  landed: boolean;
+  boosting: boolean;
 }
 
 export function createKart(x: number, y: number, heading = 0): KartState {
@@ -126,9 +155,13 @@ export function createKart(x: number, y: number, heading = 0): KartState {
     vx: 0,
     vy: 0,
     steerAmount: 0,
+    altitude: 0,
+    vAltitude: 0,
+    boostRemaining: 0,
     prevX: x,
     prevY: y,
     prevHeading: heading,
+    prevAltitude: 0,
   };
 }
 
@@ -139,9 +172,13 @@ export function resetKart(kart: KartState, x: number, y: number, heading = 0): v
   kart.vx = 0;
   kart.vy = 0;
   kart.steerAmount = 0;
+  kart.altitude = 0;
+  kart.vAltitude = 0;
+  kart.boostRemaining = 0;
   kart.prevX = x;
   kart.prevY = y;
   kart.prevHeading = heading;
+  kart.prevAltitude = 0;
 }
 
 /**
@@ -161,6 +198,33 @@ export function stepKart(
   kart.prevX = kart.x;
   kart.prevY = kart.y;
   kart.prevHeading = kart.heading;
+  kart.prevAltitude = kart.altitude;
+
+  if (kart.boostRemaining > 0) kart.boostRemaining = Math.max(0, kart.boostRemaining - dt);
+
+  // --- vertical ---
+  // The ground under the kart is flat except on a ramp, where it slopes. Being above it means
+  // airborne, and airborne changes almost everything below: no surface, weak steering, no grip.
+  const groundHeight = surface.groundHeightAt?.(kart.x, kart.y) ?? 0;
+  const wasAirborne = kart.altitude > groundHeight + 0.001;
+
+  if (wasAirborne) {
+    kart.vAltitude -= config.gravity * dt;
+    kart.altitude += kart.vAltitude * dt;
+  } else {
+    // Following the ramp surface rather than integrating up it: a kart driving up a slope
+    // should not need its own vertical velocity, and this way the slope cannot launch it early.
+    kart.altitude = groundHeight;
+    kart.vAltitude = 0;
+  }
+
+  let landed = false;
+  if (kart.altitude <= groundHeight) {
+    landed = wasAirborne;
+    kart.altitude = groundHeight;
+    kart.vAltitude = 0;
+  }
+  const airborne = kart.altitude > groundHeight + 0.001;
 
   // --- steering: digital in, analog out ---
   // Ramping toward the key and springing back when released is what stops arrow keys from
@@ -169,9 +233,14 @@ export function stepKart(
   const rate = target === 0 ? config.steerReturnRate : config.steerRate;
   kart.steerAmount = approach(kart.steerAmount, target, rate * dt);
 
-  const onRoad = surface.isRoad(kart.x, kart.y);
+  // In the air there is no surface to be off, so grass cannot slow a kart that is over it.
+  const onRoad = airborne ? true : surface.isRoad(kart.x, kart.y);
+  const boosting = kart.boostRemaining > 0;
   const grip = onRoad ? config.grip : config.offRoadGrip;
-  const speedCap = config.maxSpeed * (onRoad ? 1 : config.offRoadSpeedFactor);
+  const speedCap =
+    config.maxSpeed *
+    (onRoad ? 1 : config.offRoadSpeedFactor) *
+    (boosting ? config.boostSpeedFactor : 1);
 
   // --- split velocity into "along the nose" and "sideways" ---
   const cos = Math.cos(kart.heading);
@@ -183,16 +252,18 @@ export function stepKart(
   // No throttle input exists; the kart always drives. Over the cap (coming off a boost pad,
   // or crossing onto grass) it decays instead of snapping, so speed loss reads as a slide
   // rather than a wall.
+  const push = boosting ? config.boostAcceleration : config.acceleration;
   if (forward < speedCap) {
-    forward = Math.min(speedCap, forward + config.acceleration * dt);
+    forward = Math.min(speedCap, forward + push * dt);
   } else {
     forward = Math.max(speedCap, forward - config.acceleration * dt);
   }
   forward *= Math.exp(-config.drag * dt);
 
   // --- grip: sideways velocity bleeds away, and the leftover is the drift ---
-  // Exponential decay so the feel is identical at any sim rate.
-  lateral *= Math.exp(-grip * dt);
+  // Exponential decay so the feel is identical at any sim rate. Wheels off the ground grip
+  // nothing, so a kart launched sideways stays sideways until it lands.
+  if (!airborne) lateral *= Math.exp(-grip * dt);
 
   kart.vx = forward * cos - lateral * sin;
   kart.vy = forward * sin + lateral * cos;
@@ -206,7 +277,8 @@ export function stepKart(
   const authority = clamp(speed / Math.max(0.001, config.steerAuthoritySpeed), 0, 1);
   const speedFraction = clamp(speed / config.maxSpeed, 0, 1);
   const penalty = 1 - config.highSpeedSteerPenalty * speedFraction;
-  const yawRate = config.maxYawRate * kart.steerAmount * authority * penalty;
+  const air = airborne ? config.airSteerFactor : 1;
+  const yawRate = config.maxYawRate * kart.steerAmount * authority * penalty * air;
 
   // Reverse would need the yaw sign flipped; auto-forward means it cannot happen.
   kart.heading = wrapAngle(kart.heading + yawRate * dt);
@@ -223,6 +295,9 @@ export function stepKart(
     onRoad,
     hitWall: collision.hit,
     impactSpeed: collision.impactSpeed,
+    airborne,
+    landed,
+    boosting,
   };
 }
 

@@ -204,6 +204,22 @@ canvas {
   accent-color: var(--accent);
 }
 
+/* --- drill HUD --- */
+
+.hud {
+  margin: 0.6rem 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  min-height: 1.6em;
+}
+
+.hud[data-live='true'] {
+  color: var(--accent);
+}
+
 /* --- tuning panel --- */
 
 .tuning h2 {

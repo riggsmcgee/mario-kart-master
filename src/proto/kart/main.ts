@@ -10,7 +10,14 @@ import {
   stepKart,
   type KartStepResult,
 } from '../../engine/kart';
-import { createStadiumSurface } from '../../engine/surface';
+import { createStadiumSurface, stadiumCentreline } from '../../engine/surface';
+import {
+  TRACK_CONFIG,
+  TrackRun,
+  buildTrackPath,
+  placeFurniture,
+  type FurnitureSpec,
+} from '../../engine/track';
 import { TuningPanel, type TuningSchema } from '../../engine/tuning';
 import { ChaseCamera, CHASE_CAMERA_CONFIG } from '../../engine/chase-camera';
 import { createKartScene } from './scene';
@@ -137,6 +144,48 @@ const SCHEMA: TuningSchema<typeof CONFIG> = {
 };
 
 const surface = createStadiumSurface();
+const path = buildTrackPath(stadiumCentreline());
+
+/**
+ * The whole test layout. (1b3)
+ *
+ * This is the Q6 answer in practice: `t` is how far around the lap, `offset` is how far off
+ * the centre line. Nothing here refers to a coordinate, so the oval could change shape and
+ * every item would still be where it belongs.
+ *
+ * On this oval, t 0–0.2 is the bottom straight, 0.2–0.5 the right corner, 0.5–0.7 the top
+ * straight, 0.7–1.0 the left corner.
+ */
+function coinLine(fromT: number, toT: number, count: number, offset: number): FurnitureSpec[] {
+  return Array.from({ length: count }, (_, i) => ({
+    kind: 'coin' as const,
+    t: fromT + ((toT - fromT) * i) / Math.max(1, count - 1),
+    offset,
+  }));
+}
+
+const LAYOUT: FurnitureSpec[] = [
+  // Straights: a real pad you can line up for, and a decoy shortly after it.
+  { kind: 'pad', t: 0.05 },
+  { kind: 'decoy', t: 0.14, offset: 3.5 },
+  { kind: 'pad', t: 0.56, offset: -3 },
+
+  // A ramp in each corner, so tricks have to be taken mid-turn rather than on a straight.
+  { kind: 'ramp', t: 0.33 },
+  { kind: 'ramp', t: 0.84, offset: 2 },
+
+  // Coins reward the inside line through the top straight and the left corner.
+  ...coinLine(0.6, 0.68, 6, -4),
+  ...coinLine(0.9, 0.97, 6, -5),
+];
+
+const items = placeFurniture(path, LAYOUT);
+const run = new TrackRun(items);
+
+// Ramps are the only thing on this track with height, and the physics asks the surface how
+// high the ground is, so the surface delegates to the furniture.
+surface.groundHeightAt = run.groundHeightAt;
+
 const kart = createKart(surface.startPose.x, surface.startPose.y, surface.startPose.heading);
 const input = new Input();
 
@@ -146,6 +195,9 @@ let last: KartStepResult = {
   onRoad: true,
   hitWall: false,
   impactSpeed: 0,
+  airborne: false,
+  landed: false,
+  boosting: false,
 };
 
 /** Recent positions, for a line showing what the last few seconds of driving looked like. */
@@ -249,12 +301,98 @@ const CAMERA_SCHEMA: TuningSchema<typeof CAMERA> = {
 };
 
 const canvas3d = document.querySelector<HTMLCanvasElement>('#stage3d');
-const view = canvas3d ? createKartScene(canvas3d, surface) : null;
+const view = canvas3d ? createKartScene(canvas3d, surface, path, items) : null;
 const chase = new ChaseCamera();
+
+// --- track furniture (1b3) ---
+
+const TRACK = { ...TRACK_CONFIG };
+
+const TRACK_SCHEMA: TuningSchema<typeof TRACK> = {
+  trickWindowMs: {
+    kind: 'number',
+    label: 'Trick window',
+    min: 20,
+    max: 500,
+    step: 5,
+    unit: 'ms',
+    group: 'Tricks',
+    help: 'How close to the lip the hop has to be, either side. The number Chapter 3 exists to teach — wide enough that Jodi lands it, tight enough that landing it means something.',
+  },
+  trickBoost: {
+    kind: 'number',
+    label: 'Trick boost',
+    min: 0,
+    max: 4,
+    step: 0.1,
+    unit: 's',
+    group: 'Tricks',
+  },
+  rampLaunch: {
+    kind: 'number',
+    label: 'Ramp launch',
+    min: 0,
+    max: 5,
+    step: 0.1,
+    group: 'Tricks',
+    help: 'How much air the ramp gives. Higher means longer to think, and a bigger miss when you get it wrong.',
+  },
+  padBoost: {
+    kind: 'number',
+    label: 'Pad boost',
+    min: 0,
+    max: 4,
+    step: 0.1,
+    unit: 's',
+    group: 'Pads',
+  },
+  decoySpeedKeep: {
+    kind: 'number',
+    label: 'Decoy speed kept',
+    min: 0.1,
+    max: 1,
+    step: 0.02,
+    group: 'Pads',
+    help: 'What driving onto a fake pad costs you. Low enough to notice, high enough not to feel unfair.',
+  },
+  coinTarget: { kind: 'number', label: 'Coin target', min: 1, max: 30, step: 1, group: 'Coins' },
+};
+
+/** Transient on-screen feedback: what just happened, and when it should fade. */
+let flash = '';
+let flashUntil = 0;
+
+function say(message: string, ms = 1200): void {
+  flash = message;
+  flashUntil = performance.now() + ms;
+}
 
 function update(dt: number): void {
   input.sample();
   last = stepKart(kart, CONFIG, input.steer(), surface, dt);
+
+  const events = run.update(
+    kart,
+    TRACK,
+    {
+      now: performance.now(),
+      hopJustPressed: input.justPressed('hop'),
+      hopPressedAt: input.pressedAt('hop'),
+    },
+    last,
+  );
+
+  if (events.padHit) say('BOOST');
+  if (events.decoyHit) say('Not a boost pad.');
+  if (events.trick === 'landed') {
+    const error = events.trickErrorMs ?? 0;
+    say(`TRICK — ${error > 0 ? '+' : ''}${error.toFixed(0)} ms`);
+  } else if (events.trick === 'missed') {
+    say('No trick. Hop at the lip.');
+  }
+  if (events.coinsCollected > 0 && run.coins === TRACK.coinTarget) {
+    say(`${TRACK.coinTarget} coins!`, 2000);
+  }
 
   // Every few ticks is plenty for a visual trail, and keeps the array short.
   if (++trailCounter % 6 === 0) {
@@ -303,15 +441,23 @@ function render(alpha: number, stats: LoopStats): void {
   const poseX = lerp(kart.prevX, kart.x, alpha);
   const poseY = lerp(kart.prevY, kart.y, alpha);
   const poseHeading = lerpAngle(kart.prevHeading, kart.heading, alpha);
+  const poseAltitude = lerp(kart.prevAltitude, kart.altitude, alpha);
 
-  renderChase(poseX, poseY, poseHeading, stats.frameMs / 1000);
+  renderChase(poseX, poseY, poseHeading, poseAltitude, stats.frameMs / 1000);
   renderTopDown(poseX, poseY, poseHeading);
 }
 
-function renderChase(poseX: number, poseY: number, poseHeading: number, dt: number): void {
+function renderChase(
+  poseX: number,
+  poseY: number,
+  poseHeading: number,
+  poseAltitude: number,
+  dt: number,
+): void {
   if (!view) return;
 
-  view.kart.position.set(poseX, 0, poseY);
+  view.kart.position.set(poseX, poseAltitude, poseY);
+  view.syncFurniture(items, performance.now() / 1000);
   // Sim heading 0 points along +x; a Three.js Y-rotation of θ sends +x to (cosθ, 0, -sinθ),
   // so the mesh needs the negated angle to face where the physics says it faces.
   view.kart.rotation.y = -poseHeading;
@@ -377,6 +523,41 @@ function renderTopDown(poseX: number, poseY: number, poseHeading: number): void 
   ctx.setLineDash([]);
   ctx.globalAlpha = 1;
 
+  // Furniture, so the instrument view shows the same track the chase view does.
+  for (const item of items) {
+    if (item.kind === 'coin') {
+      ctx.fillStyle = '#e0a800';
+      ctx.globalAlpha = item.collected ? 0.2 : 1;
+      ctx.beginPath();
+      ctx.arc(toScreenX(item.x), toScreenY(item.y), 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      continue;
+    }
+
+    ctx.save();
+    ctx.translate(toScreenX(item.x), toScreenY(item.y));
+    ctx.rotate(item.heading);
+    ctx.fillStyle = item.kind === 'pad' ? '#ff8a1f' : item.kind === 'ramp' ? '#b98cff' : '#ff9a3d';
+    ctx.fillRect(
+      -item.halfLength * scale,
+      -item.halfWidth * scale,
+      item.halfLength * 2 * scale,
+      item.halfWidth * 2 * scale,
+    );
+    // Decoys are drawn with a slash so the instrument view can tell them apart even though
+    // the chase view deliberately makes them hard to spot.
+    if (item.kind === 'decoy') {
+      ctx.strokeStyle = '#7a2f00';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-item.halfLength * scale, -item.halfWidth * scale);
+      ctx.lineTo(item.halfLength * scale, item.halfWidth * scale);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   // Trail
   if (trail.length > 1) {
     ctx.strokeStyle = muted;
@@ -439,7 +620,10 @@ const STAT_ROWS = [
   ['of top speed', () => `${((last.speed / CONFIG.maxSpeed) * 100).toFixed(0)} %`],
   ['slip angle', () => `${((last.slipAngle * 180) / Math.PI).toFixed(1)}°`],
   ['steering', () => kart.steerAmount.toFixed(2)],
-  ['surface', () => (last.onRoad ? 'road' : 'GRASS')],
+  ['surface', () => (last.airborne ? 'AIR' : last.onRoad ? 'road' : 'GRASS')],
+  ['altitude', () => `${kart.altitude.toFixed(2)} u`],
+  ['boost', () => (kart.boostRemaining > 0 ? `${kart.boostRemaining.toFixed(2)} s` : '—')],
+  ['coins', () => `${run.coins} / ${TRACK.coinTarget}`],
   ['heading', () => `${((kart.heading * 180) / Math.PI).toFixed(0)}°`],
 ] as const;
 
@@ -466,6 +650,13 @@ function pumpStats(): void {
     const cell = statCells.get(label);
     if (cell) cell.textContent = format();
   }
+
+  const hud = document.querySelector<HTMLParagraphElement>('#hud');
+  if (hud) {
+    const live = performance.now() < flashUntil;
+    hud.textContent = live ? flash : `${run.coins} / ${TRACK.coinTarget} coins`;
+    hud.dataset.live = String(live);
+  }
 }
 
 // --- wiring ----------------------------------------------------------------
@@ -477,7 +668,9 @@ window.addEventListener('resize', sizeCanvas);
 window.addEventListener('keydown', (event) => {
   if (event.code !== 'KeyR') return;
   resetKart(kart, surface.startPose.x, surface.startPose.y, surface.startPose.heading);
+  run.reset();
   trail.length = 0;
+  say('Reset', 700);
   // Snap the camera too, or it swoops across the arena to catch up with the reset kart.
   chase.reset(
     {
@@ -508,6 +701,15 @@ new TuningPanel({
   exportName: 'CHASE_CAMERA_CONFIG',
   storageKey: 'mkm.tuning.camera.v1',
   mount: document.querySelector<HTMLElement>('#camera-mount') ?? undefined,
+});
+
+new TuningPanel({
+  config: TRACK,
+  schema: TRACK_SCHEMA,
+  title: 'Track config',
+  exportName: 'TRACK_CONFIG',
+  storageKey: 'mkm.tuning.track.v1',
+  mount: document.querySelector<HTMLElement>('#track-mount') ?? undefined,
 });
 
 setInterval(pumpStats, 100);

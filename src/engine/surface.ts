@@ -41,6 +41,38 @@ export interface StadiumSurface extends Surface {
   startPose: { x: number; y: number; heading: number };
 }
 
+/**
+ * Centreline samples for the oval, in lap order: bottom straight, right cap, top straight,
+ * left cap. One source of truth for the physics, the 3D mesh, and furniture placement — they
+ * must agree about where the middle of the road is or nothing lines up.
+ */
+export function stadiumCentreline(
+  options: StadiumOptions = STADIUM,
+  samples = 240,
+): Array<{ x: number; y: number }> {
+  const { straightHalfLength: L, cornerRadius: R, centerX, centerY } = options;
+  const points: Array<{ x: number; y: number }> = [];
+  const straight = Math.max(2, Math.round(samples * 0.2));
+  const cap = Math.max(8, Math.round(samples * 0.3));
+
+  const push = (x: number, y: number): void => {
+    points.push({ x: centerX + x, y: centerY + y });
+  };
+
+  for (let i = 0; i < straight; i++) push(-L + (2 * L * i) / straight, R);
+  for (let i = 0; i < cap; i++) {
+    const a = Math.PI / 2 - (Math.PI * i) / cap;
+    push(L + R * Math.cos(a), R * Math.sin(a));
+  }
+  for (let i = 0; i < straight; i++) push(L - (2 * L * i) / straight, -R);
+  for (let i = 0; i < cap; i++) {
+    const a = -Math.PI / 2 - (Math.PI * i) / cap;
+    push(-L + R * Math.cos(a), R * Math.sin(a));
+  }
+
+  return points;
+}
+
 export function createStadiumSurface(options: StadiumOptions = STADIUM): StadiumSurface {
   const outer = options.cornerRadius + options.roadHalfWidth + options.grassMargin;
   const bounds: Bounds = {

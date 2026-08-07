@@ -1,15 +1,14 @@
 import * as THREE from 'three';
 import type { StadiumSurface } from '../../engine/surface';
+import type { PathPoint, PlacedFurniture, TrackPath } from '../../engine/track';
 
 /**
- * Three.js scene for the kart harness. (1b2)
+ * Three.js scene for the kart harness. (1b2 world, 1b3 furniture)
  *
- * Flat and unlit on purpose — the plan calls for stylized original art, and lighting a scene
- * this simple only makes it muddier. Materials are `MeshBasicMaterial` throughout, which also
- * keeps the frame budget clear for gate 1b6's 60fps check on a normal Mac.
+ * Flat and unlit on purpose — the plan calls for stylized original art, lighting a scene this
+ * simple only muddies it, and it keeps the frame budget clear for gate 1b6's 60fps check.
  *
- * Provisional, like `surface.ts`: this builds the stadium test oval specifically. Real tracks
- * are data (WORKLOG Q6) and arrive with 1b5.
+ * Provisional, like `surface.ts`: this builds the stadium test oval specifically.
  *
  * Sim (x, y) maps to world (x, z); world y is up.
  */
@@ -26,59 +25,17 @@ const PALETTE = {
   kartNose: 0xffd23f,
   kartWheel: 0x22252b,
   startLine: 0xf2f2f2,
+  pad: 0xff8a1f,
+  padChevron: 0xfff3d6,
+  ramp: 0xb98cff,
+  // Deliberately close to the pad. Chapter 4 is about telling these apart, so making the decoy
+  // obviously different in the drill would teach the wrong lesson.
+  decoy: 0xff9a3d,
+  coin: 0xffd23f,
 };
 
-/** How finely the oval is sampled. Enough that the corners read as curves, not polygons. */
-const CENTRELINE_SAMPLES = 240;
-
-interface CentrelinePoint {
-  x: number;
-  z: number;
-  /** Unit normal pointing away from the centreline, toward the outside of the oval. */
-  nx: number;
-  nz: number;
-}
-
-/**
- * Walk the stadium centreline: bottom straight, right cap, top straight, left cap.
- * Returned in order and closed, so consecutive points can be stitched into a strip.
- */
-function centreline(surface: StadiumSurface): CentrelinePoint[] {
-  const { straightHalfLength: L, cornerRadius: R, centerX, centerY } = surface.options;
-  const points: CentrelinePoint[] = [];
-
-  const straightSamples = Math.max(2, Math.round(CENTRELINE_SAMPLES * 0.2));
-  const capSamples = Math.max(8, Math.round(CENTRELINE_SAMPLES * 0.3));
-
-  const push = (x: number, z: number, nx: number, nz: number): void => {
-    points.push({ x: centerX + x, z: centerY + z, nx, nz });
-  };
-
-  // Bottom straight, +z side. Outward normal points further +z.
-  for (let i = 0; i < straightSamples; i++) {
-    push(-L + (2 * L * i) / straightSamples, R, 0, 1);
-  }
-  // Right cap, sweeping from +z round to -z.
-  for (let i = 0; i < capSamples; i++) {
-    const a = Math.PI / 2 - (Math.PI * i) / capSamples;
-    push(L + R * Math.cos(a), R * Math.sin(a), Math.cos(a), Math.sin(a));
-  }
-  // Top straight, -z side.
-  for (let i = 0; i < straightSamples; i++) {
-    push(L - (2 * L * i) / straightSamples, -R, 0, -1);
-  }
-  // Left cap, closing the loop.
-  for (let i = 0; i < capSamples; i++) {
-    const a = -Math.PI / 2 - (Math.PI * i) / capSamples;
-    push(-L + R * Math.cos(a), R * Math.sin(a), Math.cos(a), Math.sin(a));
-  }
-
-  return points;
-}
-
-/** A flat ribbon of the given half-width, centred on the oval. */
 function ribbonGeometry(
-  points: CentrelinePoint[],
+  points: PathPoint[],
   innerOffset: number,
   outerOffset: number,
   y: number,
@@ -88,27 +45,69 @@ function ribbonGeometry(
   const indices: number[] = [];
 
   points.forEach((p, i) => {
-    const inner = i * 6;
-    positions[inner] = p.x + p.nx * innerOffset;
-    positions[inner + 1] = y;
-    positions[inner + 2] = p.z + p.nz * innerOffset;
-    positions[inner + 3] = p.x + p.nx * outerOffset;
-    positions[inner + 4] = y;
-    positions[inner + 5] = p.z + p.nz * outerOffset;
+    const base = i * 6;
+    positions[base] = p.x + p.nx * innerOffset;
+    positions[base + 1] = y;
+    positions[base + 2] = p.y + p.ny * innerOffset;
+    positions[base + 3] = p.x + p.nx * outerOffset;
+    positions[base + 4] = y;
+    positions[base + 5] = p.y + p.ny * outerOffset;
   });
 
   for (let i = 0; i < count; i++) {
     const next = (i + 1) % count; // wrap, so the ribbon closes
-    const a = i * 2;
-    const b = i * 2 + 1;
-    const c = next * 2;
-    const d = next * 2 + 1;
-    indices.push(a, b, c, b, d, c);
+    indices.push(i * 2, i * 2 + 1, next * 2, i * 2 + 1, next * 2 + 1, next * 2);
   }
 
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setIndex(indices);
+  return geometry;
+}
+
+/** A ramp: flat at the back, rising to a lip at +x (the direction of travel). */
+function wedgeGeometry(
+  halfLength: number,
+  halfWidth: number,
+  height: number,
+): THREE.BufferGeometry {
+  const a: [number, number, number] = [-halfLength, 0, -halfWidth];
+  const b: [number, number, number] = [halfLength, 0, -halfWidth];
+  const c: [number, number, number] = [halfLength, 0, halfWidth];
+  const d: [number, number, number] = [-halfLength, 0, halfWidth];
+  const e: [number, number, number] = [halfLength, height, -halfWidth];
+  const f: [number, number, number] = [halfLength, height, halfWidth];
+
+  const tris = [
+    a,
+    e,
+    f,
+    a,
+    f,
+    d, // the slope you drive up
+    b,
+    c,
+    f,
+    b,
+    f,
+    e, // vertical face at the lip
+    a,
+    b,
+    e, // side
+    d,
+    f,
+    c, // side
+    a,
+    d,
+    c,
+    a,
+    c,
+    b, // underside
+  ];
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(tris.flat(), 3));
+  geometry.computeVertexNormals();
   return geometry;
 }
 
@@ -146,23 +145,97 @@ function buildKart(): THREE.Group {
   return kart;
 }
 
+function buildFurniture(items: PlacedFurniture[]): {
+  group: THREE.Group;
+  coinMeshes: Map<number, THREE.Object3D>;
+} {
+  const group = new THREE.Group();
+  const coinMeshes = new Map<number, THREE.Object3D>();
+
+  for (const item of items) {
+    let mesh: THREE.Object3D;
+
+    switch (item.kind) {
+      case 'pad': {
+        mesh = new THREE.Group();
+        const slab = new THREE.Mesh(
+          new THREE.BoxGeometry(item.halfLength * 2, 0.12, item.halfWidth * 2),
+          new THREE.MeshBasicMaterial({ color: PALETTE.pad }),
+        );
+        slab.position.y = 0.06;
+        mesh.add(slab);
+        // Chevrons pointing the way you should be going: the pad reads as directional from a
+        // distance, which is how you spot it in time to line up.
+        for (let i = -1; i <= 1; i++) {
+          const chevron = new THREE.Mesh(
+            new THREE.BoxGeometry(0.5, 0.05, item.halfWidth * 1.4),
+            new THREE.MeshBasicMaterial({ color: PALETTE.padChevron }),
+          );
+          chevron.position.set(i * 1.8, 0.14, 0);
+          mesh.add(chevron);
+        }
+        break;
+      }
+      case 'decoy':
+        mesh = new THREE.Mesh(
+          wedgeGeometry(item.halfLength, item.halfWidth, item.height),
+          new THREE.MeshBasicMaterial({ color: PALETTE.decoy, side: THREE.DoubleSide }),
+        );
+        break;
+      case 'ramp':
+        mesh = new THREE.Mesh(
+          wedgeGeometry(item.halfLength, item.halfWidth, item.height),
+          new THREE.MeshBasicMaterial({ color: PALETTE.ramp, side: THREE.DoubleSide }),
+        );
+        break;
+      case 'coin': {
+        const coin = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.8, 0.8, 0.16, 14),
+          new THREE.MeshBasicMaterial({ color: PALETTE.coin }),
+        );
+        // Stand it up and face it down the track, so you drive through it rather than over it.
+        coin.rotation.z = Math.PI / 2;
+        coin.position.y = 1.2;
+        mesh = new THREE.Group();
+        mesh.add(coin);
+        coinMeshes.set(item.id, mesh);
+        break;
+      }
+    }
+
+    mesh.position.x = item.x;
+    mesh.position.z = item.y;
+    mesh.rotation.y = -item.heading;
+    group.add(mesh);
+  }
+
+  return { group, coinMeshes };
+}
+
 export interface KartScene {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   kart: THREE.Group;
+  /** Hide collected coins and spin the rest. */
+  syncFurniture(items: PlacedFurniture[], time: number): void;
   resize(width: number, height: number): void;
   render(): void;
   dispose(): void;
 }
 
-export function createKartScene(canvas: HTMLCanvasElement, surface: StadiumSurface): KartScene {
+export function createKartScene(
+  canvas: HTMLCanvasElement,
+  surface: StadiumSurface,
+  path: TrackPath,
+  items: PlacedFurniture[],
+): KartScene {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(PALETTE.sky);
-  // Fog hides the ground plane's far edge, so the world reads as continuous rather than
-  // as a tabletop that stops.
+  // Fog hides the ground plane's far edge, so the world reads as continuous rather than as a
+  // tabletop that stops.
   scene.fog = new THREE.Fog(PALETTE.sky, 60, 220);
 
   const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 400);
@@ -179,18 +252,19 @@ export function createKartScene(canvas: HTMLCanvasElement, surface: StadiumSurfa
   ground.position.set((bounds.minX + bounds.maxX) / 2, 0, (bounds.minY + bounds.maxY) / 2);
   scene.add(ground);
 
-  const points = centreline(surface);
+  const points = path.points;
   const halfWidth = surface.options.roadHalfWidth;
 
   // Road sits a hair above the grass to avoid z-fighting between coplanar surfaces.
-  const road = new THREE.Mesh(
-    ribbonGeometry(points, -halfWidth, halfWidth, 0.02),
-    new THREE.MeshBasicMaterial({ color: PALETTE.road }),
+  scene.add(
+    new THREE.Mesh(
+      ribbonGeometry(points, -halfWidth, halfWidth, 0.02),
+      new THREE.MeshBasicMaterial({ color: PALETTE.road }),
+    ),
   );
-  scene.add(road);
 
-  // White edge lines. Without them the road boundary is invisible at speed, and knowing
-  // exactly where the grass starts is the entire point of Chapter 5.
+  // White edge lines. Without them the road boundary is invisible at speed, and knowing exactly
+  // where the grass starts is the entire point of Chapter 5.
   const edgeMaterial = new THREE.MeshBasicMaterial({ color: PALETTE.roadEdge });
   scene.add(new THREE.Mesh(ribbonGeometry(points, halfWidth - 0.5, halfWidth, 0.04), edgeMaterial));
   scene.add(
@@ -209,11 +283,10 @@ export function createKartScene(canvas: HTMLCanvasElement, surface: StadiumSurfa
     const material = postMaterials[(i / 8) % 2 === 0 ? 0 : 1];
     if (!material) return;
     const post = new THREE.Mesh(postGeometry, material);
-    post.position.set(p.x + p.nx * (halfWidth + 2.2), 1.1, p.z + p.nz * (halfWidth + 2.2));
+    post.position.set(p.x + p.nx * (halfWidth + 2.2), 1.1, p.y + p.ny * (halfWidth + 2.2));
     scene.add(post);
   });
 
-  // Start line, so laps and progress are legible.
   const startLine = new THREE.Mesh(
     new THREE.PlaneGeometry(1.2, halfWidth * 2),
     new THREE.MeshBasicMaterial({ color: PALETTE.startLine }),
@@ -226,17 +299,19 @@ export function createKartScene(canvas: HTMLCanvasElement, surface: StadiumSurfa
   // Arena walls, matching the collision bounds in the physics exactly.
   const wallMaterial = new THREE.MeshBasicMaterial({ color: PALETTE.wall });
   const wallHeight = 2.5;
-  const walls: Array<[number, number, number, number]> = [
+  for (const [x, z, w, d] of [
     [(bounds.minX + bounds.maxX) / 2, bounds.minY, arenaWidth, 1],
     [(bounds.minX + bounds.maxX) / 2, bounds.maxY, arenaWidth, 1],
     [bounds.minX, (bounds.minY + bounds.maxY) / 2, 1, arenaDepth],
     [bounds.maxX, (bounds.minY + bounds.maxY) / 2, 1, arenaDepth],
-  ];
-  for (const [x, z, w, d] of walls) {
+  ] as Array<[number, number, number, number]>) {
     const wall = new THREE.Mesh(new THREE.BoxGeometry(w, wallHeight, d), wallMaterial);
     wall.position.set(x, wallHeight / 2, z);
     scene.add(wall);
   }
+
+  const { group: furniture, coinMeshes } = buildFurniture(items);
+  scene.add(furniture);
 
   const kart = buildKart();
   scene.add(kart);
@@ -245,6 +320,16 @@ export function createKartScene(canvas: HTMLCanvasElement, surface: StadiumSurfa
     scene,
     camera,
     kart,
+    syncFurniture(currentItems, time) {
+      for (const item of currentItems) {
+        if (item.kind !== 'coin') continue;
+        const mesh = coinMeshes.get(item.id);
+        if (!mesh) continue;
+        mesh.visible = !item.collected;
+        // A spinning coin catches the eye from much further away than a static one.
+        mesh.rotation.y = -item.heading + time * 2;
+      }
+    },
     resize(width, height) {
       renderer.setSize(width, height, false);
       camera.aspect = width / Math.max(1, height);
