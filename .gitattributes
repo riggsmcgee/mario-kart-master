@@ -1,0 +1,10 @@
+# Keep the working tree LF on every machine. Prettier is configured endOfLine: lf,
+# and Riggs is on Windows while the target browser is Chrome on macOS — without this,
+# checkout would rewrite files to CRLF and `npm run format:check` would fail on a
+# fresh clone.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.mp3 binary
+*.wav binary

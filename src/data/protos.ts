@@ -26,8 +26,9 @@ export const PROTOS: Proto[] = [
     id: 'input',
     title: 'Input readout',
     step: '1a2',
-    blurb: 'Action map (steer, hop, item, uiConfirm), rebindable, with a live key readout.',
-    status: 'planned',
+    blurb:
+      'Action map (steer, hop, item, accelerate, uiConfirm), rebindable, with a live key readout.',
+    status: 'built',
   },
   {
     id: 'loop',

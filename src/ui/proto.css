@@ -1,0 +1,201 @@
+/* Shared widget styling for the Phase 1 prototypes. (1a2)
+   Instrument-panel look: monospace numbers, visible state, no decoration.
+   Nothing here graduates to the real site. */
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+  margin: 0 0 1.5rem;
+}
+
+.panel > h2 {
+  margin-top: 0;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0.35rem 0 0;
+}
+
+.backlink {
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+/* --- readout table --- */
+
+table.readout {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.readout th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 0.5rem 0.4rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+table.readout td {
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+table.readout tr.live td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+}
+
+/* --- state dot --- */
+
+.led {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  margin-right: 0.4rem;
+  vertical-align: -1px;
+}
+
+.led[data-on='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* --- key chips --- */
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.chip {
+  font: inherit;
+  font-size: 0.82rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.chip:hover,
+.chip:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chip[data-capturing='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+  border-style: dashed;
+}
+
+.chip.ghost {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+button.action {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+
+button.action:hover,
+button.action:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* --- axis meter --- */
+
+.axis {
+  position: relative;
+  height: 2.2rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.axis .center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.axis .fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--accent);
+  opacity: 0.35;
+  transition: none;
+}
+
+.axis .value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.95rem;
+}
+
+/* --- log --- */
+
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  min-height: 12rem;
+}
+
+.log li {
+  color: var(--muted);
+}
+
+.log li.down {
+  color: var(--fg);
+}
+
+.warn {
+  color: #b3261e;
+  font-size: 0.88rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .warn {
+    color: #ff8a80;
+  }
+}

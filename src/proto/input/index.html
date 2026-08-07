@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1a2 Input readout — Testing Ground</title>
+  </head>
+  <body>
+    <main>
+      <a class="backlink" href="../../../index.html">&larr; Testing Ground</a>
+      <header>
+        <h1>Input readout</h1>
+        <p class="lede">
+          Step 1a2. Every action, its keys, and its live state. Click a key to rebind it (Esc
+          cancels). Bindings save to this browser; the final choice belongs to gate 1g1.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Actions</h2>
+        <table class="readout">
+          <thead>
+            <tr>
+              <th style="width: 12rem">Action</th>
+              <th style="width: 12rem">Keys</th>
+              <th style="width: 6rem">State</th>
+              <th style="width: 6rem">Held</th>
+              <th>Edges</th>
+            </tr>
+          </thead>
+          <tbody id="slots"></tbody>
+        </table>
+        <p class="warn" id="conflicts" hidden></p>
+        <p class="hint">
+          <button class="action" id="reset">Reset to defaults</button>
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Steering axis</h2>
+        <div class="axis">
+          <div class="fill" id="axis-fill"></div>
+          <div class="center"></div>
+          <div class="value num" id="axis-value">0</div>
+        </div>
+        <p class="hint">
+          Digital keys, so this is only &minus;1, 0 or +1. Hold both directions: the most recently
+          pressed one wins instead of cancelling to zero. Smoothing it into an analog-feeling turn
+          is the physics layer's job (1b1).
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Raw events</h2>
+        <ol class="log" id="log"></ol>
+        <p class="hint">
+          Newest first, timestamps in ms. Tab away with a key held and watch it release: without
+          that, a stuck key drives the kart into a wall.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
