@@ -50,8 +50,10 @@ export const PROTOS: Proto[] = [
     title: 'Kart piece (chase view)',
     step: '1b1–1b5',
     gate: '1b6',
-    blurb: 'Hand-rolled 2D physics under a Three.js chase camera. Pads, ramps, decoys, coins.',
-    status: 'planned',
+    blurb:
+      'Hand-rolled 2D physics under a Three.js chase camera. Pads, ramps, decoys, coins. ' +
+      '1b1 physics is drivable now, top-down; the chase camera lands in 1b2.',
+    status: 'built',
   },
   {
     id: 'timing',
