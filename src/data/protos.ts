@@ -35,7 +35,7 @@ export const PROTOS: Proto[] = [
     title: 'Game loop',
     step: '1a3',
     blurb: 'Fixed 120Hz sim, interpolated render, pause on tab blur, FPS readout.',
-    status: 'planned',
+    status: 'built',
   },
   {
     id: 'tuning',

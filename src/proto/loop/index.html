@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1a3 Game loop — Testing Ground</title>
+  </head>
+  <body>
+    <main>
+      <a class="backlink" href="../../../index.html">&larr; Testing Ground</a>
+      <header>
+        <h1>Game loop</h1>
+        <p class="lede">
+          Step 1a3. Fixed-timestep sim with an interpolated render. The sim runs at a constant rate
+          no matter what the display does, so a trick window tuned to 90&nbsp;ms is 90&nbsp;ms on
+          every machine.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Interpolation</h2>
+        <canvas id="stage" height="180"></canvas>
+        <p class="hint">
+          Both pucks run off the same sim. The top one is drawn at the raw sim position; the bottom
+          one is interpolated by <code>alpha</code>. Drag the sim rate down to 10&nbsp;Hz and watch
+          the top puck stutter while the bottom stays smooth.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Controls</h2>
+        <div class="controls">
+          <label>
+            <span>Sim rate <output id="hz-value" class="num">120 Hz</output></span>
+            <input id="hz" type="range" min="5" max="240" step="5" value="120" />
+          </label>
+          <label>
+            <span>Time scale <output id="scale-value" class="num">1.00&times;</output></span>
+            <input id="scale" type="range" min="0" max="2" step="0.05" value="1" />
+          </label>
+        </div>
+        <p class="hint">
+          <button class="action" id="toggle">Pause</button>
+          <button class="action" id="stall">Stall 400 ms</button>
+          <button class="action" id="reset">Reset stats</button>
+        </p>
+        <p class="hint">
+          Stalling blocks the main thread, which is what a slow frame really is. The sim catches up
+          to the clamp and discards the rest &mdash; watch <code>dropped</code> tick up instead of
+          the page locking into a spiral. Click another window: it pauses on blur and resumes
+          without fast-forwarding.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Readout</h2>
+        <table class="readout">
+          <tbody id="stats"></tbody>
+        </table>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

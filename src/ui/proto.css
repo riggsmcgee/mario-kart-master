@@ -169,6 +169,41 @@ button.action:focus-visible {
   font-size: 0.95rem;
 }
 
+/* --- canvas stage --- */
+
+canvas {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: transparent;
+}
+
+/* --- sliders --- */
+
+.controls {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.controls label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.controls label > span {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.controls input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
 /* --- log --- */
 
 .log {
