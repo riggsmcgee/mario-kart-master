@@ -41,8 +41,9 @@ export const PROTOS: Proto[] = [
     id: 'tuning',
     title: 'Tuning panel',
     step: '1a4',
-    blurb: 'Live sliders bound to any config object, copy-config-to-clipboard.',
-    status: 'planned',
+    blurb:
+      'Live sliders bound to any config object, copy-config-to-clipboard, copy-TUNING.md-entry.',
+    status: 'built',
   },
   {
     id: 'kart',

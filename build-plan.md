@@ -115,9 +115,9 @@ The first version of the site is a bare lab, deliberately nothing like the final
 ### 1a. Foundation
 
 - [x] **1a1** Scaffold Vite + TS, ESLint/Prettier, folder layout (`src/engine`, `src/proto`, `src/ui`, `src/data`), bare testbed index page. Vite `base` is `/mario-kart-master/` on build and `/` in dev, so switching Pages on later is one step. *(Sonnet)* — done 2026-08-06. GitHub Pages deploy action split out to 1a5 (deferred by Riggs, local dev for now).
-- [ ] **1a2** Keyboard input layer: action map (`steer`, `hop`, `item`, `uiConfirm`), rebindable, with a live input readout widget for the testbed. *(Opus)*
-- [ ] **1a3** Game loop: fixed-timestep sim (120Hz), interpolated render, pause on tab blur, FPS readout. *(Opus)*
-- [ ] **1a4** Tuning panel framework: live sliders bound to any config object, copy-config-to-clipboard, and a `TUNING.md` log (what changed, why, before/after). *(Sonnet)*
+- [x] **1a2** Keyboard input layer: action map (`steer`, `hop`, `item`, `uiConfirm`), rebindable, with a live input readout widget for the testbed. *(Opus)* — done 2026-08-07, confirmed working by Riggs. Added a fifth slot, `accelerate`, for Ch1's start-boost drill; see Q9.
+- [x] **1a3** Game loop: fixed-timestep sim (120Hz), interpolated render, pause on tab blur, FPS readout. *(Opus)* — done 2026-08-07, confirmed working by Riggs.
+- [x] **1a4** Tuning panel framework: live sliders bound to any config object, copy-config-to-clipboard, and a `TUNING.md` log (what changed, why, before/after). *(Sonnet)* — done 2026-08-07. Also emits a paste-ready `TUNING.md` entry diffed against the shipped baseline, so the log writes itself.
 - [ ] **1a5** GitHub Pages deploy action (Actions workflow on push to `main`). **Deferred by Riggs 2026-08-06** — testbed runs on localhost for now. Pick this up whenever a live URL is wanted; `base` is already configured. *(Sonnet)*
 
 **Acceptance:** `npm run dev` loads on Mac Chrome; input readout responds; loop holds 60fps idle. (Deployed-URL check moves to 1a5.)
@@ -395,3 +395,5 @@ Raw material for steps 4c1/4c2. Everything below is filtered for Jodi's settings
 - **2026-08-06** (Riggs): Local development only for now; GitHub Pages deploy split out to new step 1a5 and deferred. Vite `base` is already Pages-correct on build, so enabling it later is one workflow file.
 - **2026-08-06** (Riggs): Toolchain = Node 24 LTS + npm, Vite 7 + TypeScript 5.9 (strict), ESLint 9 flat config + Prettier. Testbed is a Vite multi-page app: each prototype is `src/proto/<id>/index.html`, auto-discovered by `vite.config.ts`, listed on the index from `src/data/protos.ts`.
 - **2026-08-06** (Riggs): Key bindings ship as defaults (arrows / A-D steer, Space hop, Shift item) plus a rebind widget in 1a2; the final binding choice still belongs to gate 1g1.
+- **2026-08-07** (Claude, pending Riggs at 1g1): action map gained a fifth slot, `accelerate`, because Ch1's start-boost drill needs a hold-the-accelerator input the plan's four slots do not cover. Defaults to Space, deliberately shared with `hop` since the countdown drill and the driving drills are never live together. Logged as WORKLOG Q9.
+- **2026-08-07** (Riggs): section 1a acceptance met — dev server loads, input readout responds, loop runs clean. Verified on Chrome/Windows, not yet on Chrome/macOS; macOS remains a launch-QA risk (4f1) until someone runs it there.

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1a4 Tuning panel — Testing Ground</title>
+  </head>
+  <body>
+    <main>
+      <a class="backlink" href="../../../index.html">&larr; Testing Ground</a>
+      <header>
+        <h1>Tuning panel</h1>
+        <p class="lede">
+          Step 1a4. Sliders bound straight to a config object the sim reads every tick. This is the
+          tool the kart gets tuned with in 1b &mdash; and the reason the tuning log writes itself.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Something to tune</h2>
+        <canvas id="stage" height="260"></canvas>
+        <p class="hint">
+          A bouncing ball, standing in for the kart. Click the canvas to launch it from that spot.
+          Every slider below changes the sim mid-flight &mdash; nothing reloads, nothing restarts.
+        </p>
+      </section>
+
+      <div class="panel" id="tuning-mount"></div>
+
+      <section class="panel">
+        <h2>Why the copy buttons matter</h2>
+        <p class="hint">
+          The panel snapshots the values the code shipped with and never touches that baseline. So
+          it can hand you a paste-ready <code>TUNING.md</code> entry listing before &rarr; after for
+          exactly the fields you moved, with the &ldquo;why&rdquo; left blank for you. That is the
+          log the plan asks for, minus the part where someone has to remember to write it.
+        </p>
+        <p class="hint">
+          <strong>Copy config</strong> gives you the whole object as TypeScript, ready to paste back
+          into the source once a value is signed off.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

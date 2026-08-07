@@ -18,15 +18,73 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 | | |
 |---|---|
 | Current phase | Phase 1: The Testing Ground |
-| Current step | **1a2** — keyboard input layer + live readout widget |
-| Last gate passed | none yet |
+| Current step | **1b1** — kart physics core. Section 1a Foundation is complete. |
+| Last gate passed | none yet (1a carries an acceptance check, not a gate — met 2026-08-07) |
 | Next gate | **1b6** (drive the kart prototype for 5 minutes) |
-| Repo state | scaffold up, `npm run dev` serves the testbed index |
+| Repo state | 1a1–1a4 done; three prototypes run under `npm run dev` |
 | Deferred | **1f** Supabase (no project yet) · **1a5** GitHub Pages deploy |
+| Needs an answer | **Q6** track format, before 1b5 |
 
 ---
 
 ## Log
+
+### 2026-08-07 — Session 3 (Opus 5)
+
+**Steps touched:** **1a2**, **1a3**, **1a4** (all done) — section 1a Foundation complete
+
+**Did:**
+
+- **1a2 input layer** (`src/engine/input.ts`, readout at `src/proto/input`). Bindings are on
+  `KeyboardEvent.code`, so a key stays where it physically is regardless of layout or modifiers.
+  Three problems it exists to solve: events are queued and drained by `sample()` once per sim tick
+  so a tap between two ticks is never dropped (needed for 1b3 trick timing and 1c1); opposed steer
+  keys resolve last-press-wins rather than cancelling to zero, because cancelling reads as the kart
+  ignoring you mid-correction; and blur/tab-hide release everything, since the browser sends no
+  keyup for a key released while unfocused and a stuck key drives the kart into a wall.
+- **1a3 game loop** (`src/engine/loop.ts`, demo at `src/proto/loop`). Fixed 120Hz sim, interpolated
+  render. Long frames are clamped at 250ms and the excess discarded rather than queued — otherwise
+  one slow frame queues extra steps, slowing the next frame, queueing more (the spiral of death).
+  Dropped time is shown in the readout rather than hidden. Resume after a pause discards elapsed
+  wall-clock so the kart does not fast-forward through the time Jodi spent in another window.
+- **1a4 tuning panel** (`src/engine/tuning.ts`, demo at `src/proto/tuning`) + created `TUNING.md`.
+  Live controls bound to any plain config object, mutated in place so the sim sees changes on the
+  next tick. It snapshots the values the code shipped with and never touches that baseline, so
+  **Copy TUNING.md entry** emits a real before → after table for the fields that moved, with the
+  Why left blank for a human. That was deliberate: the plan requires a tuning log, and a log that
+  depends on someone remembering to write it is a log that stops getting written.
+- **Fixed a bug Riggs found:** the testbed index sat on "Loading…" forever.
+
+**Verified:** Riggs loaded all three prototypes — index list populates, 1a2 responds, 1a3 runs
+clean. That is the section 1a acceptance criterion met, on Chrome/Windows.
+
+**The "Loading…" bug, and what it cost:**
+
+`new URL(path, base)` requires an absolute base. `import.meta.env.BASE_URL` is `/` in dev and
+`/mario-kart-master/` in a build — both relative — so it threw on the first prototype row with a
+link, `replaceChildren` never ran, and the placeholder stayed.
+
+It survived my checks because I verified the routes returned HTTP 200 and treated that as
+verification. A 200 proves the server hands back HTML; it says nothing about whether the script ran.
+I have no browser automation in this environment, so **"does the page actually render" is something
+I cannot confirm alone** — it needs Riggs's eyes, and I should ask rather than imply I checked.
+
+Mitigation shipped: `src/ui/error-banner.ts`, imported first on every page, paints any error or
+unhandled rejection across the top in red with its stack. A silent placeholder is the worst failure
+mode on a lab page — it burns the tester's time before the test starts.
+
+**Notes:**
+
+- `exactOptionalPropertyTypes` makes an omitted property and an explicit `undefined` different
+  types, so option interfaces that accept a `querySelector` result need `?: T | undefined`. Noting
+  it because it will recur on every widget in 1b.
+- Four commits now sit ahead of `origin/main`; nothing pushed yet, still awaiting that call.
+
+**Next:** 1b1, kart physics on a 2D plane — auto-forward always on, speed-sensitive steering, slide,
+off-road slowdown, wall bounce, every constant on the tuning panel. This is where the project's real
+risk starts, and it ends at gate 1b6 with Riggs driving.
+
+---
 
 ### 2026-08-06 — Session 2 (Opus 5)
 
@@ -112,6 +170,10 @@ These four are gaps or contradictions in the plan itself, raised in Session 1. N
 7. **Scoring is stored but never defined.** 1f3 syncs `stars` and `best_score`; 2b6 says "1 to 3
    stars"; no step says what earns a star in any drill. Suggest defining it in the 1g1 gate write-up,
    once the drills have real feel to measure.
+9. **The `accelerate` slot.** The plan's action map is steer/hop/item/uiConfirm, but Ch1's
+   start-boost drill needs a hold-the-accelerator input, so 1a2 added a fifth slot. It defaults to
+   Space, shared with `hop`, on the reasoning that the countdown drill and the driving drills are
+   never on screen together. Confirm or rebind at gate 1g1.
 8. **GitHub Pages deep links (parked with 1a5).** Static Pages has no SPA fallback, so a refresh on
    a chapter URL 404s unless we use hash routing or the `404.html` copy trick. Cheap now, annoying
    to retrofit at 2a1. Also for whenever 1f lands: Supabase's redirect allowlist needs both
