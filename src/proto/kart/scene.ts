@@ -97,8 +97,22 @@ function ribbonGeometry(
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setIndex(indices);
-  geometry.computeVertexNormals();
+  geometry.setAttribute('normal', flatUpNormals(count * 2));
   return geometry;
+}
+
+/**
+ * Straight up, for every vertex.
+ *
+ * These surfaces are all flat and horizontal, so their normal is known. Deriving it with
+ * `computeVertexNormals` instead makes it depend on triangle winding — and a ribbon whose
+ * winding comes out clockwise gets normals pointing at the ground, which under a hemisphere
+ * light means it is lit by the *ground* colour and renders as a dark green smear.
+ */
+function flatUpNormals(vertexCount: number): THREE.BufferAttribute {
+  const normals = new Float32Array(vertexCount * 3);
+  for (let i = 0; i < vertexCount; i++) normals[i * 3 + 1] = 1;
+  return new THREE.BufferAttribute(normals, 3);
 }
 
 /** Merge a pile of quads into one mesh, so hundreds of kerb stripes cost one draw call. */
@@ -110,8 +124,26 @@ function quadsGeometry(quads: Array<[number, number, number][]>): THREE.BufferGe
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geometry.computeVertexNormals();
+  geometry.setAttribute('normal', flatUpNormals(positions.length / 3));
   return geometry;
+}
+
+/**
+ * Material for a flat layer painted on top of another flat layer.
+ *
+ * `polygonOffset` nudges the layer toward the camera in the depth buffer only — not in space —
+ * so stacked road markings resolve in a fixed order however far away they are. Relying on tiny
+ * height differences instead is what produces the shimmering stripes that move as you drive:
+ * at distance the depth buffer cannot tell 2cm apart, so it picks a winner per pixel, per
+ * frame. `order` counts upward from the road.
+ */
+function decalMaterial(color: number, order: number): THREE.MeshLambertMaterial {
+  return new THREE.MeshLambertMaterial({
+    color,
+    polygonOffset: true,
+    polygonOffsetFactor: -order,
+    polygonOffsetUnits: -order * 2,
+  });
 }
 
 /** A ramp: flat at the back, rising to a lip at +x (the direction of travel). */
@@ -301,23 +333,16 @@ function buildKerbs(points: PathPoint[], halfWidth: number): THREE.Group {
       const innerA = halfWidth * side;
       const outerA = (halfWidth + width) * side;
       target.push([
-        [current.x + current.nx * innerA, 0.05, current.y + current.ny * innerA],
-        [current.x + current.nx * outerA, 0.05, current.y + current.ny * outerA],
-        [after.x + after.nx * outerA, 0.05, after.y + after.ny * outerA],
-        [after.x + after.nx * innerA, 0.05, after.y + after.ny * innerA],
+        [current.x + current.nx * innerA, 0.03, current.y + current.ny * innerA],
+        [current.x + current.nx * outerA, 0.03, current.y + current.ny * outerA],
+        [after.x + after.nx * outerA, 0.03, after.y + after.ny * outerA],
+        [after.x + after.nx * innerA, 0.03, after.y + after.ny * innerA],
       ]);
     }
   }
 
-  group.add(
-    new THREE.Mesh(quadsGeometry(red), new THREE.MeshLambertMaterial({ color: PALETTE.kerbRed })),
-  );
-  group.add(
-    new THREE.Mesh(
-      quadsGeometry(white),
-      new THREE.MeshLambertMaterial({ color: PALETTE.kerbWhite }),
-    ),
-  );
+  group.add(new THREE.Mesh(quadsGeometry(red), decalMaterial(PALETTE.kerbRed, 4)));
+  group.add(new THREE.Mesh(quadsGeometry(white), decalMaterial(PALETTE.kerbWhite, 4)));
   return group;
 }
 
@@ -334,13 +359,13 @@ function buildStartLine(surface: PathSurface, points: PathPoint[]): THREE.Group 
   const start = points[0];
   if (!start) return group;
 
-  group.position.set(start.x, 0.06, start.y);
+  group.position.set(start.x, 0.05, start.y);
   group.rotation.y = -Math.atan2(start.ty, start.tx);
 
   const columns = 10;
   const size = (surface.halfWidth * 2) / columns;
-  const dark = new THREE.MeshLambertMaterial({ color: 0x2b2f38 });
-  const light = new THREE.MeshLambertMaterial({ color: 0xf7f7f7 });
+  const dark = decalMaterial(0x2b2f38, 5);
+  const light = decalMaterial(0xf7f7f7, 5);
 
   for (let row = 0; row < 2; row++) {
     for (let column = 0; column < columns; column++) {
@@ -587,7 +612,16 @@ function buildKart(): KartParts {
 function buildShadow(): THREE.Mesh {
   const shadow = new THREE.Mesh(
     new THREE.CircleGeometry(1.9, 20),
-    new THREE.MeshBasicMaterial({ color: PALETTE.shadow, transparent: true, opacity: 0.28 }),
+    new THREE.MeshBasicMaterial({
+      color: PALETTE.shadow,
+      transparent: true,
+      opacity: 0.28,
+      // A transparent decal must not write depth, or it fights the road it is painted on.
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -6,
+      polygonOffsetUnits: -12,
+    }),
   );
   shadow.rotation.x = -Math.PI / 2;
   return shadow;
@@ -721,12 +755,14 @@ export function createKartScene(
   scene.add(buildClouds(random, skyRadius));
   scene.add(buildHills(random, skyRadius));
 
+  // The ground sits a clear step below everything drawn on top of it. Every layer above is
+  // separated in space as well as by polygon offset, belt and braces.
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(skyRadius * 2, skyRadius * 2),
     new THREE.MeshLambertMaterial({ color: PALETTE.grass }),
   );
   ground.rotation.x = -Math.PI / 2;
-  ground.position.set((bounds.minX + bounds.maxX) / 2, -0.02, (bounds.minY + bounds.maxY) / 2);
+  ground.position.set((bounds.minX + bounds.maxX) / 2, -0.3, (bounds.minY + bounds.maxY) / 2);
   scene.add(ground);
 
   const points = path.points;
@@ -736,22 +772,29 @@ export function createKartScene(
   // the surrounding grass runs to the horizon.
   scene.add(
     new THREE.Mesh(
-      ribbonGeometry(points, -(halfWidth + 5), halfWidth + 5, 0.005),
-      new THREE.MeshLambertMaterial({ color: PALETTE.grassDark }),
+      ribbonGeometry(points, -(halfWidth + 5), halfWidth + 5, -0.1),
+      decalMaterial(PALETTE.grassDark, 1),
     ),
   );
 
   scene.add(
     new THREE.Mesh(
-      ribbonGeometry(points, -halfWidth, halfWidth, 0.02),
-      new THREE.MeshLambertMaterial({ color: PALETTE.road }),
+      ribbonGeometry(points, -halfWidth, halfWidth, 0),
+      decalMaterial(PALETTE.road, 2),
     ),
   );
 
-  const edgeMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.roadEdge });
-  scene.add(new THREE.Mesh(ribbonGeometry(points, halfWidth - 0.5, halfWidth, 0.04), edgeMaterial));
   scene.add(
-    new THREE.Mesh(ribbonGeometry(points, -halfWidth, -halfWidth + 0.5, 0.04), edgeMaterial),
+    new THREE.Mesh(
+      ribbonGeometry(points, halfWidth - 0.5, halfWidth, 0.02),
+      decalMaterial(PALETTE.roadEdge, 3),
+    ),
+  );
+  scene.add(
+    new THREE.Mesh(
+      ribbonGeometry(points, -halfWidth, -halfWidth + 0.5, 0.02),
+      decalMaterial(PALETTE.roadEdge, 3),
+    ),
   );
 
   scene.add(buildKerbs(points, halfWidth));
@@ -773,7 +816,12 @@ export function createKartScene(
   const shadow = buildShadow();
   scene.add(shadow);
 
-  const camera = new THREE.PerspectiveCamera(62, 1, 0.1, skyRadius * 2.5);
+  // Depth precision is set by the near plane far more than the far plane: halving `near`
+  // halves how finely the depth buffer can separate two surfaces at *any* distance. The chase
+  // camera never sits closer than a few units to anything, so 1 is safe and buys a 10x
+  // improvement over the usual 0.1 — which is the difference between road markings that hold
+  // still and road markings that crawl.
+  const camera = new THREE.PerspectiveCamera(62, 1, 1, skyRadius * 1.6);
 
   return {
     scene,
