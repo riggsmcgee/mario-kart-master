@@ -1,0 +1,140 @@
+/* Countdown drill. (1c1)
+   Sized for the real site rather than the lab: big type, high contrast, one thing to look at.
+   Colours come from the testbed variables for now and will be restyled at 3a1. */
+
+.countdown {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  padding: 1.5rem 1rem 1rem;
+}
+
+/* --- start gantry lamps --- */
+
+.countdown-lights {
+  display: flex;
+  gap: 1rem;
+}
+
+.countdown-lamp {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  background: transparent;
+  transition: background-color 90ms linear;
+}
+
+.countdown-lamp[data-on='true'] {
+  background: #e8453c;
+  border-color: #e8453c;
+}
+
+/* --- the numeral --- */
+
+.countdown-numeral {
+  font-size: 4.5rem;
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  min-height: 4.5rem;
+}
+
+/* --- verdict --- */
+
+.countdown-verdict {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  min-height: 1.6em;
+  text-align: center;
+}
+
+.countdown-verdict[data-grade='perfect'],
+.countdown-verdict[data-grade='boost'] {
+  color: #1a7f37;
+}
+
+.countdown-verdict[data-grade='early'],
+.countdown-verdict[data-grade='late'],
+.countdown-verdict[data-grade='released'],
+.countdown-verdict[data-grade='none'] {
+  color: #b3261e;
+}
+
+.countdown-detail {
+  color: var(--muted);
+  text-align: center;
+  min-height: 1.5em;
+  max-width: 28rem;
+}
+
+/* --- the timeline: the part that actually teaches --- */
+
+.countdown-timeline {
+  position: relative;
+  width: min(34rem, 100%);
+  height: 3rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.countdown-window {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(26, 127, 55, 0.22);
+}
+
+.countdown-perfect {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(26, 127, 55, 0.42);
+}
+
+.countdown-ideal {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #1a7f37;
+}
+
+.countdown-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--fg);
+  transform: translateX(-1px);
+}
+
+.countdown-marker::after {
+  content: attr(data-label);
+  position: absolute;
+  top: 0.15rem;
+  left: 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--fg);
+}
+
+.countdown-scale {
+  display: flex;
+  justify-content: space-between;
+  width: min(34rem, 100%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countdown-lamp {
+    transition: none;
+  }
+}

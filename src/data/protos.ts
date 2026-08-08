@@ -60,8 +60,10 @@ export const PROTOS: Proto[] = [
     title: 'Timing piece',
     step: '1c1',
     gate: '1c2',
-    blurb: 'Countdown-and-hold component for the Ch1 start boost. Result in milliseconds.',
-    status: 'planned',
+    blurb:
+      'Countdown-and-hold component for the Ch1 start boost. Shows where you pressed against ' +
+      'the window, not just how far off you were.',
+    status: 'built',
   },
   {
     id: 'quiz',
