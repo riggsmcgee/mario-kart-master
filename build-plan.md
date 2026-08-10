@@ -133,7 +133,7 @@ The first version of the site is a bare lab, deliberately nothing like the final
 
 ### 1c. Timing piece
 
-- [ ] **1c1** DOM-based countdown-and-tap component: 3-2-1 sequence, press and hold at the right moment (mimicking holding A as the "2" finishes its descent in the real game), result shown in milliseconds with generous/medium/tight window settings. Reusable for Ch1. *(Opus)*
+- [x] **1c1** DOM-based countdown-and-tap component: 3-2-1 sequence, press and hold at the right moment (mimicking holding A as the "2" finishes its descent in the real game), result shown in milliseconds with generous/medium/tight window settings. Reusable for Ch1. *(Opus)* — done 2026-08-08. Shows the press against the window on a timeline, not just the error in ms. Awaiting gate 1c2.
 - [ ] **1c2 GATE (Riggs):** does nailing the window feel satisfying? Is the feedback readable at a glance? Tune window sizes.
 
 ### 1d. Quiz piece
@@ -148,9 +148,9 @@ The first version of the site is a bare lab, deliberately nothing like the final
 
 ### 1f. Backend piece (Supabase)
 
-**DEFERRED (Riggs, 2026-08-06).** No Supabase project exists yet. Build 1a through 1e first; this section is a hard pause point until Riggs creates the project. Until then the testbed persists nothing beyond localStorage, and 2a1's sync dependency stays unmet.
+**UNBLOCKED (Riggs, 2026-08-08).** Project created; URL + anon key supplied and in `.env.local`.
 
-- [ ] **1f1** Supabase setup. Human prerequisite first: Riggs creates the Supabase project (free tier) and puts the project URL + anon key in `.env.local` (gitignored) and in the repo's Actions secrets for the Pages build. Then: schema from Tech decisions as SQL migrations checked into `supabase/migrations`, RLS policies, seed a test user. *(Opus)*
+- [x] **1f1** Supabase setup. Human prerequisite first: Riggs creates the Supabase project (free tier) and puts the project URL + anon key in `.env.local` (gitignored) and in the repo's Actions secrets for the Pages build. Then: schema from Tech decisions as SQL migrations checked into `supabase/migrations`, RLS policies, seed a test user. *(Opus)* — done 2026-08-08. Migration written with RLS on all three tables and a signup trigger that creates the profile row. **Two things still outstanding:** Riggs must run `npx supabase db push` (see `supabase/README.md`), and the Actions secrets are not set because Pages is still deferred (1a5). No test user is seeded on purpose — the first magic-link sign-in at 1f2 creates the real one, and a hand-inserted auth row would not match what the flow actually produces.
 - [ ] **1f2** Auth prototype on the testbed: magic-link sign-in page, session persistence, signed-in state readout, sign-out. *(Opus)*
 - [ ] **1f3** Progress sync module: typed read/write API for chapter progress and plan checks, write-through localStorage cache, retry on reconnect, "last synced" readout on the testbed. *(Opus)*
 - [ ] **1f4 GATE (Riggs):** sign in from a fresh incognito window using only an email. Checks: the flow would not confuse Jodi; progress written on one browser appears on another; the site still works with wifi off (and syncs after). Log any friction.

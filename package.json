@@ -24,11 +24,13 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.5.0",
     "prettier": "^3.6.2",
+    "supabase": "^2.113.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.1.12"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.2",
     "three": "^0.185.1"
   }
 }
