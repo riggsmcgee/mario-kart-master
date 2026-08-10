@@ -86,7 +86,9 @@ export const PROTOS: Proto[] = [
     title: 'Backend piece (Supabase)',
     step: '1f1–1f3',
     gate: '1f4',
-    blurb: 'Deferred by Riggs (2026-08-06): local-only for now, no Supabase project yet.',
-    status: 'planned',
+    blurb:
+      'Magic-link sign in, session persistence, and the profile row — which is the real test: ' +
+      'it proves the signup trigger and row-level security both work.',
+    status: 'built',
   },
 ];

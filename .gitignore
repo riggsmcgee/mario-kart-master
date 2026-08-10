@@ -8,6 +8,10 @@ dist-ssr
 .env.*
 !.env.example
 
+# Supabase CLI scratch: which project this machine is linked to, and local db state.
+supabase/.temp
+supabase/.branches
+
 .DS_Store
 Thumbs.db
 

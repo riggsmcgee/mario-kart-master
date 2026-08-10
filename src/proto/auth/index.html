@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1f2 Sign in — Testing Ground</title>
+  </head>
+  <body>
+    <main>
+      <a class="backlink" href="../../../index.html">&larr; Testing Ground</a>
+      <header>
+        <h1>Sign in</h1>
+        <p class="lede">
+          Step 1f2. Magic link, no password. Jodi types her email once, clicks a link, and stays
+          signed in &mdash; a password to invent and forget is the most likely place a present like
+          this gets abandoned before Chapter 0.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Status</h2>
+        <table class="readout">
+          <tbody id="status"></tbody>
+        </table>
+        <p class="warn" id="config-warning" hidden>
+          No Supabase credentials found. Copy <code>.env.example</code> to <code>.env.local</code>,
+          fill it in, and restart the dev server.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Send a link</h2>
+        <div class="controls">
+          <label>
+            <span>Email</span>
+            <input id="email" type="email" autocomplete="email" placeholder="you@example.com" />
+          </label>
+        </div>
+        <p class="hint">
+          <button class="action" id="send">Send me a link</button>
+          <button class="action" id="signout">Sign out</button>
+        </p>
+        <p class="hint" id="message"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Profile row</h2>
+        <table class="readout">
+          <tbody id="profile"></tbody>
+        </table>
+        <div class="controls">
+          <label>
+            <span>Display name</span>
+            <input id="display-name" type="text" placeholder="Jodi" />
+          </label>
+        </div>
+        <p class="hint">
+          <button class="action" id="save-name">Save</button>
+        </p>
+        <p class="hint">
+          This panel is the real test, not the sign-in. A row appearing here proves three things at
+          once: the signup trigger created it, row-level security lets you read your own row, and
+          saving proves it lets you write it. If the read returns nothing while you are signed in,
+          the migration has not been applied.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Before this works</h2>
+        <p class="hint">
+          In the Supabase dashboard, under <strong>Auth &rarr; URL Configuration</strong>, add
+          <code>http://localhost:5173/**</code> to the redirect allow-list. Supabase accepts the
+          request and sends the mail either way &mdash; the link just fails when you click it, and
+          nothing in the browser can tell you that in advance.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -19,6 +19,19 @@ not the anon key. It's stored locally by the CLI, not in this repo.
 
 To check what would run without running it: `npx supabase db push --dry-run`.
 
+## After every migration: regenerate the types
+
+```bash
+npx supabase gen types typescript --linked > ../src/backend/database.types.ts
+```
+
+`src/backend/database.types.ts` is generated — never edit it. `src/backend/schema.ts` holds the
+hand-written domain aliases on top, so regenerating cannot clobber anything.
+
+This matters more than it looks. postgrest-js checks the whole schema against an exact shape,
+and a hand-written type that is subtly wrong fails *quietly*: `.select()` keeps working while
+`.update()` starts taking `never`. Generating removes the whole class of problem.
+
 ## Adding a change later
 
 ```bash

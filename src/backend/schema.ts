@@ -1,60 +1,37 @@
 /**
- * Hand-written types for the database. (1f1)
+ * Domain names for the database types. (1f1)
  *
- * Kept in step with `supabase/migrations` by hand rather than generated, because the schema is
- * three small tables that change rarely, and a generation step is a build dependency plus a
- * stale-artifact problem for very little gain here. If the schema starts moving, switch to
- * `supabase gen types typescript` — the shape below is deliberately what that would produce.
+ * The types themselves are **generated** into `database.types.ts` — do not edit that file, and
+ * regenerate it whenever a migration lands:
+ *
+ * ```
+ * npx supabase gen types typescript --linked > src/backend/database.types.ts
+ * ```
+ *
+ * This started out hand-written, which was a mistake worth recording. postgrest-js checks the
+ * whole schema against an exact shape, and a hand-made one that is subtly wrong does not fail
+ * loudly: `.select()` keeps working while `.update()` silently takes `never`. Generating them
+ * removes an entire class of confusing error, and costs one command per migration.
+ *
+ * This file exists so the rest of the code says `ProfileRow` rather than reaching four levels
+ * into a generated type, and so regenerating never clobbers anything hand-written.
  */
 
-export type PlayerRole = 'jodi' | 'bill' | 'kayla' | 'other';
+import type { Database } from './database.types';
+
+export type { Database };
+
+type Public = Database['public'];
+
+export type PlayerRole = Public['Enums']['player_role'];
+
+/**
+ * `status` is a text column with a check constraint rather than a Postgres enum, so it
+ * generates as plain `string`. This union is the constraint restated for the compiler — keep
+ * the two in step by hand.
+ */
 export type ChapterStatus = 'not_started' | 'in_progress' | 'done';
 
-export interface ProfileRow {
-  id: string;
-  display_name: string | null;
-  role: PlayerRole;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ChapterProgressRow {
-  user_id: string;
-  chapter_id: string;
-  status: ChapterStatus;
-  stars: number;
-  best_score: number | null;
-  updated_at: string;
-}
-
-export interface PlanCheckRow {
-  user_id: string;
-  item_id: string;
-  checked_at: string;
-}
-
-export interface Database {
-  public: {
-    Tables: {
-      profiles: {
-        Row: ProfileRow;
-        Insert: Partial<ProfileRow> & { id: string };
-        Update: Partial<ProfileRow>;
-      };
-      chapter_progress: {
-        Row: ChapterProgressRow;
-        Insert: Partial<ChapterProgressRow> & { user_id: string; chapter_id: string };
-        Update: Partial<ChapterProgressRow>;
-      };
-      plan_checks: {
-        Row: PlanCheckRow;
-        Insert: Partial<PlanCheckRow> & { user_id: string; item_id: string };
-        Update: Partial<PlanCheckRow>;
-      };
-    };
-    Views: Record<never, never>;
-    Functions: Record<never, never>;
-    Enums: { player_role: PlayerRole };
-    CompositeTypes: Record<never, never>;
-  };
-}
+export type ProfileRow = Public['Tables']['profiles']['Row'];
+export type ChapterProgressRow = Public['Tables']['chapter_progress']['Row'];
+export type PlanCheckRow = Public['Tables']['plan_checks']['Row'];
