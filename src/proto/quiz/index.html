@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1d1 Quiz card — Testing Ground</title>
+  </head>
+  <body>
+    <main>
+      <a class="backlink" href="../../../index.html">&larr; Testing Ground</a>
+      <header>
+        <h1>Quiz card</h1>
+        <p class="lede">
+          Step 1d1. A situation, two to four big buttons, and a warm answer either way. Chapter 2
+          uses it for item decisions and Chapter 4 for spotting boost pads &mdash; both are the same
+          shape of question: here is where everyone is, what do you do?
+        </p>
+      </header>
+
+      <section class="panel">
+        <div id="quiz"></div>
+      </section>
+
+      <section class="panel">
+        <p class="hint">
+          Click a button or press <strong>1</strong>, <strong>2</strong>, <strong>3</strong>. After
+          answering, <strong>Enter</strong> moves on &mdash; focus lands on the next button, so a
+          run of cards never needs the mouse.
+          <button class="action" id="again" hidden>Start over</button>
+          <span id="score" class="num"></span>
+        </p>
+        <p class="hint">
+          The picture is drawn from the same JSON that writes the question &mdash; a road, and a
+          list of who is standing on it. That is what keeps Chapter 2's eight to twelve situations
+          from turning into eight to twelve illustration jobs, and it means no art asset ever comes
+          near this repo.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Answers given</h2>
+        <ol class="log" id="log"></ol>
+      </section>
+
+      <section class="panel">
+        <h2>What to feel for</h2>
+        <p class="hint">
+          This is the rehearsal for gate 1d2, and the question there is
+          <em>does this feel like a fun quiz moment, not a test?</em> Three things to watch. Does a
+          wrong answer sting, or does it read as someone explaining something to you? Nothing here
+          is red, there is no timer and no streak to protect &mdash; on purpose, but tell me if it
+          still feels like being marked.
+        </p>
+        <p class="hint">
+          Second: every option carries its own reply, so picking the wrong one tells you why
+          <em>that</em> one loses rather than just naming the winner. Is that worth the extra
+          writing? It is roughly three times the copy per card.
+        </p>
+        <p class="hint">
+          Third, the pacing. One card, answer, one paragraph, next. Too fast? Too slow? And the copy
+          is a first draft in the intended voice &mdash; if the jokes are wrong, or if Kayla would
+          never do that, say so.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

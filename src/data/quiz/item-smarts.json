@@ -1,0 +1,96 @@
+[
+  {
+    "id": "banana-shield",
+    "situation": "Third place, back straight. Kayla is close enough to read your number plate, and you picked up a banana two corners ago.",
+    "prompt": "What do you do with the banana?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Kayla on your bumper. The banana is still in your hands.",
+      "markers": [
+        { "kind": "rival", "at": 0.14, "lane": 0, "label": "Kayla" },
+        { "kind": "banana", "at": 0.42, "lane": 0 },
+        { "kind": "you", "at": 0.58, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "hold",
+        "label": "Hold it behind the kart and keep driving",
+        "correct": true,
+        "response": "This one habit will win you more races than any other. A held banana trails along behind you, so anything arriving at your back bumper — a green shell, a red shell, Kayla herself — hits the banana instead of you. It costs nothing to carry. So carry it."
+      },
+      {
+        "id": "drop",
+        "label": "Drop it now so she has to swerve",
+        "response": "It will make her swerve, and a banana sitting still on a wide straight is easy to see coming. The bigger problem is that the second it leaves your hands your back is bare again — and the back is where the shells arrive from."
+      },
+      {
+        "id": "forward",
+        "label": "Throw it forward, up the road",
+        "response": "Thrown forward, a banana lands ahead of you — which means you are now the one who has to dodge it. Bananas go behind you, or they stay in your hands."
+      }
+    ],
+    "takeaway": "Anything held behind the kart is armour, and holding it is free."
+  },
+  {
+    "id": "mushroom-timing",
+    "situation": "Second lap. You have been sitting on a mushroom since the last item box, and the hairpin is coming up fast.",
+    "prompt": "When do you use it?",
+    "diagram": {
+      "road": "bend-right",
+      "caption": "The hairpin, and the long straight after it.",
+      "markers": [{ "kind": "you", "at": 0.22, "lane": -0.35, "label": "You" }]
+    },
+    "answers": [
+      {
+        "id": "exit",
+        "label": "As the corner opens up onto the straight",
+        "correct": true,
+        "response": "A mushroom gives you the same burst wherever you use it, so it is worth the most when you are slowest — and you are never slower than on the way out of a corner. Wait for the exit, then go."
+      },
+      {
+        "id": "apex",
+        "label": "Halfway round the hairpin, to get through it quicker",
+        "response": "A boost in the middle of a corner mostly boosts you into the barrier. The kart goes where it is pointing, and halfway round a hairpin it is pointing at the wall."
+      },
+      {
+        "id": "save",
+        "label": "Save it in case Kayla catches up",
+        "response": "Saving a mushroom for later usually means holding it forever — there is always one more reason to wait. And unlike a banana, it does nothing for you while you carry it."
+      }
+    ],
+    "takeaway": "Mushrooms are for the moment you stop being slow: corner exit, then the straight."
+  },
+  {
+    "id": "green-shell-range",
+    "situation": "Last lap, and you finally have Kayla in front of you — close enough to touch. There is a green shell in your hands.",
+    "prompt": "What do you do with it?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Kayla, about a kart length ahead.",
+      "markers": [
+        { "kind": "rival", "at": 0.72, "lane": 0, "label": "Kayla" },
+        { "kind": "you", "at": 0.4, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "fire",
+        "label": "Fire it straight ahead, right now",
+        "correct": true,
+        "response": "Green shells do not steer. They fly dead straight until they hit something, and from this close that something is Kayla. Fired from further back it would sail off into the scenery, which is exactly why close range is when to take the shot."
+      },
+      {
+        "id": "wait",
+        "label": "Wait until you are side by side",
+        "response": "By the time you are alongside her the shot is gone — you would be firing past her ear. The moment she is lined up in front of you is the moment to fire."
+      },
+      {
+        "id": "behind",
+        "label": "Fire it backwards instead",
+        "response": "There is nobody back there worth spending it on, and a green shell thrown backwards mostly rattles around the track until it gives up. She is right in front of you. Take the shot."
+      }
+    ],
+    "takeaway": "Green shells fly straight and never turn. Use them close, and use them soon."
+  }
+]

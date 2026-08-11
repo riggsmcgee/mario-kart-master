@@ -70,8 +70,10 @@ export const PROTOS: Proto[] = [
     title: 'Quiz piece',
     step: '1d1',
     gate: '1d2',
-    blurb: 'Diagram + big answer buttons + a warm explanation either way. JSON authored.',
-    status: 'planned',
+    blurb:
+      'Situation diagram + big answer buttons + a warm reply to every option, right or wrong. ' +
+      'Questions and pictures both authored as plain JSON.',
+    status: 'built',
   },
   {
     id: 'shield',

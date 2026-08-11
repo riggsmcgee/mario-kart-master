@@ -1,0 +1,192 @@
+/* Quiz card. (1d1)
+   Sized for the real site rather than the lab: one question on screen, buttons you cannot miss,
+   and no visual language borrowed from exam papers. Palette comes from the testbed variables for
+   now; the real style guide is 3a1. */
+
+.quiz {
+  display: grid;
+  gap: 1rem;
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+/* --- where you are in the set --- */
+
+.quiz-dots {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.quiz-dot {
+  height: 0.4rem;
+  flex: 1;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.quiz-dot[data-state='here'] {
+  background: var(--accent);
+}
+
+.quiz-dot[data-state='done'] {
+  background: var(--muted);
+}
+
+/* --- the situation --- */
+
+.quiz-figure {
+  margin: 0;
+}
+
+.quiz-diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.quiz-figure figcaption {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.45rem;
+  text-align: center;
+}
+
+.quiz-situation {
+  margin: 0;
+  color: var(--muted);
+}
+
+.quiz-prompt {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.3;
+}
+
+/* --- answers --- */
+
+.quiz-answers {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.quiz-answer {
+  display: grid;
+  grid-template-columns: 1.9rem 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  text-align: left;
+  font: inherit;
+  font-size: 1.05rem;
+  color: var(--fg);
+  background: transparent;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  /* Big enough to hit without aiming. This gets used on a laptop trackpad by someone who is
+     not a gamer, and a small target is the fastest way to make a quiz feel fiddly. */
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  transition: border-color 100ms ease-out;
+}
+
+.quiz-answer:hover:not(:disabled),
+.quiz-answer:focus-visible {
+  border-color: var(--accent);
+}
+
+.quiz-key {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.quiz-answer:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+/* Marked after answering. The right one is always shown, whether or not it was picked. */
+.quiz-answer[data-state='right'] {
+  border-color: #1a7f37;
+  background: rgba(26, 127, 55, 0.12);
+}
+
+.quiz-answer[data-state='picked'] {
+  border-color: var(--muted);
+  border-style: dashed;
+}
+
+.quiz-answer[data-state='other'] {
+  opacity: 0.45;
+}
+
+/* --- the reply --- */
+
+.quiz-reply {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+}
+
+.quiz-verdict {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.quiz-verdict[data-right='true'] {
+  color: #1a7f37;
+}
+
+/* Deliberately not red. A wrong answer on a teaching site is the most useful thing that can
+   happen, and colouring it like an error says the opposite. */
+.quiz-verdict[data-right='false'] {
+  color: var(--fg);
+}
+
+.quiz-detail {
+  margin: 0;
+}
+
+.quiz-takeaway {
+  margin: 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.quiz-next {
+  justify-self: start;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 0.5rem 1.1rem;
+  margin-top: 0.3rem;
+  cursor: pointer;
+}
+
+.quiz-next:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-answer {
+    transition: none;
+  }
+}

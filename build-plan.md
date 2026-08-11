@@ -138,7 +138,7 @@ The first version of the site is a bare lab, deliberately nothing like the final
 
 ### 1d. Quiz piece
 
-- [ ] **1d1** DOM quiz component: situation image/diagram + 2 to 4 big answer buttons + a warm explanation on answer, right or wrong. Authoring format: plain JSON. Three sample questions. *(Sonnet)*
+- [x] **1d1** DOM quiz component: situation image/diagram + 2 to 4 big answer buttons + a warm explanation on answer, right or wrong. Authoring format: plain JSON. Three sample questions. *(Sonnet)* — done 2026-08-11 (Opus). The diagram is drawn from the same JSON as the question — a road shape plus a list of who is on it — so a situation costs a few lines rather than an illustration, and no art asset ever enters the repo. Every answer carries its own reply, not just the right one. Awaiting gate 1d2.
 - [ ] **1d2 GATE (Riggs):** does it feel like a fun quiz moment, not a test? Adjust tone and pacing.
 
 ### 1e. Shield Up piece (item defense toy)
