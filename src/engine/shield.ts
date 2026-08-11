@@ -7,61 +7,38 @@
  * everything the moment she picks it up.
  *
  * There is no abstract shield anywhere in here. You carry a banana, picked up from an item box.
- * Hold the key and it trails behind your back bumper, where a red shell will hit it instead of
- * you. Let go and it does what a banana does: it falls on the road and stays there while you
- * drive away from it.
+ * Hold the key and it trails behind your back bumper, where a red shell hits it instead of you.
+ * Let go and it falls on the road behind you, and it is gone.
  *
- * That gives the drill its teeth without ever punishing the habit it is teaching:
- *
- *  - **Holding early is free.** Hold from the first pip, or hold the whole lap. Nothing is
- *    deducted, because in the real game nothing is.
- *  - **Letting go is the gamble.** A dropped banana can still catch the shell — it is sitting in
- *    the road behind you, after all — but only if the shell happens to come through where it
- *    fell. Steer at all, or drop it at the wrong moment, and the shell goes past it into you.
- *  - **The fake-outs bait exactly that release.** A fake looks identical until the last tenth of
- *    its approach, then veers off. Relax and let go in the relief and your banana is on the
- *    tarmac behind you, with the next siren already starting.
+ * **The rule is deliberately absolute: a red shell that is locked on hits you unless the banana
+ * is behind you when it arrives.** No near misses, no veering off, no lucky escapes (Riggs,
+ * 2026-08-11 — "that's not a thing"). Any of those would teach that not holding sometimes works
+ * out, which is exactly the belief that costs her races. Holding is free; nothing else saves you.
  *
  * No DOM and no Three.js in here: this decides what happened, the harness decides how to say it.
  */
 
 import type { PlacedFurniture } from './track';
 
-/** Kept private until a threat resolves — the whole point is that they look the same. */
-export type ThreatKind = 'shell' | 'fake';
-
 export type ShieldOutcome =
-  /** Held it all the way. The banana takes the hit and is gone. */
+  /** Held it all the way. The banana takes the hit and is spent. */
   | 'blocked'
-  /** Let go, and the shell ran over the banana anyway. Saved, but by luck as much as judgement. */
-  | 'drop-blocked'
-  /** Let go, and the shell went past where it fell. */
-  | 'drop-missed'
+  /** Let go while it was coming. The banana is on the road and the shell arrived anyway. */
+  | 'dropped'
   /** Banana in hand, never held out. */
   | 'hit'
   /** Nothing in hand. Find an item box. */
-  | 'unarmed'
-  /** False alarm, and you were covered anyway. Costs nothing — which is the lesson. */
-  | 'fake-held'
-  /** False alarm, and you were not covered. Got away with it. */
-  | 'fake-clear'
-  /** False alarm, and you threw the banana away in the relief. */
-  | 'fake-dropped';
+  | 'unarmed';
 
 export interface ShieldResolution {
   outcome: ShieldOutcome;
-  kind: ThreatKind;
   /** How long before impact the banana went out behind you, in ms. Null if it never did. */
   leadMs: number | null;
-  /** Whether it cost speed. */
+  /** Whether it cost speed. Everything except a block does. */
   struck: boolean;
 }
 
 export interface ShieldEvents {
-  /**
-   * A threat just appeared. Deliberately carries no `kind`: a caller that cannot know which it
-   * is cannot accidentally show it, and a warning that gives the answer away is not a warning.
-   */
   warned: boolean;
   resolved: ShieldResolution | null;
   /** An item box was just picked up. */
@@ -80,24 +57,20 @@ export type ShieldConfig = {
    * that noticing is a skill rather than a reflex test, short enough to stay a threat.
    */
   warningMs: number;
-  /** Share of threats that resolve harmlessly. */
-  fakeChance: number;
-  /** How long a used or taken item box stays empty. */
+  /** How long a taken item box stays empty. */
   boxRespawnMs: number;
   /** How close the kart has to pass to take a box. */
   pickupRadius: number;
   /** How far behind the kart a held banana sits — and so where a dropped one lands. */
   dropBack: number;
   /**
-   * How near a dropped banana the shell has to pass to hit it.
+   * How long a dropped banana is visible before it is gone.
    *
-   * The single number that decides whether letting go is a reasonable defence or a gamble. Small
-   * enough and only a well-judged late drop works; large enough and dropping is as good as
-   * holding, which would teach the wrong thing.
+   * Short on purpose. It exists to show you what letting go just cost, not to lie in wait: a
+   * banana still sitting on the road when the shell drives over it would imply a rescue that
+   * this drill does not offer.
    */
-  catchRadius: number;
-  /** How long a dropped banana stays on the road before it is tidied away. */
-  dropLifeMs: number;
+  dropShowMs: number;
   /** How long a hit leaves you flailing. */
   spinMs: number;
   /** Speed kept through a hit. */
@@ -114,12 +87,10 @@ export const SHIELD_CONFIG: ShieldConfig = {
   gapMinMs: 4000,
   gapMaxMs: 7000,
   warningMs: 2000,
-  fakeChance: 0.3,
   boxRespawnMs: 5000,
   pickupRadius: 2.6,
   dropBack: 3.4,
-  catchRadius: 1.8,
-  dropLifeMs: 9000,
+  dropShowMs: 1200,
   spinMs: 900,
   spinSpeedKeep: 0.3,
   approachDistance: 55,
@@ -139,7 +110,6 @@ export interface ShieldContext {
 }
 
 interface Threat {
-  kind: ThreatKind;
   warnedAt: number;
   impactAt: number;
   /** When the banana first went out behind the kart, with one in hand to put there. */
@@ -152,6 +122,8 @@ export interface DroppedItem {
   x: number;
   y: number;
   at: number;
+  /** 1 the instant it lands, falling to 0 as it goes. */
+  fade: number;
 }
 
 const NO_EVENTS: ShieldEvents = {
@@ -161,18 +133,13 @@ const NO_EVENTS: ShieldEvents = {
   droppedItem: false,
 };
 
-/** How far through the approach a fake reveals itself. Late enough that reacting is a mistake. */
-const VEER_AT = 0.9;
-/** How far off line a fake swings by the moment it would have hit. */
-const VEER_DISTANCE = 9;
-
 export class ShieldRun {
   hasItem = true;
   threats = 0;
   blocked = 0;
   struck = 0;
 
-  /** The banana on the road, if there is one. Null while it is in hand or gone. */
+  /** The banana you just let go of, while it is still visible. */
   dropped: DroppedItem | null = null;
 
   private threat: Threat | null = null;
@@ -196,6 +163,7 @@ export class ShieldRun {
     this.spinUntil = 0;
     this.nextThreatAt = now + this.gap(config);
     this.armed = true;
+    this.wasHolding = false;
     this.respawn.clear();
     for (const box of this.boxes) box.collected = false;
   }
@@ -220,22 +188,11 @@ export class ShieldRun {
     return Math.min(1, Math.max(0, (now - this.threat.warnedAt) / span));
   }
 
-  /** Where to draw the threat: units behind the kart, and units across it. */
-  approach(now: number, config: ShieldConfig): { behind: number; side: number } | null {
+  /** How far behind the kart to draw the shell. Null when nothing is coming. */
+  approach(now: number, config: ShieldConfig): number | null {
     const progress = this.progress(now, config);
-    if (progress === null || !this.threat) return null;
-
-    // A fake gives itself away only in the last fraction of a second, by sliding off line. Any
-    // earlier and reading it would be a skill; this late, acting on it is a mistake.
-    const veer =
-      this.threat.kind === 'fake' && progress > VEER_AT
-        ? ((progress - VEER_AT) / (1 - VEER_AT)) ** 2
-        : 0;
-
-    return {
-      behind: config.approachDistance * (1 - progress) + 2.5,
-      side: veer * VEER_DISTANCE,
-    };
+    if (progress === null) return null;
+    return config.approachDistance * (1 - progress) + 2.5;
   }
 
   update(config: ShieldConfig, ctx: ShieldContext): ShieldEvents {
@@ -244,8 +201,11 @@ export class ShieldRun {
 
     this.runBoxes(config, ctx, events);
 
-    // A banana on the road is tidied away eventually, or the track fills up with them.
-    if (this.dropped && ctx.now - this.dropped.at > config.dropLifeMs) this.dropped = null;
+    if (this.dropped) {
+      const age = ctx.now - this.dropped.at;
+      this.dropped.fade = 1 - age / Math.max(1, config.dropShowMs);
+      if (this.dropped.fade <= 0) this.dropped = null;
+    }
 
     // Letting go drops it whether or not anything is coming — it is a banana, not a force field.
     events.droppedItem = this.releaseCheck(config, ctx);
@@ -258,7 +218,6 @@ export class ShieldRun {
       const ready = ctx.now >= this.nextThreatAt;
       if (ready && (!config.straightsOnly || ctx.clearRoad)) {
         this.threat = {
-          kind: Math.random() < config.fakeChance ? 'fake' : 'shell',
           warnedAt: ctx.now,
           impactAt: ctx.now + config.warningMs,
           raisedAt: null,
@@ -275,18 +234,18 @@ export class ShieldRun {
     const covered = ctx.holding && this.hasItem;
     if (covered && threat.raisedAt === null) threat.raisedAt = ctx.now;
 
-    // The dropped banana gets its chance every tick, because that is what it is doing sitting
-    // there: waiting for the shell to come through. It works only if the shell's line happens
-    // to pass over it, which is what makes letting go a gamble rather than a plan.
-    if (this.dropped && this.caught(config, ctx)) {
-      events.resolved = this.finish(config, ctx, threat, 'drop-blocked', false);
-      this.dropped = null;
-      return events;
-    }
-
     if (ctx.now < threat.impactAt) return events;
 
-    events.resolved = this.settle(config, ctx, threat, covered);
+    // The whole model, in one line: the banana is behind you or the shell hits you.
+    const outcome: ShieldOutcome = covered
+      ? 'blocked'
+      : threat.dropped
+        ? 'dropped'
+        : this.hasItem
+          ? 'hit'
+          : 'unarmed';
+
+    events.resolved = this.finish(config, ctx, threat, outcome);
     return events;
   }
 
@@ -325,49 +284,9 @@ export class ShieldRun {
       x: ctx.x - Math.cos(ctx.heading) * config.dropBack,
       y: ctx.y - Math.sin(ctx.heading) * config.dropBack,
       at: ctx.now,
+      fade: 1,
     };
     return true;
-  }
-
-  /** Is the shell currently passing over the dropped banana? */
-  private caught(config: ShieldConfig, ctx: ShieldContext): boolean {
-    const approach = this.approach(ctx.now, config);
-    if (!approach || !this.dropped) return false;
-
-    // The shell tracks the kart, so it sits on the line the kart is pointing along *now* — not
-    // on the path the kart drove. That is exactly why a banana dropped early tends to be left
-    // off to one side by the time the shell arrives.
-    const cos = Math.cos(ctx.heading);
-    const sin = Math.sin(ctx.heading);
-    const shellX = ctx.x - cos * approach.behind - sin * approach.side;
-    const shellY = ctx.y - sin * approach.behind + cos * approach.side;
-
-    return Math.hypot(shellX - this.dropped.x, shellY - this.dropped.y) <= config.catchRadius;
-  }
-
-  private settle(
-    config: ShieldConfig,
-    ctx: ShieldContext,
-    threat: Threat,
-    covered: boolean,
-  ): ShieldResolution {
-    if (threat.kind === 'fake') {
-      const outcome: ShieldOutcome = threat.dropped
-        ? 'fake-dropped'
-        : covered
-          ? 'fake-held'
-          : 'fake-clear';
-      return this.finish(config, ctx, threat, outcome, false);
-    }
-
-    if (covered) return this.finish(config, ctx, threat, 'blocked', false);
-
-    const outcome: ShieldOutcome = threat.dropped
-      ? 'drop-missed'
-      : this.hasItem
-        ? 'hit'
-        : 'unarmed';
-    return this.finish(config, ctx, threat, outcome, true);
   }
 
   /** Close the books on a threat: bookkeeping, then the verdict. */
@@ -376,17 +295,15 @@ export class ShieldRun {
     ctx: ShieldContext,
     threat: Threat,
     outcome: ShieldOutcome,
-    struck: boolean,
   ): ShieldResolution {
+    const struck = outcome !== 'blocked';
+
     if (outcome === 'blocked') {
       this.blocked++;
       // The banana took the hit, so it is gone. Find another box.
       this.hasItem = false;
       this.wasHolding = false;
-    }
-    if (outcome === 'drop-blocked') this.blocked++;
-
-    if (struck) {
+    } else {
       this.struck++;
       this.spinUntil = ctx.now + config.spinMs;
     }
@@ -396,7 +313,6 @@ export class ShieldRun {
 
     return {
       outcome,
-      kind: threat.kind,
       leadMs: threat.raisedAt === null ? null : threat.impactAt - threat.raisedAt,
       struck,
     };

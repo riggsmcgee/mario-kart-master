@@ -30,21 +30,19 @@
           <button class="action" id="mute">Sound on</button>
         </p>
         <p class="hint">
-          There is no magic shield here, just a banana. Hold Shift and it sits behind your bumper
-          where the shell will hit it instead of you. Let go and it does what a banana does: it
-          lands on the road and stays there while you drive away. It can still catch the shell from
-          down there &mdash; it is in the road, after all &mdash; but only if the shell happens to
-          come through where you left it. Held, it cannot miss.
+          There is no magic shield here, just a banana. Hold Shift and it sits behind your bumper,
+          where the shell hits it instead of you. Let go and it falls on the road behind you and it
+          is gone.
         </p>
         <p class="hint">
-          Bananas come from the item boxes, four rows of them spread around the lap. Blocking a
-          shell uses yours up, so after a good block the next job is finding another box.
+          <strong>A locked-on shell does not miss.</strong> No near misses, no veering off, no lucky
+          escapes &mdash; if it is coming and the banana is not behind you when it arrives, it hits
+          you. Anything softer would teach that not holding sometimes works out, which is the exact
+          belief this drill exists to remove.
         </p>
         <p class="hint">
-          Roughly a third of the warnings are fake: identical sirens, identical approach, and then
-          the thing veers off in the last fraction of a second. They are not there to punish
-          holding. They are there to bait the flinch &mdash; the relieved release that leaves your
-          banana on the tarmac with the next siren already starting.
+          Bananas come from the item boxes, four rows of them spread around the lap. Blocking uses
+          yours up, so after a good block the next job is finding another box.
         </p>
         <p class="warn">
           Windows note: holding <strong>right</strong> Shift for eight seconds pops up the Filter
@@ -66,12 +64,9 @@
         <h2>Threats</h2>
         <ol class="log" id="log"></ol>
         <p class="hint">
-          <code>blocked</code> held it all the way &middot; <code>drop-blocked</code> let go, and
-          the shell ran over it anyway &middot; <code>drop-missed</code> let go, and the shell came
-          past it &middot; <code>hit</code> banana in hand, never held out &middot;
-          <code>unarmed</code> nothing to defend with &middot; <code>fake-held</code> false alarm,
-          covered anyway &middot; <code>fake-clear</code> false alarm, got away with it &middot;
-          <code>fake-dropped</code> false alarm, and you dropped it in the relief.
+          <code>blocked</code> held it all the way &middot; <code>dropped</code> let go while it was
+          coming &middot; <code>hit</code> banana in hand, never held out &middot;
+          <code>unarmed</code> nothing to defend with.
         </p>
       </section>
 
@@ -90,17 +85,15 @@
           panel and say what felt right.
         </p>
         <p class="hint">
-          Also worth a verdict: the fake-outs. Thirty per cent is a guess. Too many and the sirens
-          stop meaning anything; too few and the relieved release never gets caught out. And the
-          sound &mdash; if the pips are annoying rather than useful, that is a real finding, not a
-          nitpick.
+          Also worth a verdict: the sound. If the pips are annoying rather than useful, that is a
+          real finding and not a nitpick &mdash; they are doing the job of reaching you while you
+          are looking at the road, and if they fail at that they are just noise.
         </p>
         <p class="warn">
-          One number I cannot judge without playing it: <strong>banana catch radius</strong>, on the
-          config panel above. It decides whether dropping the banana is a fair last-second defence
-          or a gamble. Too generous and letting go becomes as good as holding, which teaches the
-          exact opposite of Chapter 2. Watch how often <code>drop-blocked</code> shows up in the
-          log.
+          <strong>The fake-out warnings from the original 1e1 wording are gone</strong>, following
+          &ldquo;that&rsquo;s not a thing&rdquo; &mdash; every siren now means a real shell that
+          will really arrive. Say if you want some form of false alarm back; without them the only
+          ways to be hit are having no banana, or having one and not holding it.
         </p>
       </section>
     </main>

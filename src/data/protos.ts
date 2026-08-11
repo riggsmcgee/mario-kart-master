@@ -72,7 +72,7 @@ export const PROTOS: Proto[] = [
     gate: '1d2',
     blurb:
       'Situation diagram + big answer buttons + a warm reply to every option, right or wrong. ' +
-      'Questions and pictures both authored as plain JSON.',
+      "Loaded with Chapter 2's ten item-decision cards. Questions and pictures both plain JSON.",
     status: 'built',
   },
   {
@@ -82,7 +82,7 @@ export const PROTOS: Proto[] = [
     gate: '1e2',
     blurb:
       'The kart piece with something chasing it. Bananas from item boxes, hold to keep one ' +
-      'behind your bumper, let go and it lands on the road — plus fake-outs that bait the release.',
+      'behind your bumper, and a locked-on shell that never misses if you do not.',
     status: 'built',
   },
   {

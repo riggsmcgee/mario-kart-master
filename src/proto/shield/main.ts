@@ -66,15 +66,6 @@ const SHIELD_SCHEMA: TuningSchema<typeof SHIELD> = {
     group: 'The threat',
     help: 'From siren to impact. The number this drill exists to tune: long enough that noticing is a skill rather than a reflex test, short enough to still be a threat.',
   },
-  fakeChance: {
-    kind: 'number',
-    label: 'Fake-outs',
-    min: 0,
-    max: 0.8,
-    step: 0.05,
-    group: 'The threat',
-    help: 'Share of warnings that veer off harmlessly. Their job is to bait the release, not to punish holding.',
-  },
   gapMinMs: {
     kind: 'number',
     label: 'Shortest gap',
@@ -104,16 +95,6 @@ const SHIELD_SCHEMA: TuningSchema<typeof SHIELD> = {
     help: 'How far behind it appears. Presentation only — the timing comes from the warning lead.',
   },
 
-  catchRadius: {
-    kind: 'number',
-    label: 'Banana catch radius',
-    min: 0.4,
-    max: 6,
-    step: 0.2,
-    unit: 'u',
-    group: 'The banana',
-    help: 'How near a dropped banana the shell has to pass to hit it. The number that decides whether letting go is a reasonable defence or a gamble — too generous and dropping is as good as holding, which teaches the wrong thing.',
-  },
   dropBack: {
     kind: 'number',
     label: 'Sits back',
@@ -124,14 +105,15 @@ const SHIELD_SCHEMA: TuningSchema<typeof SHIELD> = {
     group: 'The banana',
     help: 'How far behind the kart the banana trails, and so where it lands when you let go.',
   },
-  dropLifeMs: {
+  dropShowMs: {
     kind: 'number',
-    label: 'Stays on the road',
-    min: 1000,
-    max: 30000,
-    step: 500,
+    label: 'Dropped banana shows for',
+    min: 200,
+    max: 4000,
+    step: 100,
     unit: 'ms',
     group: 'The banana',
+    help: 'Only long enough to see what letting go cost you. It cannot block anything — a banana still lying there when the shell drives over it would imply a rescue this drill does not offer.',
   },
   boxRespawnMs: {
     kind: 'number',
@@ -235,16 +217,10 @@ const VERDICTS: Record<
     detail: 'The banana took the hit instead of you. That is the whole habit.',
     tone: 'good',
   },
-  'drop-blocked': {
-    title: 'LUCKY',
-    detail:
-      'You let go, and the shell happened to run straight over the banana. It will not always come through where you left it — held, it cannot miss.',
-    tone: 'neutral',
-  },
-  'drop-missed': {
+  dropped: {
     title: 'YOU LET GO',
     detail:
-      'The banana fell on the road and the shell came past it. Keep hold of it and it stays between you and whatever is coming.',
+      'The banana was behind you and then it was on the road, and a locked-on shell does not miss. Keep holding until it hits.',
     tone: 'bad',
   },
   hit: {
@@ -257,23 +233,6 @@ const VERDICTS: Record<
     title: 'HIT',
     detail: 'Nothing to defend yourself with. Drive through an item box and pick one up.',
     tone: 'neutral',
-  },
-  'fake-held': {
-    title: 'FALSE ALARM',
-    detail:
-      'That one was never going to hit you — and holding cost you nothing. You still have your banana.',
-    tone: 'good',
-  },
-  'fake-clear': {
-    title: 'IT MISSED',
-    detail: 'That one veered off on its own. You will not always be that lucky.',
-    tone: 'neutral',
-  },
-  'fake-dropped': {
-    title: 'THROWN AWAY',
-    detail:
-      'It veered off by itself, and you dropped your banana in the relief. Nothing left for the next one.',
-    tone: 'bad',
   },
 };
 
@@ -293,7 +252,7 @@ function log(resolution: ShieldResolution): void {
   li.className = resolution.struck ? '' : 'down';
   const lead =
     resolution.leadMs === null ? 'never raised' : `${resolution.leadMs.toFixed(0)} ms early`;
-  li.textContent = `${String(shield.threats).padStart(3)}  ${resolution.kind.padEnd(6)} ${resolution.outcome.padEnd(11)} ${lead}`;
+  li.textContent = `${String(shield.threats).padStart(3)}  ${resolution.outcome.padEnd(9)} ${lead}`;
   list.prepend(li);
   while (list.children.length > 12) list.lastElementChild?.remove();
 }
@@ -375,8 +334,7 @@ function render(alpha: number, stats: LoopStats): void {
   view.setItem(covered, time);
   view.setDroppedItem(shield.dropped);
 
-  const approach = shield.approach(now, SHIELD);
-  view.setThreat(approach?.behind ?? null, approach?.side ?? 0, time);
+  view.setThreat(shield.approach(now, SHIELD), time);
 
   const burst = (now - burstAt) / 420;
   view.setBurst(burstAt > 0 && burst < 1 ? burst : null, burstHit);
@@ -413,7 +371,7 @@ const STAT_ROWS = [
   ['threats', () => String(shield.threats)],
   ['blocked', () => `${shield.blocked} / ${shield.threats}`],
   ['times hit', () => String(shield.struck)],
-  ['banana', () => (shield.hasItem ? 'in hand' : shield.dropped ? 'on the road' : 'gone')],
+  ['banana', () => (shield.hasItem ? 'in hand' : 'gone — find a box')],
   ['speed', () => `${last.speed.toFixed(2)} u/s`],
 ] as const;
 

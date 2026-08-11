@@ -105,6 +105,39 @@ depends on.
 
 ---
 
+### 2026-08-11 — Session 8, third pass (Opus 5)
+
+**Steps touched:** **1d1**, **1e1** (both again, on Riggs's feedback)
+
+- **Shield Up: no more near misses.** "If there's a red shell and you're not shielding, it will
+  hit you." So the fake-outs are gone — including the clause in 1e1's own wording that asked for
+  them — along with the whole question of whether a dropped banana catches the shell. The model is
+  now one line: the banana is behind you, or the shell hits you. Anything softer teaches that not
+  holding sometimes works out, which is the belief the drill exists to remove.
+- A dropped banana is now only *shown* for about a second before vanishing, rather than lying in
+  the road. It is feedback for what letting go just cost, not an object — a banana still sitting
+  there when the shell drives over it would imply a rescue that no longer exists.
+- **Ch2's thesis is now settled: entirely defensive.** Anything that can block gets held and never
+  fired; the red shell is the one exception, because it steers itself and is therefore the only
+  item that scores without aiming. Riggs's filter, and it is a good one: *low skill, high reward.*
+  Jodi will not reliably land a green shell on a moving kart, so nothing in the deck asks her to.
+- **The quiz is now ten researched cards**, which drafts 2b3. What the research changed, as
+  opposed to confirmed:
+  - **Two item slots, and a full pair means the next item box gives you nothing at all.** That is
+    a whole card ("spend the junk on the way in") and it was not in my head before looking.
+  - **Triple bananas and triple shells orbit you without holding anything.** The hold habit has an
+    edge case, and teaching "always hold" without it would be teaching a wrong thing.
+  - **A coin is worth spending**: two coins, a small speed top-up toward the ten-coin cap, and you
+    lose three every time you are hit. Coins are about half of what first place is ever handed, so
+    "coins are junk" would write off half her item boxes.
+  - **Bob-ombs are thrown backwards, never held** — they go off on their own and do not care whose
+    they were. The exception that makes the hold rule sharper.
+  - Nintendo Life's own guide recommends leaving bananas **where item boxes spawn**. That is the
+    purest low-skill/high-reward play in the game: everyone has to drive at the boxes.
+- Three of those are worth Riggs double-checking against the real game, and the page says so.
+
+---
+
 ### 2026-08-11 — Session 8, second pass (Opus 5)
 
 **Steps touched:** **1d1**, **1e1** (both revised on Riggs's feedback, same day)

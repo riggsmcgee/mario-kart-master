@@ -38,7 +38,10 @@ const COLOUR = {
   banana: '#ffd23f',
   bananaDark: '#c99b0f',
   shell: '#e8453c',
+  shellGreen: '#3fbf4a',
   shellBand: '#fdfdfd',
+  bomb: '#2b2f38',
+  bombFuse: '#ff8a1f',
   coin: '#ffcf33',
   coinCore: '#e0a800',
   pad: '#ff8a1f',
@@ -51,7 +54,8 @@ const COLOUR = {
 
 export type RoadShape = 'straight' | 'bend-left' | 'bend-right';
 
-export type MarkerKind = 'you' | 'rival' | 'pack' | 'banana' | 'shell' | 'coin' | 'pad' | 'box';
+export type MarkerKind =
+  'you' | 'rival' | 'pack' | 'banana' | 'shell' | 'shell-green' | 'bomb' | 'coin' | 'pad' | 'box';
 
 export interface DiagramMarker {
   kind: MarkerKind;
@@ -203,24 +207,34 @@ function marker(kind: MarkerKind): SVGGElement {
       );
       return group;
     }
-    case 'shell': {
+    case 'shell':
+    case 'shell-green': {
+      const colour = kind === 'shell' ? COLOUR.shell : COLOUR.shellGreen;
       const group = svg('g');
       // Motion streaks first, so the orb sits on top of them.
       for (const x of [-6, 0, 6]) {
         group.append(
-          svg('rect', {
-            x: x - 1,
-            y: 10,
-            width: 2,
-            height: 9,
-            rx: 1,
-            fill: COLOUR.shell,
-            opacity: 0.5,
-          }),
+          svg('rect', { x: x - 1, y: 10, width: 2, height: 9, rx: 1, fill: colour, opacity: 0.5 }),
         );
       }
-      group.append(svg('circle', { cx: 0, cy: 0, r: 9, fill: COLOUR.shell }));
+      group.append(svg('circle', { cx: 0, cy: 0, r: 9, fill: colour }));
       group.append(svg('rect', { x: -9, y: -2, width: 18, height: 4, fill: COLOUR.shellBand }));
+      return group;
+    }
+    case 'bomb': {
+      const group = svg('g');
+      group.append(svg('circle', { cx: 0, cy: 1, r: 8.5, fill: COLOUR.bomb }));
+      // A lit fuse, so it reads as counting down rather than as a wheel.
+      group.append(
+        svg('path', {
+          d: 'M 3 -6 Q 8 -12 5 -15',
+          fill: 'none',
+          stroke: COLOUR.bombFuse,
+          'stroke-width': 2,
+          'stroke-linecap': 'round',
+        }),
+      );
+      group.append(svg('circle', { cx: 5, cy: -16, r: 2.6, fill: COLOUR.bombFuse }));
       return group;
     }
     case 'coin': {
@@ -267,7 +281,7 @@ function marker(kind: MarkerKind): SVGGElement {
 }
 
 /** Markers that are objects rather than vehicles do not care which way the road runs. */
-const UNROTATED: ReadonlySet<MarkerKind> = new Set(['banana', 'coin', 'box']);
+const UNROTATED: ReadonlySet<MarkerKind> = new Set(['banana', 'coin', 'box', 'bomb']);
 
 function label(text: string): SVGTextElement {
   const node = svg('text', {

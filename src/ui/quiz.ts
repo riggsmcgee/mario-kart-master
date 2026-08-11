@@ -70,6 +70,8 @@ const MARKER_KINDS: ReadonlySet<string> = new Set<MarkerKind>([
   'pack',
   'banana',
   'shell',
+  'shell-green',
+  'bomb',
   'coin',
   'pad',
   'box',

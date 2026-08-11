@@ -17,7 +17,7 @@
         "id": "hold",
         "label": "Hold it behind the kart and keep driving",
         "correct": true,
-        "response": "This one habit will win you more races than any other. A held banana trails along behind you, so anything arriving at your back bumper — a green shell, a red shell, Kayla herself — hits the banana instead of you. It costs nothing to carry. So carry it."
+        "response": "This one habit will win you more races than any other. Hold the item button and the banana trails along behind you, so anything arriving at your back bumper — a green shell, a red shell, Kayla herself — hits the banana instead of you. It costs nothing to carry. So carry it."
       },
       {
         "id": "drop",
@@ -31,6 +31,274 @@
       }
     ],
     "takeaway": "Anything held behind the kart is armour, and holding it is free."
+  },
+  {
+    "id": "green-shell-shield",
+    "situation": "A green shell in your hands. Kayla is three or four kart lengths up the road, wandering about between the kerbs.",
+    "prompt": "What is the green shell for?",
+    "diagram": {
+      "road": "straight",
+      "caption": "She is ahead, but not exactly holding a straight line.",
+      "markers": [
+        { "kind": "rival", "at": 0.78, "lane": 0.45, "label": "Kayla" },
+        { "kind": "shell-green", "at": 0.28, "lane": 0 },
+        { "kind": "you", "at": 0.44, "lane": -0.1, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "hold",
+        "label": "Hold it behind you as armour",
+        "correct": true,
+        "response": "Green shells fly dead straight and never turn, so landing one on a moving kart is mostly luck even for people who play a lot. Held behind you, the same shell blocks everything that comes at your back, every single time. No aiming, and it works on every lap."
+      },
+      {
+        "id": "fire",
+        "label": "Fire it at her",
+        "response": "She is weaving, the shell goes straight, and most of these end up rattling off a barrier somewhere. You have spent your armour on a maybe — and now the next thing to come up behind you arrives at an empty bumper."
+      },
+      {
+        "id": "wait",
+        "label": "Wait for a corner where she cannot dodge",
+        "response": "By then something will have hit you from behind and you will not have it any more. It is already doing its best work right now, sitting behind you."
+      }
+    ],
+    "takeaway": "Green shells are armour first. Aiming is a skill; holding is a habit — and the habit wins more races."
+  },
+  {
+    "id": "triple-bananas",
+    "situation": "Triple bananas. Three of them, spinning round and round your kart.",
+    "prompt": "Do you need to hold the item button?",
+    "diagram": {
+      "road": "straight",
+      "caption": "They circle you on their own.",
+      "markers": [
+        { "kind": "banana", "at": 0.62, "lane": -0.5 },
+        { "kind": "banana", "at": 0.5, "lane": 0.6 },
+        { "kind": "banana", "at": 0.38, "lane": -0.45 },
+        { "kind": "you", "at": 0.5, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "no",
+        "label": "No — they are already protecting you",
+        "correct": true,
+        "response": "Triples orbit your kart by themselves, and anything that hits one is something that did not hit you. Nothing to hold. Just drive, and when you do spend one, put it somewhere useful."
+      },
+      {
+        "id": "yes",
+        "label": "Yes, or they do nothing",
+        "response": "Holding is for one item at a time. A set of three circles you as it is — the button is only for letting them go, one at a time."
+      },
+      {
+        "id": "dump",
+        "label": "Throw them all quickly before you lose them",
+        "response": "Then you are bare again, having aimed at nobody in particular. Going round and round your kart, they are doing more for you than they ever will lying on the tarmac."
+      }
+    ],
+    "takeaway": "Triples guard you by themselves. Hold nothing, drive on, spend them one at a time."
+  },
+  {
+    "id": "bob-omb",
+    "situation": "A bob-omb, and it is ticking. Kayla is right behind you.",
+    "prompt": "What do you do with it?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Behind you, and counting down.",
+      "markers": [
+        { "kind": "rival", "at": 0.16, "lane": 0.15, "label": "Kayla" },
+        { "kind": "bomb", "at": 0.42, "lane": 0 },
+        { "kind": "you", "at": 0.6, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "back",
+        "label": "Throw it backwards, straight away",
+        "correct": true,
+        "response": "Backwards is where she is, and the blast is wide enough that you do not have to be accurate about it — which makes this one of the few throws in the game you cannot really miss with. Do it now: a bob-omb goes off on its own eventually, and it does not care whose it was."
+      },
+      {
+        "id": "hold",
+        "label": "Hold it behind you like a banana",
+        "response": "Everything else, yes. Not this one. It is counting down the whole time it is in your hands, and when it goes off back there you are well within range."
+      },
+      {
+        "id": "forward",
+        "label": "Throw it forward at the pack ahead",
+        "response": "It will go off somewhere up the road, which is precisely where you are about to be driving. Bombs go backwards."
+      }
+    ],
+    "takeaway": "Hold everything — except the one that is counting down. Bombs go backwards, immediately."
+  },
+  {
+    "id": "red-shell-fire",
+    "situation": "A red shell. Kayla is somewhere up ahead, out of sight round the bend.",
+    "prompt": "What do you do with it?",
+    "diagram": {
+      "road": "bend-right",
+      "caption": "She is round the corner, where you cannot even see her.",
+      "markers": [
+        { "kind": "rival", "at": 0.86, "lane": 0.2, "label": "Kayla" },
+        { "kind": "you", "at": 0.22, "lane": -0.3, "label": "You" },
+        { "kind": "shell", "at": 0.34, "lane": -0.3 }
+      ]
+    },
+    "answers": [
+      {
+        "id": "fire",
+        "label": "Fire it forward",
+        "correct": true,
+        "response": "This is the one item genuinely worth using rather than hoarding. A red shell steers itself: send it off and it goes and finds whoever is ahead of you, round corners, without you aiming at anything at all. Nothing else in the game gives you a hit for so little effort."
+      },
+      {
+        "id": "hold",
+        "label": "Hold it behind you as armour",
+        "response": "It does work back there — a red shell blocks like anything else. But it is the only thing you own that can score a hit without you aiming, so using it as a plain wall wastes what makes it special. Hold a banana; fire the red."
+      },
+      {
+        "id": "wait",
+        "label": "Wait until you can actually see her",
+        "response": "You never need to see her. That is the entire point of a red shell — it does the looking for you, round bends and over hills."
+      }
+    ],
+    "takeaway": "Hold everything, fire the red shells. They are the only item that aims for you."
+  },
+  {
+    "id": "red-shell-incoming",
+    "situation": "The warning is up: a red shell is locked on to you from behind. There is a banana in your hands.",
+    "prompt": "What do you do?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Locked on, and closing.",
+      "markers": [
+        { "kind": "shell", "at": 0.1, "lane": 0 },
+        { "kind": "banana", "at": 0.4, "lane": 0 },
+        { "kind": "you", "at": 0.56, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "hold",
+        "label": "Hold the item button and keep driving your line",
+        "correct": true,
+        "response": "The banana sits behind your bumper and the shell hits that instead of you. It costs nothing and it works every time — which is why the warning is really a reminder to hold the button, not a puzzle to solve."
+      },
+      {
+        "id": "swerve",
+        "label": "Swerve left and right to shake it off",
+        "response": "Red shells steer. Following you is the whole thing they do, so all the swerving achieves is arriving at the next corner sideways — and then it hits you anyway."
+      },
+      {
+        "id": "drop",
+        "label": "Drop the banana on the road behind you",
+        "response": "Now it is lying somewhere back there and the shell is still coming for you. Held, it cannot miss. There is no reason to turn a certainty into a maybe."
+      }
+    ],
+    "takeaway": "A red shell warning means hold the button. It is not a dodging puzzle — you cannot outrun something that steers."
+  },
+  {
+    "id": "slots-full",
+    "situation": "Both your item slots are full: a banana, and a coin you have not bothered spending. A row of item boxes is coming up.",
+    "prompt": "What do you do before you reach them?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Two slots, both full, and free items straight ahead.",
+      "markers": [
+        { "kind": "you", "at": 0.28, "lane": 0, "label": "You" },
+        { "kind": "box", "at": 0.8, "lane": -0.55 },
+        { "kind": "box", "at": 0.8, "lane": 0 },
+        { "kind": "box", "at": 0.8, "lane": 0.55 }
+      ]
+    },
+    "answers": [
+      {
+        "id": "spend",
+        "label": "Spend the coin on the way in, so there is room",
+        "correct": true,
+        "response": "You can carry two things, and if both slots are full you drive straight through the box and get nothing at all. Cashing in the coin on the approach turns a wasted box into a fresh item — and keeps the banana, which is the one actually doing a job."
+      },
+      {
+        "id": "nothing",
+        "label": "Nothing — driving through will swap one out",
+        "response": "It will not. A full pair of slots means the box does nothing whatsoever. You will sail through a free item and come out the other side holding exactly what you went in with."
+      },
+      {
+        "id": "both",
+        "label": "Dump both, to be sure of getting something good",
+        "response": "Then you arrive at the boxes with an empty bumper, which is the one thing worth avoiding. Spend the junk, keep the armour."
+      }
+    ],
+    "takeaway": "Two slots, and a full pair means the next box is wasted. Clear the junk on the way in — never the armour."
+  },
+  {
+    "id": "where-to-dump",
+    "situation": "You are about to spend a banana purely to free up a slot. There is a row of item boxes just ahead.",
+    "prompt": "Where do you leave it?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Everybody has to drive at the boxes. Nobody has a choice about it.",
+      "markers": [
+        { "kind": "you", "at": 0.4, "lane": 0, "label": "You" },
+        { "kind": "banana", "at": 0.3, "lane": 0 },
+        { "kind": "box", "at": 0.82, "lane": -0.55 },
+        { "kind": "box", "at": 0.82, "lane": 0 },
+        { "kind": "box", "at": 0.82, "lane": 0.55 }
+      ]
+    },
+    "answers": [
+      {
+        "id": "boxes",
+        "label": "Right on the item boxes",
+        "correct": true,
+        "response": "Everybody drives at the boxes — they have no choice, that is where the items are. A banana sitting on one is about the closest thing to a free hit in the game, and you did not have to aim at a single person to set it up."
+      },
+      {
+        "id": "anywhere",
+        "label": "Anywhere, it makes no difference",
+        "response": "It is the same button press either way, so you may as well put it somewhere people are guaranteed to drive. Two seconds of thought, one free spin-out later on."
+      },
+      {
+        "id": "straight",
+        "label": "On the widest part of the straight",
+        "response": "That is the easiest place on the whole track to steer around. Bananas earn their keep where people cannot avoid them: item boxes, ramps, the inside of a tight corner."
+      }
+    ],
+    "takeaway": "If you are dumping something, dump it where everyone has to drive. Item boxes and ramps."
+  },
+  {
+    "id": "coin-item",
+    "situation": "First place, and the box hands you… a coin. Again.",
+    "prompt": "Worth using?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Out in front, which is where the game hands you coins.",
+      "markers": [
+        { "kind": "pack", "at": 0.12, "lane": 0 },
+        { "kind": "you", "at": 0.55, "lane": 0, "label": "You" },
+        { "kind": "coin", "at": 0.72, "lane": 0 }
+      ]
+    },
+    "answers": [
+      {
+        "id": "use",
+        "label": "Yes — use it straight away",
+        "correct": true,
+        "response": "Coins are not nothing. Each one makes you a little faster, up to ten, and you lose three of them every time something hits you — so you are usually topping back up rather than getting greedy. Spending it also clears the slot, so the next box can hand you something with teeth."
+      },
+      {
+        "id": "ignore",
+        "label": "No — it is a wasted item, ignore it",
+        "response": "In first place a coin is about half of what you will ever be given, so ignoring them means ignoring half your item boxes. Two coins and an empty slot beats nothing and a blocked one."
+      },
+      {
+        "id": "save",
+        "label": "Save it in case you need the speed later",
+        "response": "Coins do not keep. They are a small top-up now, and until you spend it, it is a blocked slot stopping you picking up anything better."
+      }
+    ],
+    "takeaway": "In first, half your boxes are coins. Spend them the moment they arrive: a little speed, and room for the next one."
   },
   {
     "id": "mushroom-timing",
@@ -60,37 +328,5 @@
       }
     ],
     "takeaway": "Mushrooms are for the moment you stop being slow: corner exit, then the straight."
-  },
-  {
-    "id": "green-shell-range",
-    "situation": "Last lap, and you finally have Kayla in front of you — close enough to touch. There is a green shell in your hands.",
-    "prompt": "What do you do with it?",
-    "diagram": {
-      "road": "straight",
-      "caption": "Kayla, about a kart length ahead.",
-      "markers": [
-        { "kind": "rival", "at": 0.72, "lane": 0, "label": "Kayla" },
-        { "kind": "you", "at": 0.4, "lane": 0, "label": "You" }
-      ]
-    },
-    "answers": [
-      {
-        "id": "fire",
-        "label": "Fire it straight ahead, right now",
-        "correct": true,
-        "response": "Green shells do not steer. They fly dead straight until they hit something, and from this close that something is Kayla. Fired from further back it would sail off into the scenery, which is exactly why close range is when to take the shot."
-      },
-      {
-        "id": "wait",
-        "label": "Wait until you are side by side",
-        "response": "By the time you are alongside her the shot is gone — you would be firing past her ear. The moment she is lined up in front of you is the moment to fire."
-      },
-      {
-        "id": "behind",
-        "label": "Fire it backwards instead",
-        "response": "There is nobody back there worth spending it on, and a green shell thrown backwards mostly rattles around the track until it gives up. She is right in front of you. Take the shot."
-      }
-    ],
-    "takeaway": "Green shells fly straight and never turn. Use them close, and use them soon."
   }
 ]

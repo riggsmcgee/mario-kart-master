@@ -883,13 +883,13 @@ export interface KartScene {
   syncFurniture(items: PlacedFurniture[], time: number): void;
   /** Show the banana being carried, trailing behind the kart. (1e) */
   setItem(has: boolean, time: number): void;
-  /** Place the banana you let go of, in world coordinates. Null when there is none. (1e) */
-  setDroppedItem(at: { x: number; y: number } | null): void;
   /**
-   * Place the incoming threat: `behind` world units back along the kart's own heading, `side`
-   * units across it. Null hides it. (1e)
+   * Place the banana you let go of, in world coordinates, shrinking away as `fade` runs 1 to 0.
+   * Null when there is none. (1e)
    */
-  setThreat(behind: number | null, side: number, time: number): void;
+  setDroppedItem(at: { x: number; y: number; fade: number } | null): void;
+  /** Place the incoming threat, `behind` world units back along the kart's heading. (1e) */
+  setThreat(behind: number | null, time: number): void;
   /** Expanding ring at the kart: 0 to 1, or null for none. (1e) */
   setBurst(progress: number | null, hit: boolean): void;
   resize(width: number, height: number): void;
@@ -1081,11 +1081,14 @@ export function createKartScene(
       droppedBanana.visible = at !== null;
       if (!at) return;
       droppedBanana.position.set(at.x, 0.35, at.y);
+      // Shrinking rather than lingering. A banana still lying there when the shell drives over
+      // it would imply a rescue the drill deliberately does not offer.
+      droppedBanana.scale.setScalar(Math.max(0.01, at.fade));
     },
-    setThreat(behind, side, time) {
+    setThreat(behind, time) {
       seeker.visible = behind !== null;
       if (behind === null) return;
-      seeker.position.set(-behind, 1.15 + Math.sin(time * 7) * 0.12, side);
+      seeker.position.set(-behind, 1.15 + Math.sin(time * 7) * 0.12, 0);
       seeker.rotation.x = time * 9;
       // Grows as it closes, on top of getting nearer. Perspective alone is a weak signal when
       // the thing is behind you and the camera is low.
