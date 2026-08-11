@@ -80,8 +80,10 @@ export const PROTOS: Proto[] = [
     title: 'Shield Up piece',
     step: '1e1',
     gate: '1e2',
-    blurb: 'Red shell warning, hold to shield, fake-outs that punish holding early.',
-    status: 'planned',
+    blurb:
+      'The kart piece with something chasing it. Siren, closing shell, hold the item key to ' +
+      'block — and fake-outs that bait the relieved release.',
+    status: 'built',
   },
   {
     id: 'auth',

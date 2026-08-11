@@ -143,7 +143,7 @@ The first version of the site is a bare lab, deliberately nothing like the final
 
 ### 1e. Shield Up piece (item defense toy)
 
-- [ ] **1e1** On the kart piece's straightaway: a red shell warning appears (icon + siren pip), shell approaches from behind, holding the item key raises a shield that blocks it; includes fake-out warnings that resolve harmlessly, so holding early/late has visible consequences. *(Opus)*
+- [x] **1e1** On the kart piece's straightaway: a red shell warning appears (icon + siren pip), shell approaches from behind, holding the item key raises a shield that blocks it; includes fake-out warnings that resolve harmlessly, so holding early/late has visible consequences. *(Opus)* — done 2026-08-11. Threats only start where the road ahead is straight. Holding early is deliberately free and **releasing** is what costs you: letting go throws the item away, as the real game does, so the fake-outs bait the relieved release rather than punishing the hold. Otherwise the drill would teach mashing. Siren pips are synthesised (no audio asset). Awaiting gate 1e2.
 - [ ] **1e2 GATE (Riggs):** is the threat legible? Is the hold-to-shield habit forming after 2 minutes of play?
 
 ### 1f. Backend piece (Supabase)

@@ -17,6 +17,8 @@
 import type { KartState } from './kart';
 
 export interface PathPoint {
+  /** Position in `points`. Lets a caller look up the road from a point it was handed. */
+  index: number;
   x: number;
   y: number;
   /** Unit tangent, pointing the way the lap runs. */
@@ -52,7 +54,7 @@ export function buildTrackPath(samples: Array<{ x: number; y: number }>): TrackP
     const ty = dy / len;
     // Normal is the tangent rotated 90°, pointing to the OUTSIDE of the lap when samples run
     // in lap order. Positive `offset` is therefore outward, negative toward the infield.
-    return { x: p.x, y: p.y, tx, ty, nx: -ty, ny: tx };
+    return { index: i, x: p.x, y: p.y, tx, ty, nx: -ty, ny: tx };
   });
 
   return {
@@ -170,6 +172,20 @@ export function projectToPath(
   if (!best) return null;
 
   return { point: best, offset: (x - best.x) * best.nx + (y - best.y) * best.ny };
+}
+
+/**
+ * How much the road turns over the next `span` samples, in radians. Near zero is a straight.
+ *
+ * Shield Up (1e) uses it to keep threats on the straights: being told to hold a key while also
+ * being asked to survive a hairpin tests two things at once and teaches neither.
+ */
+export function bendAhead(path: TrackPath, from: PathPoint, span = 26): number {
+  const count = path.points.length;
+  const to = path.points[(from.index + span) % count];
+  if (!to) return 0;
+  const delta = Math.abs(Math.atan2(to.ty, to.tx) - Math.atan2(from.ty, from.tx));
+  return Math.min(delta, Math.PI * 2 - delta);
 }
 
 // --- furniture -------------------------------------------------------------

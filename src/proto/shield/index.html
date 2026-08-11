@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1e1 Shield Up — Testing Ground</title>
+  </head>
+  <body>
+    <main>
+      <a class="backlink" href="../../../index.html">&larr; Testing Ground</a>
+      <header>
+        <h1>Shield Up</h1>
+        <p class="lede">
+          Step 1e1. The kart piece with something chasing it. A siren means a red shell has locked
+          on from behind &mdash; hold the item key and whatever you are carrying takes the hit
+          instead of you. Chapter 2's whole lesson is that holding it costs you nothing, so hold it.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h2>Drive</h2>
+        <div class="stage-wrap" id="stage-wrap">
+          <canvas id="stage3d" height="440"></canvas>
+          <div class="boost-glow" id="boost-glow" data-on="false"></div>
+        </div>
+        <p class="hint">
+          <strong>&larr; &rarr;</strong> or <strong>A</strong>/<strong>D</strong> to steer.
+          <strong>Shift</strong> holds the shield up. <strong>R</strong> resets.
+          <button class="action" id="mute">Sound on</button>
+        </p>
+        <p class="hint">
+          The green item behind your kart is your armour. Hold Shift and it stays back there
+          covering you; let go and you throw it away, exactly as the real game does. That is the one
+          thing this drill charges you for &mdash; holding early is always free.
+        </p>
+        <p class="hint">
+          Roughly a third of the warnings are fake: identical sirens, identical approach, and then
+          the thing veers off in the last fraction of a second. They are not there to punish
+          holding. They are there to bait the flinch &mdash; the relieved release that leaves you
+          empty-handed with the next siren already starting.
+        </p>
+        <p class="warn">
+          Windows note: holding <strong>right</strong> Shift for eight seconds pops up the Filter
+          Keys prompt. Use the left one, or rebind the item key on the input prototype. Worth
+          knowing before we pick final bindings at 1g1.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Telemetry</h2>
+        <table class="readout">
+          <tbody id="stats"></tbody>
+        </table>
+      </section>
+
+      <div class="panel" id="shield-mount"></div>
+
+      <section class="panel">
+        <h2>Threats</h2>
+        <ol class="log" id="log"></ol>
+        <p class="hint">
+          <code>blocked</code> shield up when it arrived &middot; <code>hit</code> you had an item
+          and never raised it &middot; <code>dropped</code> raised, then let go &middot;
+          <code>unarmed</code> nothing in hand &middot; <code>fake-held</code> false alarm, covered
+          anyway &middot; <code>fake-clear</code> false alarm, got away with it.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>What to feel for</h2>
+        <p class="hint">
+          Rehearsal for gate 1e2, which asks two things.
+          <em>Is the threat legible?</em> There is deliberately no top-down view on this page: an
+          instrument showing the shell closing in from above would answer the question for you. The
+          siren, the draining bar and the pips are all you get, which is all Jodi will get.
+        </p>
+        <p class="hint">
+          <em>Is the hold-to-shield habit forming after two minutes?</em> The honest test is whether
+          you start holding before the siren rather than after it. If you are still reacting at the
+          end of two minutes, the warning lead is probably too short &mdash; move it on the panel
+          and say what felt right.
+        </p>
+        <p class="hint">
+          Also worth a verdict: the fake-outs. Thirty per cent is a guess. Too many and the sirens
+          stop meaning anything; too few and the relieved release never gets caught out. And the
+          sound &mdash; if the pips are annoying rather than useful, that is a real finding, not a
+          nitpick.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

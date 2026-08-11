@@ -18,16 +18,111 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 | | |
 |---|---|
 | Current phase | Phase 1: The Testing Ground |
-| Current step | **1b3** — track furniture: pads, ramps with trick windows, decoys, coins |
+| Current step | **1f3** — progress sync module, the last unbuilt piece in Phase 1 |
 | Last gate passed | none yet (1a carries an acceptance check, not a gate — met 2026-08-07) |
-| Next gate | **1b6** (drive the kart prototype for 5 minutes) |
-| Repo state | 1a1–1a4, 1b1–1b2 done; four prototypes run under `npm run dev` |
-| Deferred | **1f** Supabase (no project yet) · **1a5** GitHub Pages deploy |
-| Needs an answer | **Q6** track format, before 1b5 |
+| Next gate | four are open and none has been played: **1b6** kart · **1c2** timing · **1d2** quiz · **1e2** Shield Up |
+| Repo state | 1a1–1a4, 1b1–1b5, 1c1, 1d1, 1e1, 1f1–1f2 done; seven prototypes run under `npm run dev` |
+| Deferred | **1a5** GitHub Pages deploy |
+| Needs an answer | **Q5** IP wording · **Q7** star scoring · **Q9** accelerate slot (all can wait for 1g1) |
+| Not pushed | 24 commits ahead of `origin/main`; nothing has ever left this machine |
 
 ---
 
 ## Log
+
+### 2026-08-11 — Session 8 (Opus 5)
+
+**Steps touched:** **1d1**, **1e1** (both built, both awaiting their gates)
+
+**Did:**
+
+- **1d1 quiz card** (`src/ui/quiz.ts`, `src/ui/quiz-diagram.ts`, three sample questions in
+  `src/data/quiz/item-smarts.json`). The decision worth recording is that the *picture* is authored
+  in the same JSON as the question — a road shape plus a list of who is standing on it, rendered to
+  SVG. Chapter 2 wants eight to twelve situations, and any format where a situation costs an
+  illustration is a format where those situations never get written. It also satisfies design
+  principle 5 by construction: the art is generated, so no asset can enter the repo.
+- Every answer carries its own reply, not just the right one. "Wrong, the answer was B" teaches
+  nothing to the person who picked C. It costs roughly three times the copy per card, which is a
+  real cost, so 1d2 gets asked whether it was worth it.
+- `parseQuiz` validates the file at load and throws naming the question index and the missing
+  field. JSON has no compiler and this is the one file here someone might edit without being a
+  programmer.
+- **1e1 Shield Up** (`src/engine/shield.ts`, `src/ui/shield-hud.ts`, `src/ui/beeps.ts`). The kart
+  piece with something chasing it. See below — the mechanic took more thought than the code did.
+- **Moved the Three.js scene** from `src/proto/kart/scene.ts` to `src/ui/kart-scene.ts`. Shield Up
+  is the second drill to drive the same world and every Phase 2 chapter will be the third; the
+  proto README says prototypes are throwaway and the real site never imports from them, which the
+  old location quietly broke. Also gave the scene a shield bubble, a held item, the seeker and a
+  resolution burst.
+- Added `index` to `PathPoint` and a `bendAhead()` helper to `track.ts`, so a drill can ask whether
+  the road ahead is straight.
+
+**The Shield Up mechanic, and why it is built this way:**
+
+The obvious version of this drill punishes holding the key too early, and it would be wrong. The
+habit Chapter 2 exists to build is *hold the item behind you as a matter of course* — the plan's
+own words are "why holding a banana behind you wins races" — so a drill that charges for holding
+early would train the opposite of the lesson, and a drill with no cost at all would train mashing.
+
+The resolution is the real game's: **releasing throws the item.** So holding is free, letting go is
+what costs you, and the fake-outs earn their place — they are not there to punish the hold, they
+are there to bait the *relieved release* when the threat veers off, which leaves you empty-handed
+with the next siren already starting. A fake gives itself away only in the last 10% of its
+approach, late enough that acting on it is a mistake rather than a skill.
+
+One softening: releasing only costs the item while a threat is live. Losing your armour for idly
+tapping the key on an empty straight would be consistent and would feel like a trap.
+
+**Notes:**
+
+- Threats only start where the road ahead is straight (`straightsOnly`). Being asked to hold a key
+  and survive a hairpin at once tests two things and teaches neither.
+- **There is deliberately no top-down view on the Shield Up page**, unlike the kart harness. An
+  instrument showing the shell closing in from above would answer the exact question gate 1e2 asks.
+- The siren pips are **synthesised** with a few oscillators (`src/ui/beeps.ts`) — no audio file, no
+  licence, and the pitch and length tune like any other feel constant. A warning has to be audible
+  or it trains looking away from the road to find out whether you are about to be hit. There is a
+  mute button, and any browser that refuses audio just stays quiet.
+- **Windows Filter Keys**: holding *right* Shift for eight seconds pops a system prompt. The item
+  key is Shift by default, and this drill asks you to hold it for a long time. Flagged on the page
+  and worth remembering at 1g1, which picks the final bindings.
+- Nothing on either page has been seen running. I cannot open a browser, so "built" here means it
+  compiles, lints and builds — not that it looks right.
+
+**Ready for review — two gates at once:**
+
+- **1d2 (quiz):** does it feel like a fun quiz moment rather than a test? Nothing is red, there is
+  no timer and no streak, on purpose — say if it still feels like being marked. Also: is a
+  per-answer reply worth three times the copy? And the sample copy is a first draft in the intended
+  voice; if the jokes are wrong, or Kayla would never do that, say so.
+- **1e2 (Shield Up):** is the threat legible from the driving view alone? Is the hold-to-shield
+  habit forming after two minutes — that is, do you start holding *before* the siren? The 30%
+  fake-out rate and the 2000 ms warning lead are both guesses and both on the tuning panel.
+
+**Next:** 1f3, the progress sync module — the last unbuilt piece in Phase 1, and the one 2a1
+depends on.
+
+---
+
+### 2026-08-08 to 2026-08-10 — Sessions 5 to 7 (Opus 5, not logged at the time)
+
+The log skipped three sessions. Recorded here as an index only; the reasoning for each decision is
+in the commit messages, the build-plan annotations and `TUNING.md`, all of which were kept current.
+
+- **1b3** track furniture, **1b4** steer-assist guardrail (Riggs: "similar to the real game"),
+  **1b5** the test circuit. Settled **Q6**: tracks are a plain typed array positioned by `t` around
+  the lap and a lateral `offset`.
+- Boost and trick feedback; trick verdicts moved to the lip rather than the landing; too early /
+  too late / got it calls (which took two goes — the first version read the live key state, and a
+  hop is a tap).
+- Half-pipes replaced the decoy pads, then were **cut** on Riggs's call; Chapter 4 became "pads sit
+  off the natural racing line" instead.
+- **3b2 art pass** run early, plus two fixes found by Riggs from screenshots: chequered-line seams,
+  and crawling stripes on the road (z-fighting, fixed with polygon offset, explicit up normals and
+  a far more sensible near plane).
+- **1c1** the start-boost countdown drill.
+- **1f1** and **1f2** Supabase: schema, RLS, magic-link sign-in, and generated database types.
 
 ### 2026-08-07 — Session 4 (Opus 5)
 

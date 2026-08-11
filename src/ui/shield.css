@@ -1,0 +1,154 @@
+/* Shield Up HUD. (1e1)
+   Everything here sits over the driving canvas — the threat comes from behind, so the warning is
+   the only thing that tells you it exists, and it has to be readable without looking away from
+   the road. Palette is provisional; the real style guide is 3a1. */
+
+.shield-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* .stage-wrap zeroes line-height so the canvas has no descender gap. Text inside it has to
+     put that back or every line here collapses on top of the next. */
+  line-height: 1.4;
+}
+
+/* --- the warning --- */
+
+.shield-warning {
+  position: absolute;
+  top: 0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 17rem;
+  padding: 0.5rem 0.9rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(24, 6, 6, 0.82);
+  border: 2px solid #ff3b30;
+  color: #fff;
+  text-align: center;
+}
+
+.shield-warning-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.shield-icon {
+  color: #ff3b30;
+  font-size: 1.1rem;
+  /* Pointing back down the road the shell is coming up. */
+  transform: rotate(180deg);
+}
+
+.shield-warning[data-urgent='true'] {
+  animation: shield-blink 260ms steps(2, end) infinite;
+}
+
+.shield-warning[data-urgent='false'] {
+  animation: shield-blink 620ms steps(2, end) infinite;
+}
+
+@keyframes shield-blink {
+  0% {
+    border-color: #ff3b30;
+  }
+  50% {
+    border-color: #ffd23f;
+  }
+  100% {
+    border-color: #ff3b30;
+  }
+}
+
+/* Time left as a length. "1.4 seconds" is a number you have to read and then convert; a bar
+   draining toward nothing is the same information with no reading involved. */
+.shield-bar {
+  margin-top: 0.45rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+
+.shield-bar-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 999px;
+  background: #ff3b30;
+}
+
+/* --- what is in your hands --- */
+
+.shield-chip {
+  position: absolute;
+  left: 0.9rem;
+  bottom: 0.9rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  background: rgba(10, 12, 16, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+.shield-chip[data-state='up'] {
+  border-color: #7fd4ff;
+  color: #7fd4ff;
+}
+
+.shield-chip[data-state='empty'] {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* --- the verdict --- */
+
+.shield-verdict {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+  max-width: 26rem;
+}
+
+.shield-verdict-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.shield-verdict-detail {
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  font-size: 0.95rem;
+  margin-top: 0.3rem;
+}
+
+.shield-verdict[data-tone='good'] .shield-verdict-title {
+  color: #8ee04e;
+}
+
+.shield-verdict[data-tone='bad'] .shield-verdict-title {
+  color: #ff6b60;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shield-warning[data-urgent='true'],
+  .shield-warning[data-urgent='false'] {
+    animation: none;
+  }
+}

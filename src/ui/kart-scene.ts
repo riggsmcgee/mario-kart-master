@@ -1,9 +1,13 @@
 import * as THREE from 'three';
-import type { PathSurface } from '../../engine/path-surface';
-import type { PathPoint, PlacedFurniture, TrackPath } from '../../engine/track';
+import type { PathSurface } from '../engine/path-surface';
+import type { PathPoint, PlacedFurniture, TrackPath } from '../engine/track';
 
 /**
- * Three.js scene for the kart harness. (1b2 world, 1b3 furniture, 3b2 art pass)
+ * Three.js scene for the driving drills. (1b2 world, 1b3 furniture, 3b2 art pass)
+ *
+ * Lives in `src/ui` rather than beside a prototype because more than one drill drives the same
+ * world — the kart piece, Shield Up (1e), and every Phase 2 chapter that puts Jodi on a track.
+ * Prototypes are throwaway; this is not.
  *
  * **All original.** No Nintendo assets, names, shapes or characters — that is design principle
  * 5 and it is not negotiable. What makes a scene read as a kart racer is not their art anyway;
@@ -53,6 +57,14 @@ const PALETTE = {
   flame: 0xffb020,
   flameCore: 0xfff3d6,
   shadow: 0x0a2a12,
+  heldItem: 0x8ee04e,
+  heldItemBand: 0xf4ffe8,
+  shield: 0x7fd4ff,
+  shieldRim: 0xe4f6ff,
+  seeker: 0xff3b30,
+  seekerCore: 0xffe6a8,
+  burstBlock: 0x7fd4ff,
+  burstHit: 0xff3b30,
 };
 
 /** Deterministic scatter, so the scenery is in the same place every reload while tuning. */
@@ -627,6 +639,122 @@ function buildShadow(): THREE.Mesh {
   return shadow;
 }
 
+// --- item defence (1e) -----------------------------------------------------
+
+/**
+ * The item you are carrying, trailing behind the kart.
+ *
+ * Behind, and not on a HUD panel, because that is where it does its work: the whole lesson of
+ * Shield Up is that a held item is a thing sitting between your back bumper and whatever is
+ * coming. A number in the corner of the screen would teach the opposite.
+ */
+function buildHeldItem(): THREE.Group {
+  const group = new THREE.Group();
+  const shell = new THREE.Mesh(
+    new THREE.SphereGeometry(0.55, 14, 12),
+    new THREE.MeshLambertMaterial({ color: PALETTE.heldItem }),
+  );
+  group.add(shell);
+
+  const band = new THREE.Mesh(
+    new THREE.TorusGeometry(0.56, 0.09, 8, 18),
+    new THREE.MeshLambertMaterial({ color: PALETTE.heldItemBand }),
+  );
+  band.rotation.y = Math.PI / 2;
+  group.add(band);
+
+  group.position.set(-3.1, 0.7, 0);
+  group.visible = false;
+  return group;
+}
+
+/** The shield: a bubble over the kart, plus a bright equator so it reads against any scenery. */
+function buildShieldBubble(): THREE.Group {
+  const group = new THREE.Group();
+
+  const bubble = new THREE.Mesh(
+    new THREE.SphereGeometry(2.9, 20, 14),
+    new THREE.MeshBasicMaterial({
+      color: PALETTE.shield,
+      transparent: true,
+      opacity: 0.22,
+      side: THREE.DoubleSide,
+      // A transparent hull that writes depth would punch a hole in everything behind it.
+      depthWrite: false,
+    }),
+  );
+  group.add(bubble);
+
+  const rim = new THREE.Mesh(
+    new THREE.TorusGeometry(2.9, 0.1, 8, 32),
+    new THREE.MeshBasicMaterial({ color: PALETTE.shieldRim, transparent: true, opacity: 0.75 }),
+  );
+  rim.rotation.x = Math.PI / 2;
+  group.add(rim);
+
+  group.position.set(-0.2, 1.2, 0);
+  group.visible = false;
+  return group;
+}
+
+/**
+ * The thing chasing you. Original art: a red seeker orb with a tail, not anyone else's shell.
+ *
+ * It hangs off the kart group, so it inherits the kart's heading and sits exactly behind
+ * whichever way you are pointing — which is what a homing item does anyway, and costs no maths.
+ */
+function buildSeeker(): THREE.Group {
+  const group = new THREE.Group();
+
+  const orb = new THREE.Mesh(
+    new THREE.SphereGeometry(0.85, 14, 12),
+    new THREE.MeshBasicMaterial({ color: PALETTE.seeker }),
+  );
+  group.add(orb);
+
+  const core = new THREE.Mesh(
+    new THREE.SphereGeometry(0.42, 12, 10),
+    new THREE.MeshBasicMaterial({ color: PALETTE.seekerCore }),
+  );
+  core.position.x = 0.25;
+  group.add(core);
+
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(1.15, 0.09, 8, 20),
+    new THREE.MeshBasicMaterial({ color: PALETTE.seekerCore }),
+  );
+  ring.rotation.y = Math.PI / 2;
+  group.add(ring);
+
+  // A tail streaming away from the kart, so which way it is travelling is never in doubt.
+  const tail = new THREE.Mesh(
+    new THREE.ConeGeometry(0.5, 2.4, 10),
+    new THREE.MeshBasicMaterial({ color: PALETTE.seeker, transparent: true, opacity: 0.45 }),
+  );
+  tail.rotation.z = Math.PI / 2;
+  tail.position.x = -1.6;
+  group.add(tail);
+
+  group.visible = false;
+  return group;
+}
+
+/** A ring that expands and fades. Every resolution gets one, so something always happens. */
+function buildBurst(): THREE.Mesh {
+  const burst = new THREE.Mesh(
+    new THREE.TorusGeometry(1, 0.16, 8, 28),
+    new THREE.MeshBasicMaterial({
+      color: PALETTE.burstBlock,
+      transparent: true,
+      depthWrite: false,
+    }),
+  );
+  burst.rotation.x = Math.PI / 2;
+  burst.position.y = 1.1;
+  burst.visible = false;
+  return burst;
+}
+
 // --- furniture -------------------------------------------------------------
 
 interface FurnitureHandles {
@@ -721,6 +849,17 @@ export interface KartScene {
   syncKart(speed: number, altitude: number, steerAmount: number, dt: number): void;
   /** Hide collected coins, and animate coins and pads. */
   syncFurniture(items: PlacedFurniture[], time: number): void;
+  /** Show the item being carried, trailing behind the kart. (1e) */
+  setItem(has: boolean, time: number): void;
+  /** Raise or drop the shield bubble. (1e) */
+  setShield(on: boolean, time: number): void;
+  /**
+   * Place the incoming threat: `behind` world units back along the kart's own heading, `side`
+   * units across it. Null hides it. (1e)
+   */
+  setThreat(behind: number | null, side: number, time: number): void;
+  /** Expanding ring at the kart: 0 to 1, or null for none. (1e) */
+  setBurst(progress: number | null, hit: boolean): void;
   resize(width: number, height: number): void;
   render(): void;
   dispose(): void;
@@ -808,6 +947,13 @@ export function createKartScene(
   const { group: kart, chassis, flames, wheels, steering, steeringWheel } = buildKart();
   scene.add(kart);
 
+  // Item defence, all parented to the kart so they inherit its position and heading. (1e)
+  const heldItem = buildHeldItem();
+  const shieldBubble = buildShieldBubble();
+  const seeker = buildSeeker();
+  const burst = buildBurst();
+  kart.add(heldItem, shieldBubble, seeker, burst);
+
   // Barrel roll and cornering lean both roll the chassis about its nose-to-tail axis, so they
   // are tracked separately and summed rather than fighting over one rotation.
   let barrelRoll = 0;
@@ -875,6 +1021,37 @@ export function createKartScene(
         chevron.mesh.position.x =
           ((chevron.base + travel + chevron.span * 1.5) % chevron.span) - chevron.span / 2;
       }
+    },
+    setItem(has, time) {
+      heldItem.visible = has;
+      if (!has) return;
+      heldItem.position.y = 0.7 + Math.sin(time * 3) * 0.08;
+      heldItem.rotation.y = time * 1.5;
+    },
+    setShield(on, time) {
+      shieldBubble.visible = on;
+      if (!on) return;
+      // A slow wobble and spin. A perfectly still bubble reads as a modelling error; a moving
+      // one reads as something switched on.
+      shieldBubble.rotation.y = time * 1.2;
+      shieldBubble.scale.setScalar(1 + Math.sin(time * 6) * 0.03);
+    },
+    setThreat(behind, side, time) {
+      seeker.visible = behind !== null;
+      if (behind === null) return;
+      seeker.position.set(-behind, 1.15 + Math.sin(time * 7) * 0.12, side);
+      seeker.rotation.x = time * 9;
+      // Grows as it closes, on top of getting nearer. Perspective alone is a weak signal when
+      // the thing is behind you and the camera is low.
+      seeker.scale.setScalar(1 + Math.max(0, 1 - behind / 18) * 0.5);
+    },
+    setBurst(progress, hit) {
+      burst.visible = progress !== null;
+      if (progress === null) return;
+      const material = burst.material as THREE.MeshBasicMaterial;
+      material.color.setHex(hit ? PALETTE.burstHit : PALETTE.burstBlock);
+      material.opacity = Math.max(0, 1 - progress);
+      burst.scale.setScalar(0.6 + progress * 3.4);
     },
     resize(width, height) {
       renderer.setSize(width, height, false);

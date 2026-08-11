@@ -24,7 +24,7 @@ import {
   type SteerAssistResult,
 } from '../../engine/steer-assist';
 import { ChaseCamera, CHASE_CAMERA_CONFIG } from '../../engine/chase-camera';
-import { createKartScene } from './scene';
+import { createKartScene } from '../../ui/kart-scene';
 
 installErrorBanner();
 
