@@ -11,9 +11,10 @@
       <header>
         <h1>Shield Up</h1>
         <p class="lede">
-          Step 1e1. The kart piece with something chasing it. A siren means a red shell has locked
-          on from behind &mdash; hold the item key and whatever you are carrying takes the hit
-          instead of you. Chapter 2's whole lesson is that holding it costs you nothing, so hold it.
+          Step 1e1. The kart piece with something chasing it. Drive through an item box to pick up a
+          banana; when the siren says a red shell has locked on from behind, hold the item key and
+          the banana trails behind your bumper and takes the hit. Chapter 2's whole lesson is that
+          holding it costs you nothing, so hold it.
         </p>
       </header>
 
@@ -25,19 +26,25 @@
         </div>
         <p class="hint">
           <strong>&larr; &rarr;</strong> or <strong>A</strong>/<strong>D</strong> to steer.
-          <strong>Shift</strong> holds the shield up. <strong>R</strong> resets.
+          <strong>Shift</strong> holds the banana behind you. <strong>R</strong> resets.
           <button class="action" id="mute">Sound on</button>
         </p>
         <p class="hint">
-          The green item behind your kart is your armour. Hold Shift and it stays back there
-          covering you; let go and you throw it away, exactly as the real game does. That is the one
-          thing this drill charges you for &mdash; holding early is always free.
+          There is no magic shield here, just a banana. Hold Shift and it sits behind your bumper
+          where the shell will hit it instead of you. Let go and it does what a banana does: it
+          lands on the road and stays there while you drive away. It can still catch the shell from
+          down there &mdash; it is in the road, after all &mdash; but only if the shell happens to
+          come through where you left it. Held, it cannot miss.
+        </p>
+        <p class="hint">
+          Bananas come from the item boxes, four rows of them spread around the lap. Blocking a
+          shell uses yours up, so after a good block the next job is finding another box.
         </p>
         <p class="hint">
           Roughly a third of the warnings are fake: identical sirens, identical approach, and then
           the thing veers off in the last fraction of a second. They are not there to punish
-          holding. They are there to bait the flinch &mdash; the relieved release that leaves you
-          empty-handed with the next siren already starting.
+          holding. They are there to bait the flinch &mdash; the relieved release that leaves your
+          banana on the tarmac with the next siren already starting.
         </p>
         <p class="warn">
           Windows note: holding <strong>right</strong> Shift for eight seconds pops up the Filter
@@ -59,10 +66,12 @@
         <h2>Threats</h2>
         <ol class="log" id="log"></ol>
         <p class="hint">
-          <code>blocked</code> shield up when it arrived &middot; <code>hit</code> you had an item
-          and never raised it &middot; <code>dropped</code> raised, then let go &middot;
-          <code>unarmed</code> nothing in hand &middot; <code>fake-held</code> false alarm, covered
-          anyway &middot; <code>fake-clear</code> false alarm, got away with it.
+          <code>blocked</code> held it all the way &middot; <code>drop-blocked</code> let go, and
+          the shell ran over it anyway &middot; <code>drop-missed</code> let go, and the shell came
+          past it &middot; <code>hit</code> banana in hand, never held out &middot;
+          <code>unarmed</code> nothing to defend with &middot; <code>fake-held</code> false alarm,
+          covered anyway &middot; <code>fake-clear</code> false alarm, got away with it &middot;
+          <code>fake-dropped</code> false alarm, and you dropped it in the relief.
         </p>
       </section>
 
@@ -75,16 +84,23 @@
           siren, the draining bar and the pips are all you get, which is all Jodi will get.
         </p>
         <p class="hint">
-          <em>Is the hold-to-shield habit forming after two minutes?</em> The honest test is whether
-          you start holding before the siren rather than after it. If you are still reacting at the
-          end of two minutes, the warning lead is probably too short &mdash; move it on the panel
-          and say what felt right.
+          <em>Is the hold-the-banana habit forming after two minutes?</em> The honest test is
+          whether you start holding before the siren rather than after it. If you are still reacting
+          at the end of two minutes, the warning lead is probably too short &mdash; move it on the
+          panel and say what felt right.
         </p>
         <p class="hint">
           Also worth a verdict: the fake-outs. Thirty per cent is a guess. Too many and the sirens
           stop meaning anything; too few and the relieved release never gets caught out. And the
           sound &mdash; if the pips are annoying rather than useful, that is a real finding, not a
           nitpick.
+        </p>
+        <p class="warn">
+          One number I cannot judge without playing it: <strong>banana catch radius</strong>, on the
+          config panel above. It decides whether dropping the banana is a fair last-second defence
+          or a gamble. Too generous and letting go becomes as good as holding, which teaches the
+          exact opposite of Chapter 2. Watch how often <code>drop-blocked</code> shows up in the
+          log.
         </p>
       </section>
     </main>

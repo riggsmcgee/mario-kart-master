@@ -105,6 +105,31 @@ depends on.
 
 ---
 
+### 2026-08-11 — Session 8, second pass (Opus 5)
+
+**Steps touched:** **1d1**, **1e1** (both revised on Riggs's feedback, same day)
+
+- **Quiz bug, and a good one to remember.** The previous card's answer stayed on screen behind the
+  next question. `.quiz-reply` sets `display: grid`, which silently beats the browser's own
+  `[hidden] { display: none }` — equal specificity, and an author stylesheet always wins over the
+  user-agent one. Setting `hidden` in JavaScript therefore did nothing at all. Any element styled
+  with a `display` rule needs its own `[hidden]` rule to go with it.
+- **Shield Up is now a banana, not a shield** (Riggs). Picked up from item boxes, held behind the
+  bumper, and when released it falls on the road and stays there. A dropped banana can still catch
+  the shell — it is lying in the road — but only if the shell comes through where it landed, which
+  is what makes letting go a gamble rather than a plan. Held, it cannot miss.
+- Four rows of item boxes around the lap (`TEST_TRACK_ITEM_BOXES`, kept separate from the kart
+  piece's layout). Blocking spends the banana, so a good block is followed by a hunt for a box.
+- The warning is now the real game's indicator: a drawn shell icon rather than the words "red
+  shell". A picture is read from the corner of the eye; a line of text has to be looked at, and
+  looking at it means not looking at the road.
+- **One number I cannot judge without playing it:** `catchRadius`, how near a dropped banana the
+  shell has to pass to hit it. It decides whether dropping is a fair last-second defence or a
+  gamble, and if it is too generous then letting go becomes as good as holding — which teaches the
+  exact opposite of Chapter 2. Flagged on the page; watch how often `drop-blocked` appears.
+
+---
+
 ### 2026-08-08 to 2026-08-10 — Sessions 5 to 7 (Opus 5, not logged at the time)
 
 The log skipped three sessions. Recorded here as an index only; the reasoning for each decision is

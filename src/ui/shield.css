@@ -39,11 +39,18 @@
   letter-spacing: 0.08em;
 }
 
-.shield-icon {
+/* The thing that is about to hit you, drawn rather than named. Read from the corner of the eye,
+   which is where it has to be read from — looking at the warning means not looking at the road. */
+.shield-shell {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: none;
+}
+
+/* Pointing back down the road the shell is coming up. */
+.shield-arrow {
   color: #ff3b30;
-  font-size: 1.1rem;
-  /* Pointing back down the road the shell is coming up. */
-  transform: rotate(180deg);
+  font-size: 0.9rem;
 }
 
 .shield-warning[data-urgent='true'] {

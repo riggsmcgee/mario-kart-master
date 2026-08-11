@@ -1,49 +1,57 @@
 /**
  * Shield Up: the item-defence drill. (1e1)
  *
- * Chapter 2's habit, in one sentence: **the item you are carrying is armour, and carrying it
+ * Chapter 2's habit, in one sentence: **the banana you are carrying is armour, and carrying it
  * costs you nothing.** Jodi loses races to shells she never saw coming, and the fix is not
  * reaction speed — it is holding the item button as a matter of course instead of firing
  * everything the moment she picks it up.
  *
- * So the drill is built to make that habit the obviously correct play, and to charge for the one
- * reflex that breaks it:
+ * There is no abstract shield anywhere in here. You carry a banana, picked up from an item box.
+ * Hold the key and it trails behind your back bumper, where a red shell will hit it instead of
+ * you. Let go and it does what a banana does: it falls on the road and stays there while you
+ * drive away from it.
  *
- *  - **Holding early is free.** Raise the shield the instant the siren starts, or hold it the
- *    whole lap; nothing is deducted. Anything else would teach the opposite of the lesson.
- *  - **Letting go is what costs you.** Releasing during a threat throws the item away — which is
- *    exactly what the real game does with a held item — and leaves your back bare.
- *  - **The fake-outs exist to bait that release.** A fake threat looks identical right up to the
- *    last fraction of a second, then veers off. Relax and let go in the relief, and you have
- *    thrown your armour away for nothing, with the next siren already on its way.
+ * That gives the drill its teeth without ever punishing the habit it is teaching:
  *
- * That is why there is no penalty for holding and a real one for flinching. A drill where
- * mashing the key wins would train mashing.
+ *  - **Holding early is free.** Hold from the first pip, or hold the whole lap. Nothing is
+ *    deducted, because in the real game nothing is.
+ *  - **Letting go is the gamble.** A dropped banana can still catch the shell — it is sitting in
+ *    the road behind you, after all — but only if the shell happens to come through where it
+ *    fell. Steer at all, or drop it at the wrong moment, and the shell goes past it into you.
+ *  - **The fake-outs bait exactly that release.** A fake looks identical until the last tenth of
+ *    its approach, then veers off. Relax and let go in the relief and your banana is on the
+ *    tarmac behind you, with the next siren already starting.
  *
  * No DOM and no Three.js in here: this decides what happened, the harness decides how to say it.
  */
+
+import type { PlacedFurniture } from './track';
 
 /** Kept private until a threat resolves — the whole point is that they look the same. */
 export type ThreatKind = 'shell' | 'fake';
 
 export type ShieldOutcome =
-  /** Real shell, shield up. The item is spent doing its job. */
+  /** Held it all the way. The banana takes the hit and is gone. */
   | 'blocked'
-  /** Real shell, item in hand, shield never raised. */
+  /** Let go, and the shell ran over the banana anyway. Saved, but by luck as much as judgement. */
+  | 'drop-blocked'
+  /** Let go, and the shell went past where it fell. */
+  | 'drop-missed'
+  /** Banana in hand, never held out. */
   | 'hit'
-  /** Raised, then released before impact: item thrown away, and whatever was coming arrived. */
-  | 'dropped'
-  /** Real shell, nothing in hand to raise. */
+  /** Nothing in hand. Find an item box. */
   | 'unarmed'
   /** False alarm, and you were covered anyway. Costs nothing — which is the lesson. */
   | 'fake-held'
   /** False alarm, and you were not covered. Got away with it. */
-  | 'fake-clear';
+  | 'fake-clear'
+  /** False alarm, and you threw the banana away in the relief. */
+  | 'fake-dropped';
 
 export interface ShieldResolution {
   outcome: ShieldOutcome;
   kind: ThreatKind;
-  /** How long before impact the shield went up, in ms. Null if it never did. */
+  /** How long before impact the banana went out behind you, in ms. Null if it never did. */
   leadMs: number | null;
   /** Whether it cost speed. */
   struck: boolean;
@@ -56,8 +64,10 @@ export interface ShieldEvents {
    */
   warned: boolean;
   resolved: ShieldResolution | null;
-  /** A fresh item just arrived. */
-  rearmed: boolean;
+  /** An item box was just picked up. */
+  gotItem: boolean;
+  /** The banana was just let go of. */
+  droppedItem: boolean;
 }
 
 // A type alias, not an interface, so it satisfies the tuning panel's index-signature constraint.
@@ -72,8 +82,22 @@ export type ShieldConfig = {
   warningMs: number;
   /** Share of threats that resolve harmlessly. */
   fakeChance: number;
-  /** How long a new item takes to arrive after the last one is spent or thrown. */
-  itemRefreshMs: number;
+  /** How long a used or taken item box stays empty. */
+  boxRespawnMs: number;
+  /** How close the kart has to pass to take a box. */
+  pickupRadius: number;
+  /** How far behind the kart a held banana sits — and so where a dropped one lands. */
+  dropBack: number;
+  /**
+   * How near a dropped banana the shell has to pass to hit it.
+   *
+   * The single number that decides whether letting go is a reasonable defence or a gamble. Small
+   * enough and only a well-judged late drop works; large enough and dropping is as good as
+   * holding, which would teach the wrong thing.
+   */
+  catchRadius: number;
+  /** How long a dropped banana stays on the road before it is tidied away. */
+  dropLifeMs: number;
   /** How long a hit leaves you flailing. */
   spinMs: number;
   /** Speed kept through a hit. */
@@ -91,7 +115,11 @@ export const SHIELD_CONFIG: ShieldConfig = {
   gapMaxMs: 7000,
   warningMs: 2000,
   fakeChance: 0.3,
-  itemRefreshMs: 3500,
+  boxRespawnMs: 5000,
+  pickupRadius: 2.6,
+  dropBack: 3.4,
+  catchRadius: 1.8,
+  dropLifeMs: 9000,
   spinMs: 900,
   spinSpeedKeep: 0.3,
   approachDistance: 55,
@@ -103,6 +131,9 @@ export interface ShieldContext {
   now: number;
   /** Item key held this tick. */
   holding: boolean;
+  x: number;
+  y: number;
+  heading: number;
   /** Is the road ahead straight enough to start a threat here. */
   clearRoad: boolean;
 }
@@ -111,16 +142,29 @@ interface Threat {
   kind: ThreatKind;
   warnedAt: number;
   impactAt: number;
-  /** When the shield first went up, with an item to raise. */
+  /** When the banana first went out behind the kart, with one in hand to put there. */
   raisedAt: number | null;
-  /** Raised and then let go before impact. */
+  /** Held and then let go before impact. */
   dropped: boolean;
 }
 
-const NO_EVENTS: ShieldEvents = { warned: false, resolved: null, rearmed: false };
+export interface DroppedItem {
+  x: number;
+  y: number;
+  at: number;
+}
 
-/** How far through the approach the fake reveals itself. Late enough that reacting is a mistake. */
+const NO_EVENTS: ShieldEvents = {
+  warned: false,
+  resolved: null,
+  gotItem: false,
+  droppedItem: false,
+};
+
+/** How far through the approach a fake reveals itself. Late enough that reacting is a mistake. */
 const VEER_AT = 0.9;
+/** How far off line a fake swings by the moment it would have hit. */
+const VEER_DISTANCE = 9;
 
 export class ShieldRun {
   hasItem = true;
@@ -128,22 +172,32 @@ export class ShieldRun {
   blocked = 0;
   struck = 0;
 
+  /** The banana on the road, if there is one. Null while it is in hand or gone. */
+  dropped: DroppedItem | null = null;
+
   private threat: Threat | null = null;
   private nextThreatAt = 0;
-  private itemBackAt = 0;
   private spinUntil = 0;
   private armed = false;
+  /** Whether the banana was out behind the kart last tick, so a release is an edge. */
+  private wasHolding = false;
+  /** When each taken box comes back, by furniture id. */
+  private readonly respawn = new Map<number, number>();
+
+  constructor(readonly boxes: PlacedFurniture[]) {}
 
   reset(now: number, config: ShieldConfig): void {
     this.hasItem = true;
     this.threats = 0;
     this.blocked = 0;
     this.struck = 0;
+    this.dropped = null;
     this.threat = null;
-    this.itemBackAt = 0;
     this.spinUntil = 0;
     this.nextThreatAt = now + this.gap(config);
     this.armed = true;
+    this.respawn.clear();
+    for (const box of this.boxes) box.collected = false;
   }
 
   /**
@@ -157,11 +211,6 @@ export class ShieldRun {
     if (now >= this.spinUntil) return null;
     const startedAt = this.spinUntil - config.spinMs;
     return Math.min(1, Math.max(0, (now - startedAt) / config.spinMs));
-  }
-
-  /** Seconds until the next item, or null when one is in hand. */
-  itemWait(now: number): number | null {
-    return this.hasItem ? null : Math.max(0, (this.itemBackAt - now) / 1000);
   }
 
   /** How far through the approach a live threat is, 0 to 1. Null when nothing is coming. */
@@ -185,7 +234,7 @@ export class ShieldRun {
 
     return {
       behind: config.approachDistance * (1 - progress) + 2.5,
-      side: veer * 9,
+      side: veer * VEER_DISTANCE,
     };
   }
 
@@ -193,17 +242,20 @@ export class ShieldRun {
     const events: ShieldEvents = { ...NO_EVENTS };
     if (!this.armed) this.reset(ctx.now, config);
 
-    if (!this.hasItem && ctx.now >= this.itemBackAt) {
-      this.hasItem = true;
-      events.rearmed = true;
-    }
+    this.runBoxes(config, ctx, events);
+
+    // A banana on the road is tidied away eventually, or the track fills up with them.
+    if (this.dropped && ctx.now - this.dropped.at > config.dropLifeMs) this.dropped = null;
+
+    // Letting go drops it whether or not anything is coming — it is a banana, not a force field.
+    events.droppedItem = this.releaseCheck(config, ctx);
 
     const threat = this.threat;
 
     if (!threat) {
-      const ready = ctx.now >= this.nextThreatAt;
       // A threat that is due but the road is not straight simply waits. Being asked to hold a
       // key and survive a hairpin at once tests two things and teaches neither.
+      const ready = ctx.now >= this.nextThreatAt;
       if (ready && (!config.straightsOnly || ctx.clearRoad)) {
         this.threat = {
           kind: Math.random() < config.fakeChance ? 'fake' : 'shell',
@@ -218,52 +270,136 @@ export class ShieldRun {
       return events;
     }
 
-    const up = ctx.holding && this.hasItem;
-    if (up && threat.raisedAt === null) threat.raisedAt = ctx.now;
+    if (events.droppedItem) threat.dropped = true;
 
-    // Letting go throws the item, as it does in the real game — but only while something is
-    // actually coming. Losing your armour for idly tapping the key outside a threat would be
-    // consistent and would feel like a trap, and the flinch is the thing being trained.
-    if (threat.raisedAt !== null && !ctx.holding && !threat.dropped) {
-      threat.dropped = true;
-      this.hasItem = false;
-      this.itemBackAt = ctx.now + config.itemRefreshMs;
+    const covered = ctx.holding && this.hasItem;
+    if (covered && threat.raisedAt === null) threat.raisedAt = ctx.now;
+
+    // The dropped banana gets its chance every tick, because that is what it is doing sitting
+    // there: waiting for the shell to come through. It works only if the shell's line happens
+    // to pass over it, which is what makes letting go a gamble rather than a plan.
+    if (this.dropped && this.caught(config, ctx)) {
+      events.resolved = this.finish(config, ctx, threat, 'drop-blocked', false);
+      this.dropped = null;
+      return events;
     }
 
     if (ctx.now < threat.impactAt) return events;
 
-    events.resolved = this.resolve(config, ctx, threat);
-    this.threat = null;
-    this.nextThreatAt = ctx.now + this.gap(config);
+    events.resolved = this.settle(config, ctx, threat, covered);
     return events;
   }
 
-  private resolve(config: ShieldConfig, ctx: ShieldContext, threat: Threat): ShieldResolution {
-    const covered = ctx.holding && this.hasItem;
-    const leadMs = threat.raisedAt === null ? null : threat.impactAt - threat.raisedAt;
+  // --- internals -----------------------------------------------------------
 
-    let outcome: ShieldOutcome;
-    let struck = false;
+  /** Item boxes: take one when empty-handed, and put it back a few seconds later. */
+  private runBoxes(config: ShieldConfig, ctx: ShieldContext, events: ShieldEvents): void {
+    for (const box of this.boxes) {
+      if (box.collected) {
+        const back = this.respawn.get(box.id) ?? 0;
+        if (ctx.now >= back) {
+          box.collected = false;
+          this.respawn.delete(box.id);
+        }
+        continue;
+      }
+      if (this.hasItem) continue;
+      if (Math.hypot(ctx.x - box.x, ctx.y - box.y) > config.pickupRadius) continue;
 
-    if (threat.kind === 'fake') {
-      outcome = threat.dropped ? 'dropped' : covered ? 'fake-held' : 'fake-clear';
-    } else if (covered) {
-      outcome = 'blocked';
-      this.blocked++;
-      // Blocking spends the item: it did its job, and now you need another.
-      this.hasItem = false;
-      this.itemBackAt = ctx.now + config.itemRefreshMs;
-    } else {
-      outcome = threat.dropped ? 'dropped' : this.hasItem ? 'hit' : 'unarmed';
-      struck = true;
+      box.collected = true;
+      this.respawn.set(box.id, ctx.now + config.boxRespawnMs);
+      this.hasItem = true;
+      events.gotItem = true;
     }
+  }
+
+  /** Did the banana just leave your hands? Drops it on the road behind the kart if so. */
+  private releaseCheck(config: ShieldConfig, ctx: ShieldContext): boolean {
+    const out = ctx.holding && this.hasItem;
+    const released = this.wasHolding && !out && this.hasItem;
+    this.wasHolding = out;
+    if (!released) return false;
+
+    this.hasItem = false;
+    this.dropped = {
+      x: ctx.x - Math.cos(ctx.heading) * config.dropBack,
+      y: ctx.y - Math.sin(ctx.heading) * config.dropBack,
+      at: ctx.now,
+    };
+    return true;
+  }
+
+  /** Is the shell currently passing over the dropped banana? */
+  private caught(config: ShieldConfig, ctx: ShieldContext): boolean {
+    const approach = this.approach(ctx.now, config);
+    if (!approach || !this.dropped) return false;
+
+    // The shell tracks the kart, so it sits on the line the kart is pointing along *now* — not
+    // on the path the kart drove. That is exactly why a banana dropped early tends to be left
+    // off to one side by the time the shell arrives.
+    const cos = Math.cos(ctx.heading);
+    const sin = Math.sin(ctx.heading);
+    const shellX = ctx.x - cos * approach.behind - sin * approach.side;
+    const shellY = ctx.y - sin * approach.behind + cos * approach.side;
+
+    return Math.hypot(shellX - this.dropped.x, shellY - this.dropped.y) <= config.catchRadius;
+  }
+
+  private settle(
+    config: ShieldConfig,
+    ctx: ShieldContext,
+    threat: Threat,
+    covered: boolean,
+  ): ShieldResolution {
+    if (threat.kind === 'fake') {
+      const outcome: ShieldOutcome = threat.dropped
+        ? 'fake-dropped'
+        : covered
+          ? 'fake-held'
+          : 'fake-clear';
+      return this.finish(config, ctx, threat, outcome, false);
+    }
+
+    if (covered) return this.finish(config, ctx, threat, 'blocked', false);
+
+    const outcome: ShieldOutcome = threat.dropped
+      ? 'drop-missed'
+      : this.hasItem
+        ? 'hit'
+        : 'unarmed';
+    return this.finish(config, ctx, threat, outcome, true);
+  }
+
+  /** Close the books on a threat: bookkeeping, then the verdict. */
+  private finish(
+    config: ShieldConfig,
+    ctx: ShieldContext,
+    threat: Threat,
+    outcome: ShieldOutcome,
+    struck: boolean,
+  ): ShieldResolution {
+    if (outcome === 'blocked') {
+      this.blocked++;
+      // The banana took the hit, so it is gone. Find another box.
+      this.hasItem = false;
+      this.wasHolding = false;
+    }
+    if (outcome === 'drop-blocked') this.blocked++;
 
     if (struck) {
       this.struck++;
       this.spinUntil = ctx.now + config.spinMs;
     }
 
-    return { outcome, kind: threat.kind, leadMs, struck };
+    this.threat = null;
+    this.nextThreatAt = ctx.now + this.gap(config);
+
+    return {
+      outcome,
+      kind: threat.kind,
+      leadMs: threat.raisedAt === null ? null : threat.impactAt - threat.raisedAt,
+      struck,
+    };
   }
 
   private gap(config: ShieldConfig): number {

@@ -13,7 +13,7 @@
  * — sound is a helper here, never a requirement.
  */
 
-export type Sound = 'warn' | 'urgent' | 'block' | 'hit' | 'item';
+export type Sound = 'warn' | 'urgent' | 'block' | 'hit' | 'item' | 'drop';
 
 interface Recipe {
   /** Start and end frequency, Hz. */
@@ -34,6 +34,8 @@ const RECIPES: Record<Sound, Recipe> = {
   // Falling and rough: the sound of something going wrong.
   hit: { from: 260, to: 90, ms: 260, type: 'sawtooth', gain: 0.09 },
   item: { from: 660, to: 990, ms: 120, type: 'sine', gain: 0.06 },
+  // A small downward plop: something leaving your hands and landing on the road.
+  drop: { from: 420, to: 220, ms: 110, type: 'sine', gain: 0.05 },
 };
 
 export class Beeper {

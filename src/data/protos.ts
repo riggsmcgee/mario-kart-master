@@ -81,8 +81,8 @@ export const PROTOS: Proto[] = [
     step: '1e1',
     gate: '1e2',
     blurb:
-      'The kart piece with something chasing it. Siren, closing shell, hold the item key to ' +
-      'block — and fake-outs that bait the relieved release.',
+      'The kart piece with something chasing it. Bananas from item boxes, hold to keep one ' +
+      'behind your bumper, let go and it lands on the road — plus fake-outs that bait the release.',
     status: 'built',
   },
   {

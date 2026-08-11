@@ -57,10 +57,11 @@ const PALETTE = {
   flame: 0xffb020,
   flameCore: 0xfff3d6,
   shadow: 0x0a2a12,
-  heldItem: 0x8ee04e,
-  heldItemBand: 0xf4ffe8,
-  shield: 0x7fd4ff,
-  shieldRim: 0xe4f6ff,
+  banana: 0xffd23f,
+  bananaTip: 0x8a6a1c,
+  itemBox: 0x2fc4b2,
+  itemBoxGlow: 0x0e6f63,
+  itemBoxCore: 0xfff6de,
   seeker: 0xff3b30,
   seekerCore: 0xffe6a8,
   burstBlock: 0x7fd4ff,
@@ -642,58 +643,82 @@ function buildShadow(): THREE.Mesh {
 // --- item defence (1e) -----------------------------------------------------
 
 /**
- * The item you are carrying, trailing behind the kart.
+ * A banana. Held behind the kart while you hold the key, lying on the road once you let go.
  *
- * Behind, and not on a HUD panel, because that is where it does its work: the whole lesson of
- * Shield Up is that a held item is a thing sitting between your back bumper and whatever is
- * coming. A number in the corner of the screen would teach the opposite.
+ * There is no abstract "shield" anywhere in this drill on purpose: the thing protecting you is a
+ * real object in the world, in the place where it does its work — between your back bumper and
+ * whatever is coming. An icon in the corner of the screen would teach the opposite.
+ *
+ * A curved arc of a torus, with a stalk. No Nintendo geometry involved: it is a banana because
+ * bananas are yellow and curved.
  */
-function buildHeldItem(): THREE.Group {
+function buildBanana(): THREE.Group {
   const group = new THREE.Group();
-  const shell = new THREE.Mesh(
-    new THREE.SphereGeometry(0.55, 14, 12),
-    new THREE.MeshLambertMaterial({ color: PALETTE.heldItem }),
-  );
-  group.add(shell);
 
-  const band = new THREE.Mesh(
-    new THREE.TorusGeometry(0.56, 0.09, 8, 18),
-    new THREE.MeshLambertMaterial({ color: PALETTE.heldItemBand }),
+  const flesh = new THREE.Mesh(
+    new THREE.TorusGeometry(0.55, 0.17, 8, 14, Math.PI * 0.85),
+    new THREE.MeshLambertMaterial({ color: PALETTE.banana }),
   );
-  band.rotation.y = Math.PI / 2;
-  group.add(band);
+  // Rotated so the curve opens downward: a banana resting on its two ends.
+  flesh.rotation.z = Math.PI * 0.575;
+  group.add(flesh);
 
-  group.position.set(-3.1, 0.7, 0);
-  group.visible = false;
+  for (const end of [-1, 1]) {
+    const tip = new THREE.Mesh(
+      new THREE.SphereGeometry(0.16, 8, 6),
+      new THREE.MeshLambertMaterial({ color: PALETTE.bananaTip }),
+    );
+    tip.position.set(0.42 * end, 0.34, 0);
+    group.add(tip);
+  }
+
   return group;
 }
 
-/** The shield: a bubble over the kart, plus a bright equator so it reads against any scenery. */
-function buildShieldBubble(): THREE.Group {
+/** The banana in your hands, trailing behind the kart. Parented to the kart, so it follows. */
+function buildHeldBanana(): THREE.Group {
+  const banana = buildBanana();
+  banana.position.set(-3.2, 0.5, 0);
+  banana.visible = false;
+  return banana;
+}
+
+/**
+ * The banana you let go of. Lives in world space, not on the kart — that is the entire point:
+ * once dropped it stays where it fell while you drive away from it.
+ */
+function buildDroppedBanana(): THREE.Group {
+  const banana = buildBanana();
+  banana.position.y = 0.35;
+  banana.visible = false;
+  return banana;
+}
+
+/** An item box: a slowly tumbling cube, bright enough to aim for from a distance. */
+function buildItemBox(): THREE.Group {
   const group = new THREE.Group();
 
-  const bubble = new THREE.Mesh(
-    new THREE.SphereGeometry(2.9, 20, 14),
-    new THREE.MeshBasicMaterial({
-      color: PALETTE.shield,
+  const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(1.7, 1.7, 1.7),
+    new THREE.MeshLambertMaterial({
+      color: PALETTE.itemBox,
       transparent: true,
-      opacity: 0.22,
-      side: THREE.DoubleSide,
-      // A transparent hull that writes depth would punch a hole in everything behind it.
-      depthWrite: false,
+      opacity: 0.72,
+      emissive: PALETTE.itemBoxGlow,
+      emissiveIntensity: 0.35,
     }),
   );
-  group.add(bubble);
+  group.add(cube);
 
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(2.9, 0.1, 8, 32),
-    new THREE.MeshBasicMaterial({ color: PALETTE.shieldRim, transparent: true, opacity: 0.75 }),
+  // A solid core inside the translucent shell, so it still reads as an object at distance
+  // rather than as a faint smudge.
+  const core = new THREE.Mesh(
+    new THREE.SphereGeometry(0.42, 10, 8),
+    new THREE.MeshBasicMaterial({ color: PALETTE.itemBoxCore }),
   );
-  rim.rotation.x = Math.PI / 2;
-  group.add(rim);
+  group.add(core);
 
-  group.position.set(-0.2, 1.2, 0);
-  group.visible = false;
+  group.position.y = 1.4;
   return group;
 }
 
@@ -760,12 +785,14 @@ function buildBurst(): THREE.Mesh {
 interface FurnitureHandles {
   group: THREE.Group;
   coins: Map<number, THREE.Object3D>;
+  boxes: Map<number, THREE.Object3D>;
   chevrons: Array<{ mesh: THREE.Object3D; span: number; base: number }>;
 }
 
 function buildFurniture(items: PlacedFurniture[]): FurnitureHandles {
   const group = new THREE.Group();
   const coins = new Map<number, THREE.Object3D>();
+  const boxes = new Map<number, THREE.Object3D>();
   const chevrons: Array<{ mesh: THREE.Object3D; span: number; base: number }> = [];
 
   for (const item of items) {
@@ -824,6 +851,11 @@ function buildFurniture(items: PlacedFurniture[]): FurnitureHandles {
         coins.set(item.id, mesh);
         break;
       }
+      case 'box': {
+        mesh = buildItemBox();
+        boxes.set(item.id, mesh);
+        break;
+      }
     }
 
     mesh.position.x = item.x;
@@ -832,7 +864,7 @@ function buildFurniture(items: PlacedFurniture[]): FurnitureHandles {
     group.add(mesh);
   }
 
-  return { group, coins, chevrons };
+  return { group, coins, boxes, chevrons };
 }
 
 // --- scene -----------------------------------------------------------------
@@ -849,10 +881,10 @@ export interface KartScene {
   syncKart(speed: number, altitude: number, steerAmount: number, dt: number): void;
   /** Hide collected coins, and animate coins and pads. */
   syncFurniture(items: PlacedFurniture[], time: number): void;
-  /** Show the item being carried, trailing behind the kart. (1e) */
+  /** Show the banana being carried, trailing behind the kart. (1e) */
   setItem(has: boolean, time: number): void;
-  /** Raise or drop the shield bubble. (1e) */
-  setShield(on: boolean, time: number): void;
+  /** Place the banana you let go of, in world coordinates. Null when there is none. (1e) */
+  setDroppedItem(at: { x: number; y: number } | null): void;
   /**
    * Place the incoming threat: `behind` world units back along the kart's own heading, `side`
    * units across it. Null hides it. (1e)
@@ -947,12 +979,16 @@ export function createKartScene(
   const { group: kart, chassis, flames, wheels, steering, steeringWheel } = buildKart();
   scene.add(kart);
 
-  // Item defence, all parented to the kart so they inherit its position and heading. (1e)
-  const heldItem = buildHeldItem();
-  const shieldBubble = buildShieldBubble();
+  // Item defence. (1e) The held banana, the seeker and the burst hang off the kart so they
+  // inherit its position and heading; the dropped banana does not, because staying where it
+  // fell while the kart drives away is the whole point of it.
+  const heldBanana = buildHeldBanana();
   const seeker = buildSeeker();
   const burst = buildBurst();
-  kart.add(heldItem, shieldBubble, seeker, burst);
+  kart.add(heldBanana, seeker, burst);
+
+  const droppedBanana = buildDroppedBanana();
+  scene.add(droppedBanana);
 
   // Barrel roll and cornering lean both roll the chassis about its nose-to-tail axis, so they
   // are tracked separately and summed rather than fighting over one rotation.
@@ -1016,6 +1052,17 @@ export function createKartScene(
         mesh.position.y = 1.3 + Math.sin(time * 2.6 + item.id) * 0.22;
       }
 
+      for (const item of currentItems) {
+        if (item.kind !== 'box') continue;
+        const mesh = furniture.boxes.get(item.id);
+        if (!mesh) continue;
+        // `collected` is the drill's respawn state, so a box that has been taken simply vanishes
+        // until it is put back.
+        mesh.visible = !item.collected;
+        mesh.rotation.set(time * 0.9, -item.heading + time * 1.3, time * 0.6);
+        mesh.position.y = 1.4 + Math.sin(time * 2 + item.id) * 0.15;
+      }
+
       for (const chevron of furniture.chevrons) {
         const travel = (time * 9) % chevron.span;
         chevron.mesh.position.x =
@@ -1023,18 +1070,17 @@ export function createKartScene(
       }
     },
     setItem(has, time) {
-      heldItem.visible = has;
+      heldBanana.visible = has;
       if (!has) return;
-      heldItem.position.y = 0.7 + Math.sin(time * 3) * 0.08;
-      heldItem.rotation.y = time * 1.5;
+      // Bobbing and swinging a little, as something dragged along behind a kart would.
+      heldBanana.position.y = 0.5 + Math.sin(time * 3.4) * 0.07;
+      heldBanana.position.z = Math.sin(time * 1.7) * 0.18;
+      heldBanana.rotation.y = Math.sin(time * 1.7) * 0.35;
     },
-    setShield(on, time) {
-      shieldBubble.visible = on;
-      if (!on) return;
-      // A slow wobble and spin. A perfectly still bubble reads as a modelling error; a moving
-      // one reads as something switched on.
-      shieldBubble.rotation.y = time * 1.2;
-      shieldBubble.scale.setScalar(1 + Math.sin(time * 6) * 0.03);
+    setDroppedItem(at) {
+      droppedBanana.visible = at !== null;
+      if (!at) return;
+      droppedBanana.position.set(at.x, 0.35, at.y);
     },
     setThreat(behind, side, time) {
       seeker.visible = behind !== null;

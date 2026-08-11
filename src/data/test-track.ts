@@ -80,6 +80,25 @@ export const TEST_TRACK_LAYOUT: FurnitureSpec[] = [
   ...coinLine(0.88, 0.96, 5, -5),
 ];
 
+/**
+ * Item boxes, for Shield Up (1e). Kept out of {@link TEST_TRACK_LAYOUT} so the kart piece is not
+ * cluttered with furniture it has no use for; the shield harness concatenates the two.
+ *
+ * Four rows of three, roughly a quarter of a lap apart, so being caught empty-handed is never
+ * more than a few seconds of driving away from being fixed. Rows sit across the road rather than
+ * along it — picking one is a small line choice, exactly as it is in the real game.
+ */
+export const TEST_TRACK_ITEM_BOXES: FurnitureSpec[] = [
+  ...boxRow(0.04),
+  ...boxRow(0.3),
+  ...boxRow(0.56),
+  ...boxRow(0.8),
+];
+
+function boxRow(t: number): FurnitureSpec[] {
+  return [-5, 0, 5].map((offset) => ({ kind: 'box' as const, t, offset }));
+}
+
 function coinLine(fromT: number, toT: number, count: number, offset: number): FurnitureSpec[] {
   return Array.from({ length: count }, (_, i) => ({
     kind: 'coin' as const,

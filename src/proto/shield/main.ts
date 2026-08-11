@@ -23,13 +23,19 @@ import {
 import {
   TEST_TRACK_CONTROL,
   TEST_TRACK_HALF_WIDTH,
+  TEST_TRACK_ITEM_BOXES,
   TEST_TRACK_LAYOUT,
 } from '../../data/test-track';
 import { TuningPanel, type TuningSchema } from '../../engine/tuning';
 import { STEER_ASSIST_CONFIG, computeSteerAssist } from '../../engine/steer-assist';
 import { ChaseCamera, CHASE_CAMERA_CONFIG } from '../../engine/chase-camera';
 import { createKartScene } from '../../ui/kart-scene';
-import { SHIELD_CONFIG, ShieldRun, type ShieldResolution } from '../../engine/shield';
+import {
+  SHIELD_CONFIG,
+  ShieldRun,
+  type ShieldOutcome,
+  type ShieldResolution,
+} from '../../engine/shield';
 import { ShieldHud } from '../../ui/shield-hud';
 import { Beeper } from '../../ui/beeps';
 
@@ -98,16 +104,54 @@ const SHIELD_SCHEMA: TuningSchema<typeof SHIELD> = {
     help: 'How far behind it appears. Presentation only — the timing comes from the warning lead.',
   },
 
-  itemRefreshMs: {
+  catchRadius: {
     kind: 'number',
-    label: 'New item after',
+    label: 'Banana catch radius',
+    min: 0.4,
+    max: 6,
+    step: 0.2,
+    unit: 'u',
+    group: 'The banana',
+    help: 'How near a dropped banana the shell has to pass to hit it. The number that decides whether letting go is a reasonable defence or a gamble — too generous and dropping is as good as holding, which teaches the wrong thing.',
+  },
+  dropBack: {
+    kind: 'number',
+    label: 'Sits back',
+    min: 1,
+    max: 10,
+    step: 0.2,
+    unit: 'u',
+    group: 'The banana',
+    help: 'How far behind the kart the banana trails, and so where it lands when you let go.',
+  },
+  dropLifeMs: {
+    kind: 'number',
+    label: 'Stays on the road',
+    min: 1000,
+    max: 30000,
+    step: 500,
+    unit: 'ms',
+    group: 'The banana',
+  },
+  boxRespawnMs: {
+    kind: 'number',
+    label: 'Box comes back after',
     min: 500,
-    max: 12000,
+    max: 20000,
     step: 250,
     unit: 'ms',
-    group: 'Consequences',
-    help: 'How long you spend defenceless after spending or throwing an item.',
+    group: 'The banana',
   },
+  pickupRadius: {
+    kind: 'number',
+    label: 'Box pickup radius',
+    min: 1,
+    max: 8,
+    step: 0.2,
+    unit: 'u',
+    group: 'The banana',
+  },
+
   spinSpeedKeep: {
     kind: 'number',
     label: 'Speed kept on a hit',
@@ -143,16 +187,17 @@ const SHIELD_SCHEMA: TuningSchema<typeof SHIELD> = {
   },
 };
 
-// Same world as the kart piece — this is that drill with something chasing you.
+// Same world as the kart piece — this is that drill with something chasing you — plus the item
+// boxes, which only this drill has any use for.
 const path = buildLoopPath(TEST_TRACK_CONTROL);
 const surface = createPathSurface(path, TEST_TRACK_HALF_WIDTH);
-const items = placeFurniture(path, TEST_TRACK_LAYOUT);
+const items = placeFurniture(path, [...TEST_TRACK_LAYOUT, ...TEST_TRACK_ITEM_BOXES]);
 const track = new TrackRun(items);
 surface.groundHeightAt = track.groundHeightAt;
 
 const kart = createKart(surface.startPose.x, surface.startPose.y, surface.startPose.heading);
 const input = new Input();
-const shield = new ShieldRun();
+const shield = new ShieldRun(items.filter((item) => item.kind === 'box'));
 const beeper = new Beeper();
 
 let last: KartStepResult = {
@@ -182,18 +227,41 @@ let burstHit = false;
 const SPIN_TURNS = 2;
 
 const VERDICTS: Record<
-  string,
+  ShieldOutcome,
   { title: string; detail: string; tone: 'good' | 'bad' | 'neutral' }
 > = {
   blocked: {
     title: 'BLOCKED',
-    detail: 'The item took the hit instead of you. That is the whole habit.',
+    detail: 'The banana took the hit instead of you. That is the whole habit.',
     tone: 'good',
+  },
+  'drop-blocked': {
+    title: 'LUCKY',
+    detail:
+      'You let go, and the shell happened to run straight over the banana. It will not always come through where you left it — held, it cannot miss.',
+    tone: 'neutral',
+  },
+  'drop-missed': {
+    title: 'YOU LET GO',
+    detail:
+      'The banana fell on the road and the shell came past it. Keep hold of it and it stays between you and whatever is coming.',
+    tone: 'bad',
+  },
+  hit: {
+    title: 'HIT',
+    detail:
+      'A banana in your hands the whole time. Hold the item key the moment the siren starts — it costs you nothing.',
+    tone: 'bad',
+  },
+  unarmed: {
+    title: 'HIT',
+    detail: 'Nothing to defend yourself with. Drive through an item box and pick one up.',
+    tone: 'neutral',
   },
   'fake-held': {
     title: 'FALSE ALARM',
     detail:
-      'That one was never going to hit you — and holding cost you nothing. You still have your item.',
+      'That one was never going to hit you — and holding cost you nothing. You still have your banana.',
     tone: 'good',
   },
   'fake-clear': {
@@ -201,42 +269,21 @@ const VERDICTS: Record<
     detail: 'That one veered off on its own. You will not always be that lucky.',
     tone: 'neutral',
   },
-  hit: {
-    title: 'HIT',
+  'fake-dropped': {
+    title: 'THROWN AWAY',
     detail:
-      'You had something to hold and never held it. Hold the item key as soon as the siren starts.',
+      'It veered off by itself, and you dropped your banana in the relief. Nothing left for the next one.',
     tone: 'bad',
-  },
-  unarmed: {
-    title: 'HIT',
-    detail: 'Nothing in your hands to raise. A new item is on its way.',
-    tone: 'neutral',
   },
 };
 
 function announce(resolution: ShieldResolution): void {
-  // "Dropped" is the lesson the fake-outs exist to teach, and it reads differently depending on
-  // whether anything was actually coming — so it is the one outcome phrased here rather than in
-  // the table above.
-  if (resolution.outcome === 'dropped') {
-    hud?.say(
-      resolution.kind === 'fake' ? 'THROWN AWAY' : 'YOU LET GO',
-      resolution.kind === 'fake'
-        ? 'It veered off by itself, and you threw your item away in the relief. Nothing left to raise for the next one.'
-        : 'Letting go throws the item away, so the shell arrived and found nothing in its way. Hold until it hits.',
-      'bad',
-      2400,
-    );
-    return;
-  }
-
   const verdict = VERDICTS[resolution.outcome];
-  if (!verdict) return;
   const detail =
     resolution.outcome === 'blocked' && resolution.leadMs !== null
-      ? `Shield up ${resolution.leadMs.toFixed(0)} ms before it arrived. ${verdict.detail}`
+      ? `Out behind you ${resolution.leadMs.toFixed(0)} ms before it arrived. ${verdict.detail}`
       : verdict.detail;
-  hud?.say(verdict.title, detail, verdict.tone, 2000);
+  hud?.say(verdict.title, detail, verdict.tone, resolution.struck ? 2400 : 2000);
 }
 
 function log(resolution: ShieldResolution): void {
@@ -269,11 +316,15 @@ function update(dt: number): void {
   const events = shield.update(SHIELD, {
     now,
     holding: input.isDown('item'),
+    x: kart.x,
+    y: kart.y,
+    heading: kart.heading,
     clearRoad,
   });
 
   if (events.warned) nextPipAt = now;
-  if (events.rearmed) beeper.play('item');
+  if (events.gotItem) beeper.play('item');
+  if (events.droppedItem) beeper.play('drop');
 
   // Pips speed up as it closes. Sound is what lets the warning reach you while you are looking
   // at the road, which is where the drill wants your eyes.
@@ -318,9 +369,11 @@ function render(alpha: number, stats: LoopStats): void {
   view.syncKart(last.speed, poseAltitude, kart.steerAmount, dt);
   if (boostGlow) boostGlow.dataset.on = String(boosting);
 
+  // The banana is only *behind* the kart while you hold the key. Unheld, it sits in your item
+  // slot — the chip on the HUD — which is exactly the distinction the drill is teaching.
   const covered = input.isDown('item') && shield.hasItem;
-  view.setItem(shield.hasItem, time);
-  view.setShield(covered, time);
+  view.setItem(covered, time);
+  view.setDroppedItem(shield.dropped);
 
   const approach = shield.approach(now, SHIELD);
   view.setThreat(approach?.behind ?? null, approach?.side ?? 0, time);
@@ -334,7 +387,7 @@ function render(alpha: number, stats: LoopStats): void {
   view.kart.rotation.y = -poseHeading + (spin ?? 0) * Math.PI * 2 * SPIN_TURNS;
 
   hud?.setWarning(shield.progress(now, SHIELD));
-  hud?.setItem(covered ? 'up' : shield.hasItem ? 'ready' : 'empty', shield.itemWait(now));
+  hud?.setItem(covered ? 'up' : shield.hasItem ? 'ready' : 'empty');
   hud?.update(now);
 
   chase.update(
@@ -360,11 +413,7 @@ const STAT_ROWS = [
   ['threats', () => String(shield.threats)],
   ['blocked', () => `${shield.blocked} / ${shield.threats}`],
   ['times hit', () => String(shield.struck)],
-  [
-    'item',
-    () =>
-      shield.hasItem ? 'in hand' : `${(shield.itemWait(performance.now()) ?? 0).toFixed(1)} s`,
-  ],
+  ['banana', () => (shield.hasItem ? 'in hand' : shield.dropped ? 'on the road' : 'gone')],
   ['speed', () => `${last.speed.toFixed(2)} u/s`],
 ] as const;
 

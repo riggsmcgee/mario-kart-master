@@ -19,6 +19,37 @@ export type ItemState = 'ready' | 'up' | 'empty';
 
 export type VerdictTone = 'good' | 'bad' | 'neutral';
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/**
+ * The incoming-item icon, as the real game does it: the thing that is about to hit you, drawn,
+ * rather than the word for it. A picture is read at a glance and from the corner of the eye;
+ * a line of text has to be looked at, and looking at it means not looking at the road.
+ *
+ * Original art — a red orb with a white band, the same shape the quiz diagrams use for a shell.
+ */
+function shellIcon(): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '-14 -14 28 28');
+  svg.setAttribute('class', 'shield-shell');
+  svg.setAttribute('aria-hidden', 'true');
+
+  const orb = document.createElementNS(SVG_NS, 'circle');
+  orb.setAttribute('r', '11');
+  orb.setAttribute('fill', '#ff3b30');
+  svg.append(orb);
+
+  const band = document.createElementNS(SVG_NS, 'rect');
+  band.setAttribute('x', '-11');
+  band.setAttribute('y', '-2.5');
+  band.setAttribute('width', '22');
+  band.setAttribute('height', '5');
+  band.setAttribute('fill', '#fdfdfd');
+  svg.append(band);
+
+  return svg;
+}
+
 export class ShieldHud {
   private readonly root: HTMLDivElement;
   private readonly warning: HTMLDivElement;
@@ -40,13 +71,15 @@ export class ShieldHud {
     // Announced, not just drawn: this is the one thing on screen that is time-critical.
     this.warning.setAttribute('role', 'alert');
 
-    const icon = document.createElement('span');
-    icon.className = 'shield-icon';
-    icon.textContent = '▲';
-    icon.setAttribute('aria-hidden', 'true');
+    const icon = shellIcon();
+
+    const arrow = document.createElement('span');
+    arrow.className = 'shield-arrow';
+    arrow.textContent = '▼';
+    arrow.setAttribute('aria-hidden', 'true');
 
     const text = document.createElement('span');
-    text.textContent = 'RED SHELL — BEHIND YOU';
+    text.textContent = 'INCOMING — BEHIND YOU';
 
     const track = document.createElement('div');
     track.className = 'shield-bar';
@@ -56,7 +89,7 @@ export class ShieldHud {
 
     const head = document.createElement('div');
     head.className = 'shield-warning-head';
-    head.append(icon, text);
+    head.append(icon, text, arrow);
     this.warning.append(head, track);
 
     this.chip = document.createElement('div');
@@ -89,11 +122,11 @@ export class ShieldHud {
     this.warning.dataset.urgent = String(progress > 0.55);
   }
 
-  setItem(state: ItemState, waitSeconds: number | null): void {
+  setItem(state: ItemState): void {
     this.chip.dataset.state = state;
-    if (state === 'up') this.chip.textContent = 'SHIELD UP';
-    else if (state === 'ready') this.chip.textContent = 'Item ready — hold Shift';
-    else this.chip.textContent = `No item — ${(waitSeconds ?? 0).toFixed(1)}s`;
+    if (state === 'up') this.chip.textContent = '🍌 Banana out back';
+    else if (state === 'ready') this.chip.textContent = '🍌 Banana ready — hold Shift';
+    else this.chip.textContent = 'No item — drive through a box';
   }
 
   say(title: string, detail: string, tone: VerdictTone, ms = 1800): void {

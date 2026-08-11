@@ -190,7 +190,7 @@ export function bendAhead(path: TrackPath, from: PathPoint, span = 26): number {
 
 // --- furniture -------------------------------------------------------------
 
-export type FurnitureKind = 'pad' | 'ramp' | 'coin';
+export type FurnitureKind = 'pad' | 'ramp' | 'coin' | 'box';
 
 /** One authored item. The only thing anyone writes by hand. */
 export interface FurnitureSpec {
@@ -225,6 +225,9 @@ const DEFAULT_SIZE: Record<FurnitureKind, { length: number; width: number; heigh
   pad: { length: 7, width: 5, height: 0 },
   ramp: { length: 9, width: 8, height: 1.8 },
   coin: { length: 1.6, width: 1.6, height: 0 },
+  // Item boxes are collected rather than driven over, and `collected` carries their state the
+  // same way it does for coins. Shield Up (1e) owns what picking one up actually does.
+  box: { length: 2.4, width: 2.4, height: 0 },
 };
 
 export function placeFurniture(path: TrackPath, specs: FurnitureSpec[]): PlacedFurniture[] {
