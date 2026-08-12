@@ -173,6 +173,47 @@ export function parseQuiz(raw: unknown): QuizQuestion[] {
   });
 }
 
+// --- templating ------------------------------------------------------------
+
+/**
+ * Route every authored string in a card through `{name}`/`{rival}` templating.
+ *
+ * The decks write `{rival}` rather than a literal name (4e1), which means *nothing* may render a
+ * card string without passing it through here first — and that is exactly the sort of rule that
+ * gets obeyed in one place and forgotten in another. It was: this lived inside Chapter 2, so the
+ * testbed's quiz page, loading the same JSON, printed a literal "{rival}" on screen.
+ *
+ * It belongs next to the component that renders the cards, so every caller has it to hand.
+ */
+export function fillQuiz(questions: QuizQuestion[], t: (text: string) => string): QuizQuestion[] {
+  const fillDiagram = (diagram: DiagramSpec): DiagramSpec => {
+    const next: DiagramSpec = {
+      ...diagram,
+      markers: diagram.markers.map((marker) =>
+        marker.label === undefined ? marker : { ...marker, label: t(marker.label) },
+      ),
+    };
+    if (next.caption !== undefined) next.caption = t(next.caption);
+    return next;
+  };
+
+  return questions.map((question) => {
+    const next: QuizQuestion = {
+      ...question,
+      situation: t(question.situation),
+      prompt: t(question.prompt),
+      takeaway: t(question.takeaway),
+      answers: question.answers.map((answer) => ({
+        ...answer,
+        label: t(answer.label),
+        response: t(answer.response),
+      })),
+    };
+    if (next.diagram) next.diagram = fillDiagram(next.diagram);
+    return next;
+  });
+}
+
 // --- the card -------------------------------------------------------------
 
 /**

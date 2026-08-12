@@ -26,8 +26,7 @@
  */
 
 import itemSmarts from '../../data/quiz/item-smarts.json';
-import { Quiz, parseQuiz, type QuizQuestion } from '../../ui/quiz';
-import type { DiagramSpec } from '../../ui/quiz-diagram';
+import { Quiz, parseQuiz, fillQuiz } from '../../ui/quiz';
 import { createShieldDrill } from '../../ui/shield-drill';
 import { el, prose, rich } from '../dom';
 import type { ChapterContent, ChapterContext, Mounted } from '../types';
@@ -60,42 +59,6 @@ const QUIZ_TOKENS = [
 
 /** Parsed once, at import. A typo in the deck should fail loudly here rather than draw a blank card. */
 const DECK = parseQuiz(itemSmarts);
-
-type Fill = (text: string) => string;
-
-/**
- * Route every authored string in a card through `{name}`/`{rival}` templating.
- *
- * The deck writes `{rival}` rather than a literal name, the same way `spot-the-pad.json` does, so
- * the cards read correctly whoever the doorman signed in. 4e1 is satisfied in the data, and this
- * is the code that makes that true — nothing renders a card string without passing it through.
- */
-function fillDiagram(diagram: DiagramSpec, t: Fill): DiagramSpec {
-  const next: DiagramSpec = {
-    ...diagram,
-    markers: diagram.markers.map((marker) =>
-      marker.label === undefined ? marker : { ...marker, label: t(marker.label) },
-    ),
-  };
-  if (next.caption !== undefined) next.caption = t(next.caption);
-  return next;
-}
-
-function fillQuestion(question: QuizQuestion, t: Fill): QuizQuestion {
-  const next: QuizQuestion = {
-    ...question,
-    situation: t(question.situation),
-    prompt: t(question.prompt),
-    takeaway: t(question.takeaway),
-    answers: question.answers.map((answer) => ({
-      ...answer,
-      label: t(answer.label),
-      response: t(answer.response),
-    })),
-  };
-  if (next.diagram) next.diagram = fillDiagram(next.diagram, t);
-  return next;
-}
 
 /** One line of the item reference. Bold verdict first, because that is the part she will skim. */
 function itemRule(item: string, verdict: string, why: string): HTMLLIElement {
@@ -258,7 +221,7 @@ const content: ChapterContent = {
 
       const quiz = new Quiz({
         mount: quizMount,
-        questions: DECK.map((question) => fillQuestion(question, t)),
+        questions: fillQuiz(DECK, t),
         // Sound on every answer, and deliberately not a buzzer on the wrong ones — the plan is
         // explicit that nothing here marks her.
         onAnswer: (result) => ctx.sfx.play(result.correct ? 'right' : 'nudge'),

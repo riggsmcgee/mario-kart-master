@@ -2,7 +2,7 @@ import '../../ui/testbed.css';
 import '../../ui/proto.css';
 import '../../ui/quiz.css';
 import { installErrorBanner } from '../../ui/error-banner';
-import { Quiz, parseQuiz, type QuizResult, type QuizSummary } from '../../ui/quiz';
+import { Quiz, parseQuiz, fillQuiz, type QuizResult, type QuizSummary } from '../../ui/quiz';
 import itemSmarts from '../../data/quiz/item-smarts.json';
 
 installErrorBanner();
@@ -15,7 +15,11 @@ installErrorBanner();
  * in the real chapter.
  */
 
-const questions = parseQuiz(itemSmarts);
+// The deck writes {rival} rather than a literal name (4e1), so the lab has to fill it too —
+// otherwise this page prints the placeholder on screen, which it did until 2026-08-12.
+const questions = fillQuiz(parseQuiz(itemSmarts), (text) =>
+  text.replace(/{rival}/g, 'Kayla').replace(/{name}/g, 'Jodi'),
+);
 
 const mount = document.querySelector<HTMLElement>('#quiz');
 const score = document.querySelector<HTMLElement>('#score');

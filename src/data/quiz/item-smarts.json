@@ -1,13 +1,13 @@
 [
   {
     "id": "banana-shield",
-    "situation": "Third place, back straight. Kayla is close enough to read your number plate, and you picked up a banana two corners ago.",
+    "situation": "Third place, back straight. {rival} is close enough to read your number plate, and you picked up a banana two corners ago.",
     "prompt": "What do you do with the banana?",
     "diagram": {
       "road": "straight",
-      "caption": "Kayla on your bumper. The banana is still in your hands.",
+      "caption": "{rival} on your bumper. The banana is still in your hands.",
       "markers": [
-        { "kind": "rival", "at": 0.14, "lane": 0, "label": "Kayla" },
+        { "kind": "rival", "at": 0.14, "lane": 0, "label": "{rival}" },
         { "kind": "banana", "at": 0.42, "lane": 0 },
         { "kind": "you", "at": 0.58, "lane": 0, "label": "You" }
       ]
@@ -17,7 +17,7 @@
         "id": "hold",
         "label": "Hold it behind the kart and keep driving",
         "correct": true,
-        "response": "This one habit will win you more races than any other. Hold the item button and the banana trails along behind you, so anything arriving at your back bumper — a green shell, a red shell, Kayla herself — hits the banana instead of you. It costs nothing to carry. So carry it."
+        "response": "This one habit will win you more races than any other. Hold the item button and the banana trails along behind you, so anything arriving at your back bumper — a green shell, a red shell, {rival} herself — hits the banana instead of you. It costs nothing to carry. So carry it."
       },
       {
         "id": "drop",
@@ -34,13 +34,13 @@
   },
   {
     "id": "green-shell-shield",
-    "situation": "A green shell in your hands. Kayla is three or four kart lengths up the road, wandering about between the kerbs.",
+    "situation": "A green shell in your hands. {rival} is three or four kart lengths up the road, wandering about between the kerbs.",
     "prompt": "What is the green shell for?",
     "diagram": {
       "road": "straight",
       "caption": "She is ahead, but not exactly holding a straight line.",
       "markers": [
-        { "kind": "rival", "at": 0.78, "lane": 0.45, "label": "Kayla" },
+        { "kind": "rival", "at": 0.78, "lane": 0.45, "label": "{rival}" },
         { "kind": "shell-green", "at": 0.28, "lane": 0 },
         { "kind": "you", "at": 0.44, "lane": -0.1, "label": "You" }
       ]
@@ -101,13 +101,13 @@
   },
   {
     "id": "bob-omb",
-    "situation": "A bob-omb, and it is ticking. Kayla is right behind you.",
+    "situation": "A bob-omb, and it is ticking. {rival} is right behind you.",
     "prompt": "What do you do with it?",
     "diagram": {
       "road": "straight",
       "caption": "Behind you, and counting down.",
       "markers": [
-        { "kind": "rival", "at": 0.16, "lane": 0.15, "label": "Kayla" },
+        { "kind": "rival", "at": 0.16, "lane": 0.15, "label": "{rival}" },
         { "kind": "bomb", "at": 0.42, "lane": 0 },
         { "kind": "you", "at": 0.6, "lane": 0, "label": "You" }
       ]
@@ -134,13 +134,13 @@
   },
   {
     "id": "red-shell-fire",
-    "situation": "A red shell. Kayla is somewhere up ahead, out of sight round the bend.",
+    "situation": "A red shell. {rival} is somewhere up ahead, out of sight round the bend.",
     "prompt": "What do you do with it?",
     "diagram": {
       "road": "bend-right",
       "caption": "She is round the corner, where you cannot even see her.",
       "markers": [
-        { "kind": "rival", "at": 0.86, "lane": 0.2, "label": "Kayla" },
+        { "kind": "rival", "at": 0.86, "lane": 0.2, "label": "{rival}" },
         { "kind": "you", "at": 0.22, "lane": -0.3, "label": "You" },
         { "kind": "shell", "at": 0.34, "lane": -0.3 }
       ]
@@ -323,7 +323,7 @@
       },
       {
         "id": "save",
-        "label": "Save it in case Kayla catches up",
+        "label": "Save it in case {rival} catches up",
         "response": "Saving a mushroom for later usually means holding it forever — there is always one more reason to wait. And unlike a banana, it does nothing for you while you carry it."
       }
     ],

@@ -55,7 +55,10 @@ function skillsCard(ctx: ChapterContext): HTMLElement {
     'div',
     { class: 'card' },
     el('p', { class: 'eyebrow' }, 'What you are getting'),
-    el('h3', null, ctx.t('The eight chapters')),
+    // Counted from the data, like the list below it and the line at the end. The one place this
+    // was written out as a word was the one place the copy could quietly start lying the day a
+    // chapter is added or cut.
+    el('h3', null, ctx.t(`The ${SKILLS.length} chapters`)),
     el(
       'ol',
       { style: { margin: '1.1rem 0 0.6rem', paddingLeft: '1.4em' } },
