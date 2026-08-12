@@ -18,17 +18,109 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 | | |
 |---|---|
 | Current phase | Phase 4, most of the way through — the whole course exists end to end |
-| Current step | **4f1** final QA, blocked on a Mac; **2b9** video tone-watching; **3c2** recording |
-| Last gate passed | Riggs playtested the Phase 1 pieces and cleared them in one go (2026-08-12), rather than gate by gate |
+| Current step | **4f1** final QA, blocked on a Mac; **3c2** recording |
+| Last gate passed | Riggs playtested the assembled site (2026-08-12) and sent a list; Session 10 is the response to it |
 | Next gate | **2c1** full run-through · **3f1** cold click-through · **4f2** Jodi, watched silently |
-| Repo state | All of Phase 1 built; Phase 2 assembled; Phase 3 done except the intro animation and the recording; Phase 4 done except launch QA |
+| Repo state | All of Phase 1 built; Phase 2 assembled and split into lesson/practice pages; Phase 3 done except the intro animation and the recording; Phase 4 done except launch QA |
 | Deferred | nothing — 1a5 landed 2026-08-12 |
 | Needs an answer | **Q9** accelerate slot (cosmetic now); ~~Q5~~ ~~Q7~~ ~~Q6~~ ~~Q8~~ answered |
-| Not pushed | resolved 2026-08-12 — see the session entry below |
+| Blocked on Riggs | Pages source → "GitHub Actions"; the two Supabase secrets; nine mp3s |
 
 ---
 
 ## Log
+
+### 2026-08-12 — Session 10 (Opus 5)
+
+**Steps touched:** **2a2** (rebuilt) · **2b1** · **2b6** · **2b7** · **2b8** · **2b9** (answered) ·
+**4b1** (rebuilt) · **4b2** (new) · **1b7** (new — drift, racing line)
+
+Riggs playtested the assembled site and sent back a list. Every item on it was a real problem, and
+three of them were problems with decisions I had argued myself into. This session is the response.
+
+**The chapters are two pages now.** He sent a screenshot of Chapter 3 with the drill arriving two
+thirds of the way down a page of prose, and the fix is the obvious one once seen: `#/chapter/ch3`
+is the lesson and `#/chapter/ch3/try` is the practice. Reading and playing want different postures.
+The template (`chapter-page.ts`) draws both, so all nine still behave identically.
+
+**The "On the Switch" cards are gone.** Nine of them amounted to a training programme delivered in
+nine unconnected pieces, at the exact moment she was still learning the idea rather than ready to
+practise it. That material is now Chapter 8's programme.
+
+**Chapter 8 is a forty-box grid.** Rebuilt to his sketch: eight weeks down, five sessions across,
+one job per box, with a panel beside it showing tonight's in full. `data/regimen.ts` is the new
+spine. **There are no dates in it** — he picked two months as a shape, and a dated plan is one that
+is behind by week three, at which point the honest response is to stop opening the website. Forty
+numbered boxes self-pace. The print sheet is a *blank* wall chart for the same reason: it goes on
+the fridge on day one and stays there, so mirroring her ticks would make it wrong by that evening.
+
+**Finishing the course changes the front door.** A bare URL now lands on `#/plan` once every
+chapter is done. Deep links still go where they point.
+
+**Three things I had got wrong, and what replaced them:**
+
+- **Chapter 5's coins were not a racing line.** I had written a long comment talking myself out of
+  painting one, on the grounds that the coins *were* the line. They were not: collecting a coin is
+  a discrete event, so the drill rewarded *touching* the line fifteen times rather than *staying
+  on* it. Those are different skills and only one of them is the chapter. `engine/racing-line.ts`
+  paints a real line and scores the share of the lap she spends on it.
+- **Kendahl was the frame when she should have been an aside.** She now gets one sentence at the
+  end of the section on smoothness, which is where the joke lands harder anyway.
+- **Chapter 6 talked her out of a core mechanic.** It argued drifting was "the one you need least"
+  while sending her to a video whose author plainly disagrees. Drifting is implemented
+  (`engine/drift.ts` — hop, hold, blue then orange, release for a boost) and the chapter has a
+  drill. The argument changed shape rather than volume: it is now "here is the one condition under
+  which it pays", which was always the genuinely useful part.
+
+**2b9 is answered without watching anything.** I could not get a transcript — YouTube's caption
+endpoint now returns 200 with an empty body, the InnerTube clients 400, and the three transcript
+services all 403. What I could read is each video's own **chapter markers and description**, which
+is better evidence than a summary anyway because it is the author's own table of contents. On that
+basis the rule changed from "one general tutorial per chapter" to **one mechanic per video, or no
+video**:
+
+- Kept **Bayesic's intro** (12m32s) as the anchor, **his coins video** (5m00s, one subject) for
+  Chapter 5, and **his drifting video** starting at 1:31 — the uploader's own "Basics of Drifting"
+  mark — for Chapter 6, with a note to stop at 5:03 where it turns into competitive tech.
+- Cut **Shortcat's** 37-minute omnibus (items at 11:03) and **SwitchPlay's** general tour, whose
+  own description says it was narrated by an AI voice. On a present, that one disqualifies itself.
+- Chapters 1, 3, 4 and 7 now have **no video at all**, which is the honest answer.
+
+All three survivors are the same person, which was not the plan and is better than the plan.
+
+**Chapter 0 has a practice page**: five questions, one per section of the intro video. That video
+is now load-bearing for the whole course, so "did she watch it" is worth asking — and a wrong
+answer teaches the thing anyway. It is not a gate and nothing is marked.
+
+**The kart chapter answers the weight question.** Jodi drives Pink Gold Peach because Kayla told
+her heavier is better. That is not wrong, which is why it has stuck — weight really does buy top
+speed and win collisions. It is the right answer to a different question, and the card concedes
+the point before turning it. Alongside it: within a weight class the drivers are **mechanically
+identical**, so Peach, Daisy, Birdo and Yoshi are one kart with four costumes. The headline build
+is Peach now, the light one is Toadette, and Waluigi leads Bill's list.
+
+**What was verified.** Typecheck, lint and production build clean. **21/21 routes** render the
+right content under real Chromium, including all eight new practice pages. And the two new
+mechanics were **driven, not just screenshotted** — a scripted browser held a drift three times and
+banked three mini-turbos, and the line score read 100% on the line, 69% after driving straight past
+where the line goes, and 39% after deliberately steering off. A screenshot proves a drill rendered;
+it does not prove the mechanic works.
+
+**One tool added.** `scripts/voiceover-doc.mjs` regenerates the quoted scripts in
+`docs/voiceover-scripts.md` from `src/data/voiceover.ts`, preserving the hand-written Target/Tone
+direction. The doc's own header says a transcript disagreeing with the audio is worse than no
+transcript, and then the two drifted the first time I rewrote three chapters — so the words now
+have one source. (Its first version had a regex bug that doubled every chapter: `\n*$` under the
+`m` flag matches the end of every *line*. Fixed, and the reason is in the file.)
+
+**Still not verified, unchanged from last session:** nothing has run on macOS, 60fps is unmeasured,
+no Safari pass, the print sheet has never met a printer, and nobody has timed a full run-through.
+
+**Open:** the Pages deploy still fails at `actions/configure-pages@v5` — Pages has not been
+switched to "GitHub Actions" as its source, which is Riggs's to do. Everything before that step
+passes on CI.
+
+---
 
 ### 2026-08-12 — Session 9 (Opus 5)
 
