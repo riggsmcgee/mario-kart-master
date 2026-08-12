@@ -22,13 +22,16 @@ function protoPages(): Record<string, string> {
 
 export default defineConfig(({ command }) => ({
   // Dev runs at the root; a production build is pathed for GitHub Pages
-  // (repo-name subpath). Pages deploy itself is deferred — see WORKLOG 1a1.
+  // (repo-name subpath). Deployed by .github/workflows/deploy.yml since 1a5.
   base: command === 'build' ? '/mario-kart-master/' : '/',
   build: {
     target: 'es2022',
     rollupOptions: {
       input: {
+        // The course is the front door (2a1). The Phase 1 lab moved to /testbed/ — it is kept
+        // because the tuning panels live there and nowhere else.
         index: resolve(import.meta.dirname, 'index.html'),
+        testbed: resolve(import.meta.dirname, 'testbed/index.html'),
         ...protoPages(),
       },
     },

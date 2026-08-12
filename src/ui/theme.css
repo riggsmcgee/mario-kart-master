@@ -1,0 +1,403 @@
+/**
+ * The house style. (3a1)
+ *
+ * Built before the chapters rather than after them, against the plan's ordering. Nine chapters
+ * built plain and then restyled is the same work twice, and the second pass is the one that
+ * gets rushed.
+ *
+ * **Where the colours come from.** Not a palette generator: they are lifted from the Three.js
+ * scene the drills already render (`kart-scene.ts`), because those drills sit *inside* these
+ * pages. Kerb red, kart-trim yellow, dash-pad orange, item-box teal. A site whose accent colour
+ * disagreed with the game embedded in it would read as two products stapled together.
+ *
+ * **Why light rather than dark.** The obvious move for anything game-shaped is a near-black page
+ * with one bright accent. It is also what every generated "gaming" UI looks like, and it is the
+ * wrong call for the actual reader: Jodi is in her sixties, on a Mac, in a lit room, and the
+ * plan's fourth design principle is "big and readable". The vivid, saturated moments in this
+ * site are the drills, which bring their own sky. The pages around them stay bright and calm.
+ *
+ * **Type.** Fredoka carries headings — rounded, wide, unmistakably toy-like without being a
+ * novelty face. Nunito Sans does body copy because it holds up at 20px and above, which is the
+ * size everything here is set at. DM Mono appears only on measurements, and it earns its place:
+ * this is a site that teaches timing, so milliseconds show up constantly and deserve a voice
+ * that is visibly an instrument reading rather than prose.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  /* --- the five that matter ------------------------------------------------ */
+
+  /** Asphalt. Every piece of text, and the road on the lap map. */
+  --track: #2b3040;
+  /** Sky-lit paper, desaturated from the scene's horizon. Deliberately not cream. */
+  --paper: #f1f6fc;
+  /** Kerb red. Where you are now, and anything urgent. */
+  --kerb: #e8453c;
+  /** Kart trim. Stars, done stamps, the good news. */
+  --trim: #ffd23f;
+  /** Dash panel. The one obvious next button, every time. */
+  --boost: #ff8a1f;
+
+  /* --- support ------------------------------------------------------------- */
+
+  /** Item box. The "On the Switch" cards — the part she takes to the Switch. */
+  --box: #2fc4b2;
+  --turf: #3fa346;
+  --sky: #c7ecff;
+
+  /* --- derived surfaces ---------------------------------------------------- */
+
+  --card: #ffffff;
+  --ink: var(--track);
+  --ink-soft: #5b6478;
+  --ink-faint: #8d95a6;
+  --rule: #d7e0ec;
+  --rule-soft: #e8eef6;
+
+  --kerb-wash: #fde8e7;
+  --trim-wash: #fff6d9;
+  --box-wash: #dff7f4;
+  --turf-wash: #e2f5e2;
+
+  /* --- type ---------------------------------------------------------------- */
+
+  --display: 'Fredoka', 'Trebuchet MS', 'Avenir Next', system-ui, sans-serif;
+  --body: 'Nunito Sans', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'DM Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', monospace;
+
+  /* A deliberately short scale. Four sizes of heading is three more than this needs. */
+  --t-hero: clamp(2.6rem, 6vw, 4.4rem);
+  --t-title: clamp(2rem, 4vw, 3rem);
+  --t-section: clamp(1.4rem, 2.4vw, 1.85rem);
+  --t-body: clamp(1.125rem, 1.5vw, 1.3rem);
+  --t-small: 1rem;
+  --t-label: 0.82rem;
+
+  /* --- space and shape ----------------------------------------------------- */
+
+  --gap: 1.25rem;
+  --gap-lg: 2.5rem;
+  --gap-xl: 4rem;
+  --round: 18px;
+  --round-lg: 28px;
+  --round-pill: 999px;
+
+  /* Shadows sit warm rather than grey, so cards look lit rather than cut out. */
+  --lift: 0 2px 0 rgba(43, 48, 64, 0.08), 0 8px 22px rgba(43, 48, 64, 0.09);
+  --lift-lg: 0 3px 0 rgba(43, 48, 64, 0.1), 0 18px 44px rgba(43, 48, 64, 0.14);
+
+  --measure: 34rem;
+}
+
+/* --- reset ---------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  font-weight: 400;
+  /* The page is bright; a faint sky wash at the top keeps it from reading as a blank document. */
+  background-image: linear-gradient(180deg, var(--sky) 0%, rgba(199, 236, 255, 0) 420px);
+  background-repeat: no-repeat;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0 0 1em;
+  max-width: var(--measure);
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
+
+/* Visible, chunky, and the same everywhere. Keyboard is Jodi's only input device. */
+:focus-visible {
+  outline: 3px solid var(--track);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* --- layout --------------------------------------------------------------- */
+
+.wrap {
+  width: min(100% - 2.5rem, 60rem);
+  margin-inline: auto;
+}
+
+.stack > * + * {
+  margin-top: var(--gap);
+}
+
+.stack-lg > * + * {
+  margin-top: var(--gap-lg);
+}
+
+/* --- the eyebrow ---------------------------------------------------------- */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 0.5rem;
+}
+
+/* --- buttons -------------------------------------------------------------- */
+/*
+ * One primary button per screen, per the plan's "one obvious next button". The pressed state
+ * moves the button down onto its own shadow, which is the cheapest way to make a flat button
+ * feel like a physical one.
+ */
+
+.btn {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85em 1.6em;
+  border: none;
+  border-radius: var(--round-pill);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--rule);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--rule);
+}
+
+.btn-go {
+  background: var(--boost);
+  color: #3a1c00;
+  box-shadow: 0 3px 0 #c9670c;
+  font-size: 1.2rem;
+  padding: 0.95em 2em;
+}
+
+.btn-go:active {
+  box-shadow: 0 0 0 #c9670c;
+}
+
+.btn-quiet {
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.btn-quiet:active {
+  transform: none;
+}
+
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- cards ---------------------------------------------------------------- */
+
+.card {
+  background: var(--card);
+  border-radius: var(--round-lg);
+  padding: clamp(1.4rem, 3vw, 2.2rem);
+  box-shadow: var(--lift);
+}
+
+/*
+ * The pit board: what to go and do on the Switch.
+ *
+ * Styled unlike anything else on the page on purpose. It is the only part of a chapter that
+ * has to survive leaving the browser — she reads it, closes the laptop, and picks up a Joy-Con
+ * — so it should be the thing her eye finds when she scrolls back.
+ */
+.switch-card {
+  background: var(--box-wash);
+  border: 3px solid var(--box);
+  border-radius: var(--round-lg);
+  padding: clamp(1.4rem, 3vw, 2rem);
+  position: relative;
+}
+
+.switch-card h3 {
+  font-size: var(--t-section);
+  margin-bottom: 0.6rem;
+}
+
+.switch-card .eyebrow {
+  color: #14776c;
+}
+
+.switch-card ol,
+.switch-card ul {
+  margin: 0;
+  padding-left: 1.3em;
+}
+
+.switch-card li + li {
+  margin-top: 0.55em;
+}
+
+/* --- the mono voice ------------------------------------------------------- */
+
+.ms {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- stars ---------------------------------------------------------------- */
+
+.stars {
+  display: inline-flex;
+  gap: 0.25rem;
+  line-height: 1;
+}
+
+.star {
+  width: 1.5em;
+  height: 1.5em;
+  color: var(--rule);
+}
+
+.star[data-on='true'] {
+  color: var(--trim);
+}
+
+/* --- done stamp ----------------------------------------------------------- */
+/*
+ * Rotated, overlapping its container, and it lands with a thunk (3b1). A stamp that faded in
+ * politely would not be a stamp.
+ */
+
+.stamp {
+  display: inline-block;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--turf);
+  border: 4px solid var(--turf);
+  border-radius: 10px;
+  padding: 0.35em 0.7em;
+  transform: rotate(-7deg);
+}
+
+@keyframes stamp-in {
+  0% {
+    transform: rotate(-7deg) scale(2.4);
+    opacity: 0;
+  }
+  60% {
+    transform: rotate(-7deg) scale(0.92);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-7deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.stamp[data-fresh='true'] {
+  animation: stamp-in 0.42s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+/* --- reduced motion ------------------------------------------------------- */
+/*
+ * Everything animated here is decoration on top of a state that is already correct, so
+ * switching it all off costs nothing but the flourish.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- print ---------------------------------------------------------------- */
+/*
+ * Only Chapter 8's programme is ever printed (4d1), and it goes on a fridge. Everything that
+ * is navigation, decoration or interactive is dropped.
+ */
+
+@media print {
+  body {
+    background: #fff;
+    font-size: 11pt;
+  }
+
+  .no-print,
+  .lap-map,
+  .site-header,
+  .site-footer,
+  .btn {
+    display: none !important;
+  }
+
+  .card,
+  .switch-card {
+    box-shadow: none;
+    border: 1px solid #999;
+    break-inside: avoid;
+  }
+}
