@@ -5,19 +5,44 @@
  * ending at Chapter 7 with "go and set up your Switch", and Chapter 8 as the material she keeps
  * after the browser is closed.
  *
- * Everything static about a chapter lives here — title, hook, video, the On-the-Switch card —
- * so the chapter list, the lap map and the router can all be built without loading a single
- * chapter module. The modules themselves are dynamically imported (see `chapter-registry.ts`),
- * which is what keeps Three.js out of the concept-only chapters.
+ * Everything static about a chapter lives here — title, hook, video, whether it has a practice
+ * page — so the chapter list, the lap map and the router can all be built without loading a
+ * single chapter module. The modules themselves are dynamically imported (see
+ * `chapter-registry.ts`), which is what keeps Three.js out of the concept-only chapters.
  *
  * **Copy in this file uses `{name}` and `{rival}`.** Never a literal "Jodi" — see `types.ts`.
  *
- * **On the videos.** Eight links were verified live on 2026-08-06 (titles and channels recorded
- * in the plan's shortlist). Only four of them are general tutorials, and the plan maps those to
- * specific chapters; the other four are per-track deep dives that belong to Chapter 8. Chapters
- * with no verified video get no video rather than a plausible-looking one, and no `start` time
- * is invented anywhere — trimming to a timestamp means watching the video, which is step 2b9 and
- * belongs to a human.
+ * **On the videos. (Riggs, 2026-08-12 — this replaces the 2026-08-06 shortlist.)**
+ *
+ * The old rule was "one general tutorial per chapter where one exists", and it produced exactly
+ * the problem Riggs called out on playtest: a chapter about the start boost sending her to a
+ * thirty-seven-minute omnibus that covers the start boost somewhere in the middle. A video that
+ * has to be scrubbed through is a video she will not watch.
+ *
+ * The rule now is **one mechanic per video, or no video at all.** A chapter with no
+ * single-purpose video available gets none — the concept section and the drill are the teaching,
+ * and the intro video in Chapter 0 already covers the fundamentals in one sitting.
+ *
+ * What survived that rule, and why. Every timestamp below is the uploader's own chapter marker,
+ * read off the video page on 2026-08-12 rather than guessed:
+ *
+ *  - **Ch0 — Bayesic, "How to Play Mario Kart 8 Deluxe"** (12m32s). The anchor. Its own sections
+ *    run Basics / Essential mechanics / Item management / Putting it together, which is the whole
+ *    of Chapters 1–4 in one place from somebody who explains well.
+ *  - **Ch5 — Bayesic, "What is the point of COINS?"** (5m00s). One mechanic, five minutes, and it
+ *    ends by costing coins out in seconds-per-race. It is linked from the intro video's own
+ *    description, which is how it was found.
+ *  - **Ch6 — Bayesic, "Everything You Need to Know About Drifting"** (13m3s). Starts at 1:31, the
+ *    uploader's "Basics of Drifting" mark. The two sections after 5:03 are competitive tech and
+ *    she is told to stop there.
+ *
+ * All three are the same person, which was not the plan and is better than the plan: one voice
+ * across the course reads as a recommendation rather than a pile of search results.
+ *
+ * **Cut, with reasons.** Shortcat's "FULL Beginner Guide" was Chapter 2's item video — it is
+ * thirty-seven minutes long and reaches items at 11:03. SwitchPlay's "Complete Beginner's Guide"
+ * was Chapter 5's; it is a nine-minute tour of the entire game, and its description states it was
+ * narrated by an AI voice. On a present, that one disqualifies itself.
  */
 
 export interface VideoRef {
@@ -31,11 +56,25 @@ export interface VideoRef {
   note?: string;
 }
 
-export interface SwitchCard {
+/**
+ * The practice page. (Riggs, 2026-08-12.)
+ *
+ * Every chapter used to be one long scroll: concept, then video, then a drill, then a card
+ * telling her what to go and do on the Switch. Seeing it rendered settled it — the drill turned
+ * up two thirds of the way down a page she was still reading, and reading and playing want
+ * different postures.
+ *
+ * So a chapter is now two pages. **Learn** is prose and a video and nothing that moves. **Try it**
+ * is the drill, on its own, with the chapter's one idea restated above it in a sentence. The split
+ * is here in the data rather than inferred from whether a module exports an `interactive`, because
+ * the home page and the router both need to know a practice page exists without loading the
+ * chapter's chunk — which is the whole reason Three.js stays out of the concept chapters.
+ */
+export interface Drill {
+  /** Heading on the practice page. Names the exercise, not the skill. */
   title: string;
-  steps: string[];
-  /** The one line to remember if she reads nothing else. */
-  rule?: string;
+  /** One line under it: what she is actually about to do. */
+  blurb: string;
 }
 
 /**
@@ -63,7 +102,8 @@ export interface ChapterMeta {
   /** One or two lines. The reason to care, before any teaching happens. */
   hook: string;
   video?: VideoRef;
-  onSwitch?: SwitchCard;
+  /** Present when this chapter has a practice page at `#/chapter/<id>/try`. */
+  drill?: Drill;
   stars?: StarRule;
   /** Chapter 8 renders itself; the template steps aside. */
   custom?: boolean;
@@ -80,8 +120,14 @@ export const CHAPTERS: ChapterMeta[] = [
       id: 'CpeyjM8dyuk',
       title: 'How to Play Mario Kart 8 Deluxe — The video I WISH I had when I first started',
       channel: 'Bayesic',
-      note: 'Worth eight minutes of your life. Ignore the drifting section for now — that is Chapter 6, and it is optional.',
+      note: 'Twelve minutes, and the only long one in the whole course. Watch it now and the next six chapters will feel like things you already half knew. He is the only person you will hear from besides me.',
     },
+    drill: {
+      title: 'Five from the video',
+      blurb:
+        'Five quick ones, straight off the back of that video. Nothing is marked and nothing is locked — a wrong answer just explains itself.',
+    },
+    stars: { unit: 'right out of 5', two: 3, three: 4 },
   },
   {
     id: 'ch1',
@@ -89,15 +135,10 @@ export const CHAPTERS: ChapterMeta[] = [
     skill: 'Start boost',
     title: 'The race is won before it starts',
     hook: 'There is free speed on the start line and most people never take it. It costs you nothing, it works with your settings, and it happens before {rival} has touched anything.',
-    onSwitch: {
-      title: 'Do this on the Switch',
-      rule: 'Every single race. Start holding as the 2 disappears.',
-      steps: [
-        'Start any race. As the countdown shows 2 and it begins to vanish, hold A and keep holding it through GO.',
-        'You will hear it and feel it — the kart lurches forward instead of pulling away normally.',
-        'Do it every race for a week, including races you do not care about. This is the one skill that should become automatic.',
-        'If you get it wrong, you simply start normally. There is no penalty for trying, so there is no reason not to.',
-      ],
+    drill: {
+      title: 'Five starts',
+      blurb:
+        'A countdown, five times over. Hold as the 2 vanishes and keep holding through GO. Nothing else on screen matters.',
     },
     stars: { unit: 'good starts out of 5', two: 3, three: 4 },
   },
@@ -107,21 +148,10 @@ export const CHAPTERS: ChapterMeta[] = [
     skill: 'Item smarts',
     title: 'The banana behind you',
     hook: 'You do not need to aim anything. You do not need to be fast. You need to stop firing things the second you get them, and start carrying them behind you like a shield.',
-    video: {
-      id: 'KADBlsfmIjQ',
-      title: 'FULL Beginner Guide | Tips to Help You WIN at Mario Kart 8 Deluxe!',
-      channel: 'Shortcat',
-      note: 'The item section is the part that matters to you. The shortcuts are not for us.',
-    },
-    onSwitch: {
-      title: 'Do this on the Switch',
-      rule: 'One banana held behind you beats ten mid-pack heroics.',
-      steps: [
-        'Play one whole race where you never fire a single item forwards. Hold everything behind you instead.',
-        'Notice how often something hits the thing you are carrying rather than hitting you.',
-        'The one exception: a red shell. Fire it, because it steers itself and does not need aiming.',
-        'If you have two items and one is junk, spend the junk before the next item box — a full pair means the box gives you nothing.',
-      ],
+    drill: {
+      title: 'Hold the banana',
+      blurb:
+        'Six shells are coming. Hold your banana behind you and they hit that instead of you. Let go at the wrong moment and you find out why holding matters.',
     },
     stars: { unit: 'shells blocked out of 6', two: 3, three: 5 },
   },
@@ -131,15 +161,10 @@ export const CHAPTERS: ChapterMeta[] = [
     skill: 'Ramp tricks',
     title: 'Every ramp is free speed',
     hook: 'Every time you go over a bump, a ramp or a jump, there is a boost sitting there waiting. One button, at the right moment, and you land going faster than you took off.',
-    onSwitch: {
-      title: 'Do this on the Switch',
-      rule: 'If the kart leaves the ground, press the button.',
-      steps: [
-        'Press R (or whichever shoulder button you have) right as the kart reaches the top of a ramp.',
-        'You will see the kart do a flip or a spin. That flourish is the tell — no flourish means no boost.',
-        'Practise on one track until you get it on every ramp, then stop thinking about it.',
-        'Getting it wrong costs you nothing at all. A missed trick is just a normal jump.',
-      ],
+    drill: {
+      title: 'Six ramps',
+      blurb:
+        'Six ramps, one lap. Press the button at the top of each one and watch for the flourish — no flourish, no boost.',
     },
     stars: { unit: 'clean tricks out of 6', two: 3, three: 5 },
   },
@@ -149,15 +174,10 @@ export const CHAPTERS: ChapterMeta[] = [
     skill: 'Boost pads',
     title: 'The fast way round is not the tight way round',
     hook: 'The orange arrows on the road are free speed, and here is the thing nobody tells you: they are often not on the line you would naturally drive. Knowing where they are is worth more than driving well.',
-    onSwitch: {
-      title: 'Do this on the Switch',
-      rule: 'Go the long way if the long way is boosted.',
-      steps: [
-        'On Mario Kart Stadium, after the first right turn, take the OUTER lane. The dash panels and the coins are both out there.',
-        'Drive one lap where your only goal is hitting every orange arrow you can find. Ignore your position entirely.',
-        'Do that on each of the four Mushroom Cup tracks once. You are building a map, not practising driving.',
-        '{rival} is hugging the inside because it looks shorter. Let her.',
-      ],
+    drill: {
+      title: 'Find the arrows',
+      blurb:
+        'Eight boost pads, and several of them are nowhere near the line you would drive by instinct. Go and get them anyway.',
     },
     stars: { unit: 'pads hit out of 8', two: 5, three: 7 },
   },
@@ -165,48 +185,42 @@ export const CHAPTERS: ChapterMeta[] = [
     id: 'ch5',
     number: 5,
     skill: 'Lines and coins',
-    title: 'What Kendahl already knows',
-    hook: 'Kendahl does not drift. She does not defend with items. She takes no risks at all. And she beats {rival} regularly, because she drives a tidy line and picks up coins. This is the highest-scoring chapter in the whole course.',
+    title: 'The fast way round a corner',
+    hook: 'Every corner has a good path through it and a bad one, and the bad one is the one everybody picks by instinct. This is the highest-scoring chapter in the course, and it is the only skill here that never has an off day.',
     video: {
-      id: 'yRuAdvRxCQA',
-      title: "Mario Kart 8 Deluxe Complete Beginner's Guide 2023",
-      channel: 'SwitchPlay Gaming',
-      note: 'The coins section is the one to watch. Ten coins is a real speed increase and almost nobody bothers.',
+      id: 'IlQRlP7FAlc',
+      title: 'What is the point of COINS in Mario Kart 8 Deluxe?',
+      channel: 'Bayesic',
+      note: 'Five minutes, one subject. He works out at the end roughly how many seconds a race full coins is worth, which is the number nobody ever tells you.',
     },
-    onSwitch: {
-      title: 'Do this on the Switch',
-      rule: 'Ten coins by the end of lap one. Every race.',
-      steps: [
-        'Run one solo 100cc race where the only goal is finishing with ten coins. Do not think about position.',
-        'Time Trials on Mario Kart Stadium and Water Park. Race your own ghost and try to beat it — not a record, just yesterday-you.',
-        'Coins are speed AND armour: you lose three every time something hits you, which is another reason to carry that banana.',
-        'Follow the same line every lap until it feels boring. Boring is the goal.',
-      ],
+    drill: {
+      title: 'Follow the line',
+      blurb:
+        'There is a line painted on the road. Sit on it. The score is the share of the lap you spend on it, so smooth beats quick every single time.',
     },
-    stars: { unit: 'coins held at the line', two: 6, three: 10 },
+    stars: { unit: '% of the lap on the line', two: 55, three: 75 },
   },
   {
     id: 'ch6',
     number: 6,
     skill: 'The drift',
-    title: 'Drifting, explained once',
-    hook: 'This is the one everybody talks about, and it is the one you need least. Here is what it actually is, why your settings still allow most of it, and why you should learn it last if at all.',
+    title: 'Drifting is a boost you steer with',
+    hook: 'This is the one everybody talks about, and it is worth the fuss. It is not a cornering trick — it is a way of *manufacturing* a boost out of a corner you had to take anyway, and it works with your settings exactly as they are.',
     video: {
       id: '_21NuS0xjfc',
       title: 'Everything You Need to Know About Drifting in Mario Kart 8 Deluxe',
       channel: 'Bayesic',
-      note: 'This gets technical fast. Watch the first couple of minutes; the purple sparks near the end are switched off by your steering setting anyway.',
+      // 1:31 is the uploader's own "Basics of Drifting" mark; 5:03 begins "Mini Turbo Deep Dive",
+      // which is competitive tech and not for her. Both read off the video page, not guessed.
+      start: 91,
+      note: 'It starts you at the good bit. **Stop at about five minutes** — after that it turns into a deep dive for people who play this for money.',
     },
-    onSwitch: {
-      title: 'Do this on the Switch — but only when the rest is automatic',
-      rule: 'Blue sparks then orange sparks, on long corners only.',
-      steps: [
-        'Hold the drift button through one long sweeping corner. Sweet Sweet Canyon has the best ones in your cup.',
-        'Watch for blue sparks, then orange. Let go and you get a boost.',
-        'Do not attempt this in tight corners or in traffic. It is worth nothing there and it costs you your line.',
-        'If this feels like too much, skip it. Kendahl does.',
-      ],
+    drill: {
+      title: 'Six corners',
+      blurb:
+        'Hop into the corner, hold it, watch the sparks turn from blue to orange, and let go on the way out. Six chances, and a missed one costs you nothing.',
     },
+    stars: { unit: 'mini-turbos out of 6', two: 3, three: 5 },
   },
   {
     id: 'ch7',
@@ -214,15 +228,10 @@ export const CHAPTERS: ChapterMeta[] = [
     skill: 'Your kart',
     title: 'Pick your weapon',
     hook: 'One decision, made once, and then never again. At 100cc with items on, the kart that recovers quickly beats the kart that goes fastest — because you are going to get hit, and what matters is how quickly you are back up to speed.',
-    onSwitch: {
-      title: 'Do this on the Switch — right now, before you forget',
-      rule: 'Set it once. Never think about it again.',
-      steps: [
-        'Go to the character select screen and set your combo up now, while it is fresh.',
-        'The headline pick: Yoshi, Teddy Buggy, Roller tyres, Cloud glider.',
-        'Roller tyres are the important part. If you change nothing else, change the tyres.',
-        'That is the classroom finished. Chapter 8 is what you take with you.',
-      ],
+    drill: {
+      title: 'Build your kart',
+      blurb:
+        'Three builds that all work, and the numbers behind them. Pick one and the plan at the end of the course will remember it.',
     },
   },
   {
@@ -230,7 +239,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 8,
     skill: 'The plan',
     title: 'The {rival} Plan',
-    hook: 'Everything above was the classroom. This is the training programme, the cup you are going to own, and a map of all four of its tracks. Print it and stick it on the fridge.',
+    hook: 'Everything above was the classroom. This is the training programme: forty sessions, one a day, weekdays only. One job per session, and the grid fills in as you go.',
     custom: true,
   },
 ];
@@ -250,6 +259,9 @@ export function previousChapter(id: string): ChapterMeta | undefined {
   const index = CHAPTERS.findIndex((chapter) => chapter.id === id);
   return index > 0 ? CHAPTERS[index - 1] : undefined;
 }
+
+/** The last chapter. Finishing it is what unlocks the plan as her landing page. */
+export const FINAL_CHAPTER_ID = 'ch8';
 
 /**
  * Stars for a score, against a chapter's rule. One for finishing, which is the plan's
