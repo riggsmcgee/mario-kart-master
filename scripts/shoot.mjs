@@ -48,6 +48,7 @@ const OUT = value('out', 'screenshots');
 const ROUTES = [
   ['home', '/#/', 'A present, with homework'],
   ['settings', '/#/settings', 'Bits and pieces'],
+  ['plan', '/#/plan', 'Forty sessions'],
   ['ch0-intro', '/#/chapter/ch0', 'Chapter 0 · The promise'],
   ['ch1-start-boost', '/#/chapter/ch1', 'Chapter 1 · Start boost'],
   ['ch2-items', '/#/chapter/ch2', 'Chapter 2 · Item smarts'],
@@ -57,15 +58,49 @@ const ROUTES = [
   ['ch6-drift', '/#/chapter/ch6', 'Chapter 6 · The drift'],
   ['ch7-kart', '/#/chapter/ch7', 'Chapter 7 · Your kart'],
   ['ch8-plan', '/#/chapter/ch8', 'Chapter 8 · The plan'],
+
+  // The practice pages. Added when the chapters were split in two (2026-08-12) — and they need
+  // checking at least as much as the lessons do, because a `/try` route that quietly falls back to
+  // the lesson is exactly the class of bug that got this file its `expect` column in the first
+  // place. Each one expects its *drill* heading, which only the practice page draws.
+  ['ch0-try', '/#/chapter/ch0/try', 'Five from the video'],
+  ['ch1-try', '/#/chapter/ch1/try', 'Five starts'],
+  ['ch2-try', '/#/chapter/ch2/try', 'Hold the banana'],
+  ['ch3-try', '/#/chapter/ch3/try', 'Six ramps'],
+  ['ch4-try', '/#/chapter/ch4/try', 'Find the arrows'],
+  ['ch5-try', '/#/chapter/ch5/try', 'Follow the line'],
+  ['ch6-try', '/#/chapter/ch6/try', 'Six corners'],
+  ['ch7-try', '/#/chapter/ch7/try', 'Build your kart'],
+
   ['testbed', '/testbed/', 'The Testing Ground'],
+];
+
+/**
+ * Requests that are allowed to fail, matched on the **URL** rather than on the console text.
+ *
+ * This used to be a console-message pattern (`/Failed to load resource.*audio\/ch\d\.mp3/`) and it
+ * only worked against the dev server, which happens to put the URL in the message. Served the way
+ * Pages serves it, Chromium logs a bare "Failed to load resource: 404" for the audio probe with no
+ * filename in it — so the pattern missed, and every lesson page failed for a file that is missing
+ * on purpose. Matching the request URL is what the rule always meant.
+ */
+const ALLOWED_MISSING = [
+  /\/audio\/ch\d\.mp3$/i, // voiceovers not recorded yet (3c2), and the player copes by design
+  /favicon/i,
+  // Google's font CDN, which is not ours and drops the odd request. `theme.css` names a full
+  // fallback stack for all three faces, so a miss costs the look and nothing else. A genuinely
+  // wrong font URL would fail on every route rather than one, which is still visible here.
+  /^https:\/\/fonts\.gstatic\.com\//i,
 ];
 
 /** Console noise that is expected and not a defect. */
 const IGNORE = [
-  /Failed to load resource.*audio\/ch\d\.mp3/i, // voiceovers not recorded yet, by design
   /favicon/i,
   /Download the React DevTools/i,
   /WebGL.*deprecated/i,
+  // Paired with ALLOWED_MISSING above: the failed request is reported by the response handler,
+  // which knows the URL, so the console's URL-less echo of the same thing is noise.
+  /^Failed to load resource: the server responded with a status of 404/i,
 ];
 
 async function startServer() {
@@ -113,6 +148,15 @@ for (const [name, path, expect] of ROUTES) {
     problems.push(`console: ${text}`);
   });
   page.on('pageerror', (error) => problems.push(`threw: ${error.message}`));
+
+  // The real check for missing files. A 404 the app shrugs off is still a 404, and this is the
+  // only place that knows which URL it was.
+  page.on('response', (response) => {
+    if (response.status() < 400) return;
+    const url = response.url();
+    if (ALLOWED_MISSING.some((pattern) => pattern.test(url))) return;
+    problems.push(`${response.status()}: ${url}`);
+  });
 
   try {
     await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 30_000 });

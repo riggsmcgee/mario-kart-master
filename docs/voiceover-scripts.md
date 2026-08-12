@@ -44,7 +44,7 @@ the file by name.
 
 ## Chapter 0 — So you want to beat Kayla at Mario Kart?
 
-**Target:** 60–90 seconds (~230 words)
+**Target:** 60–90 seconds (~260 words)
 **Tone:** Warm and conspiratorial — you are letting her in on a plan, not opening a lecture. Slow
 right down on the homework line; it is the thesis of the entire site. The last two lines are a
 grin, so grin while you say them.
@@ -63,14 +63,14 @@ grin, so grin while you say them.
 >
 > You're about to know. All of it.
 >
-> Nine short chapters, about half an hour. One idea each, and a little toy version of it right here
-> so you can feel it once.
+> Nine short chapters, about half an hour. Each one is two pages: a page that explains the idea,
+> and then a page where you get to try it, so it lands in your hands instead of just your head.
 >
-> Then the real work happens on your Switch. Every chapter ends with a card telling you exactly
-> what to go and practise. That is the course. This is just the classroom.
+> Then the real work happens on your Switch, and the last chapter is where that lives — forty
+> short sessions with one job each. That's the course. This is just the classroom.
 >
-> Fair warning. You'll be terrible at the drills for two minutes. Everybody is. Nothing here can be
-> broken and nothing counts against you.
+> Fair warning. You'll be terrible at the drills for two minutes. Everybody is. Nothing here can
+> be broken and nothing counts against you.
 >
 > I can't promise you'll beat her. I can promise that one evening she is going to look over and
 > say, when did you learn that. And you get to shrug.
@@ -88,12 +88,12 @@ you did.
 
 > There is free speed sitting on the start line, Jodi, and almost nobody picks it up.
 >
-> The countdown goes three, two, one, GO. When the _two_ starts to fade off the screen — that is
+> The countdown goes three, two, one, GO. When the *two* starts to fade off the screen — that is
 > your moment. Hold the accelerator then, and keep holding it.
 >
 > Now, you've got auto-accelerate switched on, so you'd think holding the button does nothing. I
-> didn't believe it either. So I went and tested it on my own Switch. **It still works.** You still
-> get the boost.
+> didn't believe it either. So I went and tested it on my own Switch. **It still works.** You
+> still get the boost.
 >
 > Get the timing wrong and you just start normally. That is the entire punishment. So there is
 > genuinely no reason not to try it every single race.
@@ -104,47 +104,48 @@ you did.
 >
 > What do you win? About a kart length. Which does not sound like much.
 >
-> It's the difference between arriving at the first corner in front of Kayla or behind her. And she
-> goes very quiet when she's behind you.
+> It's the difference between arriving at the first corner in front of Kayla or behind her. And
+> she goes very quiet when she's behind you.
 
 ---
 
 ## Chapter 2 — The banana behind you
 
-**Target:** 60–90 seconds (~230 words)
+**Target:** 60–90 seconds (~240 words)
 **Tone:** The most emphatic of the nine. This one is a coach talking, not a chat. Land "hold the
 button down" as an instruction and let it sit for a beat. The doorway joke is throwaway — do not
 sell it.
 
-> This is the chapter that wins you races, Jodi. If you skim one of them, don't let it be this one.
+> This is the chapter that wins you races, Jodi. If you skim one of them, don't let it be this
+> one.
 >
-> When you get an item, your instinct is to use it. Fire it, throw it, get it gone. That instinct is
-> losing you races.
+> When you get an item, your instinct is to use it. Fire it, throw it, get it gone. That instinct
+> is losing you races.
 >
-> **Hold the button down and the item sits behind your kart.** A banana, a shell, it does not matter
-> which. Anything that arrives at your back bumper hits that instead of hitting you.
+> **Hold the button down and the item sits behind your kart.** A banana, a shell, it does not
+> matter which. Anything that arrives at your back bumper hits that instead of hitting you.
 >
-> And holding costs you nothing. No speed, no steering, no downside. You can carry a banana round a
-> whole lap and all it does is protect you.
+> And holding costs you nothing. No speed, no steering, no downside. You can carry a banana round
+> a whole lap and all it does is protect you.
 >
-> One exception. The red shell. Fire that one, because it steers itself — it's the only item in the
-> game you can't miss with. Everything else stays behind you.
+> One exception. The red shell. Fire that one, because it steers itself — it's the only item in
+> the game you can't miss with. Everything else stays behind you.
 >
 > I know a green shell feels like a weapon. Not really — it flies dead straight, so hitting a kart
 > that's weaving is luck, not skill. And a miss leaves your back bare, just as the shell that was
 > coming for you arrives.
 >
-> A mushroom is different again. That is a boost, not armour, so save it for a straight bit of road.
-> A mushroom in a corner is like sprinting in a doorway.
+> A mushroom is different again. That is a boost, not armour, so save it for a straight bit of
+> road. A mushroom in a corner is like sprinting in a doorway.
 >
-> There's a drill here where shells come at you from behind, and some quick questions after it. Six
-> shells. Hold the button, keep the banana, and not one of them touches you.
+> There's a drill here where shells come at you from behind, and some quick questions after it.
+> Six shells. Hold the button, keep the banana, and not one of them touches you.
 
 ---
 
 ## Chapter 3 — Every ramp is free speed
 
-**Target:** 60–90 seconds (~185 words)
+**Target:** 60–90 seconds (~190 words)
 **Tone:** Light and easy. This is the cheapest skill in the game and it should sound like it.
 "Like a sensible person" is the only joke — say it dry. Warm on the last paragraph: it is a
 compliment disguised as a fact about Kayla.
@@ -155,13 +156,14 @@ compliment disguised as a fact about Kayla.
 > shoulder button. The kart does a little flip in the air, and you land going faster than you took
 > off.
 >
-> That flip is the tell, Jodi. A spin means you got it. If it sails over like a sensible person, you
-> missed it.
+> That flip is the tell, Jodi. A spin means you got it. If it sails over like a sensible person,
+> you missed it.
 >
-> The timing is the whole skill. Not on the way up. Not floating about in the air. Right at the top.
+> The timing is the whole skill. Not on the way up. Not floating about in the air. Right at the
+> top.
 >
-> And missing costs you absolutely nothing. A missed trick is just a jump. So press it every time —
-> ramps, jumps, bumps, that little rise where the road changes.
+> And missing costs you absolutely nothing. A missed trick is just a jump. So press it every time
+> — ramps, jumps, bumps, that little rise where the road changes.
 >
 > The drill here has six ramps round a loop, and it tells you how early or late you were. Don't
 > chase a perfect score. Chase the habit.
@@ -173,7 +175,7 @@ compliment disguised as a fact about Kayla.
 
 ## Chapter 4 — The fast way round is not the tight way round
 
-**Target:** 60–90 seconds (~200 words)
+**Target:** 60–90 seconds (~210 words)
 **Tone:** The reveal chapter. Quiet and matter-of-fact on the setup, then put the weight on "not on
 the line you would naturally drive" and pause after it. "Let her" is allowed to be a little smug.
 
@@ -202,87 +204,102 @@ the line you would naturally drive" and pause after it. "Let her" is allowed to 
 
 ---
 
-## Chapter 5 — What Kendahl already knows
+## Chapter 5 — The fast way round a corner
 
-**Target:** 60–90 seconds (~195 words)
-**Tone:** The sincere one. No jokes needed anywhere in this chapter — the story does the work.
-Open flat and unhurried, like you are about to tell her something she has never noticed about her
-own kitchen table. Slow the last two lines right down.
+**Target:** 60–90 seconds (~310 words)
+**Tone:** The sincere one. Open by meaning it — "this is the big one" is not a hook, it is true,
+and it should sound like you have thought about which chapter matters most. Take "wide, tight,
+wide" slowly enough that she could say it along with you. The Kendahl line at the end is an
+afterthought you happened to remember: throw it away, do not land it.
 
-> I want to talk about Kendahl.
+> This is the big one, Jodi. If you take one thing away from this whole website, take this
+> chapter.
 >
-> She doesn't drift. She doesn't do anything clever with items. She takes no risks whatsoever. And
-> she beats Kayla. Regularly.
+> Everything else I've taught you is a knack — a button at the right moment, an item held at the
+> right time. Knacks have bad days. This one doesn't.
 >
-> All she does is drive a tidy line and pick up coins. That's it. That is the whole thing, and the
-> proof of it is sitting in your own family.
+> Here's the idea. Every corner has a good path through it and a bad one, and the bad one is the
+> one everybody picks by instinct, which is to hug the inside all the way round. Shortest, yes.
+> Fastest, no.
 >
-> So. Coins. Ten of them and your kart is genuinely faster. Not a trick, not a myth — more top
-> speed, for picking things up off the road. Almost nobody bothers.
+> The good way is three parts. Wide going in. Tight through the middle. Wide coming out. It is a
+> longer path on paper and a faster one in the kart, because you never have to slow down as much
+> and you come out pointing at the next corner instead of at a wall.
 >
-> They're armour as well. Every time something hits you, you lose three of them. Which is one more
-> reason to be carrying that banana from chapter two.
+> And underneath all of it: be smooth. Most of the speed people lose isn't lost in corners at all
+> — it's lost sawing left, right, left, right down a straight. Pick a line, sit on it, stop
+> fiddling.
 >
-> Then the line. Same line every lap, until it is boring. Boring is the goal. Boring means you're
-> not thinking, and not thinking is fast.
+> Coins, while we are here. Ten of them and your kart is genuinely faster. Not a trick, not a
+> myth. It stops at ten, so ten is the number, and almost nobody bothers.
 >
-> The drill paints a good line on the road for you and then fades it away as you get the hang of it.
-> Ten coins at the finish and you've got it.
+> They're armour as well. Every time something hits you, you drop three. Which is one more reason
+> to be carrying that banana from chapter two.
 >
-> This is the highest-scoring chapter in the whole course, Jodi. If you take one thing away from
-> this website, take this one. Take Kendahl.
+> On the next page there's a line painted straight onto the road. Your score is how much of the
+> lap you spend sitting on it — not how much of it you touch. Smooth wins.
+>
+> Oh — and this is exactly what Kendahl does, incidentally. No drifting, no items, no risks. A
+> tidy line and her coins, and she beats Kayla regularly. Make of that what you like.
 
 ---
 
-## Chapter 6 — Drifting, explained once
+## Chapter 6 — Drifting is a boost you steer with
 
-**Target:** 60–90 seconds (~215 words)
-**Tone:** Relaxed and permission-giving. You are actively telling her she is allowed to skip this,
-so do not sound like you are selling it. Take the drafting aside faster and lighter, like you have
-just remembered it. "Kendahl does" is the last word — deadpan, then stop.
+**Target:** 60–90 seconds (~310 words)
+**Tone:** Let-me-in-on-it. The second paragraph is the one to slow right down on — "not a way of
+taking a corner, a way of manufacturing a boost" is the whole chapter and everything after it is
+consequences. Brighten up on "long corners only"; that is the practical bit she can use tonight.
+Take the drafting aside faster and lighter, like you have just remembered it.
 
-> Right. Drifting. The famous one. The one everybody goes on about.
+> Right. Drifting. The famous one, the one everybody goes on about — and for once the fuss is
+> fair.
 >
-> And I'll be straight with you: it's the one you need least. That is why it is chapter six and not
-> chapter one.
+> But here's the bit nobody says out loud. A drift is not a way of taking a corner. It is a way of
+> manufacturing a boost out of a corner you had to take anyway. Get that and the whole thing makes
+> sense.
 >
-> Here is what it actually is. You hold the drift button through a corner and the kart slides round
-> it instead of steering round it. Sparks come off the back wheels. Blue first, then orange. Let go
-> while they are glowing and you fire out of the corner.
+> So: you hold the drift button through the corner and the kart slides round instead of steering
+> round. Sparks come off the back wheels. Blue first, then orange. Let go while they are glowing
+> and you fire out of the corner.
 >
-> With your steering assist switched on, blue and orange both still work. There is a third one,
-> purple, that your settings turn off. You are not missing anything you need.
+> Blue arrives quickly and is worth very little. Orange takes about a second and a half and is
+> worth nearly three of them. There is a third colour, purple, and you can ignore it entirely — it
+> needs a longer drift than any corner in your cup, and it is for people who play this for a
+> living.
 >
-> Where it pays is long sweeping corners. Where it doesn't is tight ones, or traffic, or anywhere
-> you'd rather just drive the corner properly.
+> Which brings us to the part people skip, and it is the useful part: long corners only. On a
+> tight one you spend the whole thing charging a spark that never arrives and you come out slower
+> than if you'd just driven round it. On a long sweeper you get orange and you leave faster than
+> you went in. Sweet Sweet Canyon is full of exactly those.
 >
 > While I've got you — thirty seconds on drafting. Sit right behind another kart down a long
 > straight and their air pulls you along with them. You'll feel it happen. So next time Kayla is
 > just ahead of you, tuck in behind her and wait. Free speed for doing nothing, which is my
 > favourite kind.
 >
-> No drill this time. Nothing to press. Watch the diagram, watch the clip, and if it all sounds like
-> too much then skip it. Genuinely. Kendahl does.
+> Next page you get six corners to try it on. Nothing is at stake and a fluffed one costs you
+> nothing at all, so go and fluff a few.
 
 ---
 
 ## Chapter 7 — Pick your weapon
 
-**Target:** 60–90 seconds (~195 words)
+**Target:** 60–90 seconds (~200 words)
 **Tone:** Decisive. Short sentences, no hedging, no "you could also" — she should come away feeling
 handed an answer rather than a menu. Say the combo slowly enough that she could write it down.
 
 > One decision, Jodi. You make it once and then you never think about it again.
 >
 > The temptation is to pick whatever looks fastest. Don't. With items switched on you are going to
-> get hit — that is not pessimism, that's the game. So what matters is not your top speed. It's how
-> quickly you are back up to speed after something knocks you sideways.
+> get hit — that is not pessimism, that's the game. So what matters is not your top speed. It's
+> how quickly you are back up to speed after something knocks you sideways.
 >
 > Which means acceleration and handling. Top speed is the bar that looks best on the screen and
 > helps you least.
 >
-> My pick for you: **Yoshi, the Teddy Buggy, roller tyres, and the cloud glider.** Quick to recover,
-> easy to steer, very hard to get wrong.
+> My pick for you: **Yoshi, the Teddy Buggy, roller tyres, and the cloud glider.** Quick to
+> recover, easy to steer, very hard to get wrong.
 >
 > The tyres are the important part. The little fat roller ones. If you change nothing else on that
 > whole screen, change the tyres.
@@ -291,8 +308,8 @@ handed an answer rather than a menu. Say the combo slowly enough that she could 
 > three is fine. What is not fine is swapping it about every week. You can't learn a kart you keep
 > changing.
 >
-> And that is the classroom finished. Go and set it up on the Switch now, while it's fresh. Chapter
-> eight is the bit you keep.
+> And that is the classroom finished. Go and set it up on the Switch now, while it's fresh.
+> Chapter eight is the bit you keep.
 
 ---
 
@@ -308,12 +325,13 @@ call". Stop talking after it.
 > Three or four sessions a week, fifteen or twenty minutes each. That's less than an episode of
 > anything.
 >
-> One cup: the Mushroom Cup. Four tracks. You're going to know those four the way you know your own
-> street — and when it is your turn to pick, you pick them. Every time. Don't be polite about it.
+> One cup: the Mushroom Cup. Four tracks. You're going to know those four the way you know your
+> own street — and when it is your turn to pick, you pick them. Every time. Don't be polite about
+> it.
 >
-> There is a guide in here for each one. Where the pads are, where the coins are, the single hazard
-> that actually matters. Read the overviews now. The deep dives are for about week three, when the
-> words will mean something.
+> There is a guide in here for each one. Where the pads are, where the coins are, the single
+> hazard that actually matters. Read the overviews now. The deep dives are for about week three,
+> when the words will mean something.
 >
 > And there is a ladder to climb. Beat your own ghost. Then finish top three against the computer.
 > Then win the cup against the computer. Then take one race off Kayla. Then take the whole cup off
