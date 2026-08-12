@@ -144,10 +144,11 @@ export const CHARACTERS: readonly Character[] = [
   character('baby-rosalina', 'Baby Rosalina', 'feather'),
   character('lemmy', 'Lemmy', 'feather', 'A tiny menace. Identical to the babies where it counts.'),
 
-  character('toad', 'Toad', 'light', 'Almost as nippy as a baby, and rather less embarrassing.'),
-  character('toadette', 'Toadette', 'light'),
+  character('toadette', 'Toadette', 'light', 'Nippy, cheerful, and identical to Toad on paper.'),
+  character('toad', 'Toad', 'light'),
   character('koopa-troopa', 'Koopa Troopa', 'light'),
   character('shy-guy', 'Shy Guy', 'light'),
+  character('wendy', 'Wendy', 'light'),
   character(
     'isabelle',
     'Isabelle',
@@ -155,24 +156,48 @@ export const CHARACTERS: readonly Character[] = [
     'Polite, organised, quietly quick. Make of that what you will.',
   ),
 
-  character('yoshi', 'Yoshi', 'medium', 'The sensible middle. Nothing about him is a problem.'),
-  character('peach', 'Peach', 'medium'),
+  character('peach', 'Peach', 'medium', 'The sensible middle. Nothing about her is a problem.'),
   character('daisy', 'Daisy', 'medium'),
+  character('birdo', 'Birdo', 'medium'),
+  character('yoshi', 'Yoshi', 'medium'),
   character('mario', 'Mario', 'medium'),
   character('luigi', 'Luigi', 'medium'),
 
+  character('rosalina', 'Rosalina', 'cruiser', 'Tall, unbothered, and hard to shift off a line.'),
   character('waluigi', 'Waluigi', 'cruiser', 'Heavy enough to hold his ground, and still turns.'),
-  character('rosalina', 'Rosalina', 'cruiser'),
-  character(
-    'donkey-kong',
-    'Donkey Kong',
-    'cruiser',
-    'You will not be moved. You will also not be nimble.',
-  ),
+  character('donkey-kong', 'Donkey Kong', 'cruiser'),
+  character('king-boo', 'King Boo', 'cruiser'),
 
+  character(
+    'pink-gold-peach',
+    'Pink Gold Peach',
+    'heavy',
+    'Fast in a straight line and reluctant everywhere else. The one she is on now.',
+  ),
+  character('metal-mario', 'Metal Mario', 'heavy'),
   character('bowser', 'Bowser', 'heavy', 'Fast in a straight line, and a barge everywhere else.'),
   character('wario', 'Wario', 'heavy'),
 ];
+
+/**
+ * Every driver who is mechanically the same as this one.
+ *
+ * The single most useful fact about the character select screen, and one nobody tells you: within
+ * a weight class the drivers are **identical**. Peach, Daisy, Birdo and Yoshi are one kart with
+ * four costumes. So "which character should I be" has a real answer — whichever you like the look
+ * of — and Chapter 7 can say so, which matters here for a specific reason: Jodi drives Pink Gold
+ * Peach because {rival} told her heavier is better, and the fix is not "drive a boy character",
+ * it is "the one you actually want is right there and it costs you nothing".
+ *
+ * Excludes the driver asked about, so the result reads as "…or any of these instead".
+ */
+export function sameClassAs(id: string): readonly Character[] {
+  const driver = CHARACTERS.find((item) => item.id === id);
+  if (!driver) return [];
+  return CHARACTERS.filter(
+    (item) => item.weightClass === driver.weightClass && item.id !== driver.id,
+  );
+}
 
 export const BODIES: readonly Part[] = [
   part(
@@ -412,10 +437,10 @@ function combo(
  * about what "the headline build" is.
  */
 export const ARCHETYPES: Record<ArchetypeId, Combo> = {
-  comfy: combo('comfy', 'yoshi', 'teddy-buggy', 'roller', 'cloud-glider'),
-  zippy: combo('zippy', 'toad', 'biddybuggy', 'roller', 'cloud-glider'),
-  steady: combo('steady', 'waluigi', 'wild-wiggler', 'roller', 'super-glider'),
-  muscle: combo('muscle', 'donkey-kong', 'mach-8', 'roller', 'super-glider'),
+  comfy: combo('comfy', 'peach', 'teddy-buggy', 'roller', 'cloud-glider'),
+  zippy: combo('zippy', 'toadette', 'biddybuggy', 'roller', 'cloud-glider'),
+  steady: combo('steady', 'rosalina', 'wild-wiggler', 'roller', 'super-glider'),
+  muscle: combo('muscle', 'waluigi', 'mach-8', 'roller', 'super-glider'),
 };
 
 const USED_BY = new Map<string, ArchetypeId[]>();

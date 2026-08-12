@@ -23,7 +23,14 @@
  * correct for both of them — only the order of the shelf changes.
  */
 
-import { ARCHETYPES, loadCombo, saveCombo, type ArchetypeId, type Combo } from '../../data/parts';
+import {
+  ARCHETYPES,
+  loadCombo,
+  sameClassAs,
+  saveCombo,
+  type ArchetypeId,
+  type Combo,
+} from '../../data/parts';
 import { el, frag, prose, rich } from '../dom';
 import type { ChapterContent, ChapterContext, Mounted } from '../types';
 import './ch7.css';
@@ -49,19 +56,19 @@ const COPY: Record<ArchetypeId, BuildCopy> = {
     title: 'The Zippy One',
     tagline: 'For the impatient.',
     tags: ['Fastest pick-up', 'Tiny', 'Gets shoved'],
-    why: 'The fastest recovery on this page — get hit, and you are back at full speed almost before the shell has finished gloating. The price is that you are light, and light karts get shoved about. If {rival} enjoys bumping into people, she will enjoy it more against this one. Any of the tiny characters drives the same way, so take whichever one makes you laugh.',
+    why: 'The fastest recovery on this page — get hit, and you are back at full speed almost before the shell has finished gloating. The price is that you are light, and light karts get shoved about. If {rival} enjoys bumping into people, she will enjoy it more against this one. Toad, Koopa, Shy Guy and Wendy all drive identically, so take whichever one makes you laugh.',
   },
   steady: {
     title: 'The Steady One',
     tagline: 'Hard to push around.',
     tags: ['Holds its ground', 'Unbothered', 'Slower to recover'],
-    why: 'Heavier, so the bumping tends to happen to other people. A little slower to wind back up after a hit — you are trading "recover faster" for "get knocked about less", which is a perfectly respectable trade. Still on Rollers, so it never feels like steering a bus.',
+    why: 'Heavier, so the bumping happens to other people. A little slower to wind back up after a hit — you are trading "recover faster" for "get knocked about less", which is a perfectly respectable trade, and the closest thing here to the kart you are already on. Still on Rollers, so it never feels like steering a bus. Waluigi, Donkey Kong and King Boo are the same build with a different face.',
   },
   muscle: {
     title: 'The Muscle',
     tagline: 'For when the answer is simply "more".',
     tags: ['Immovable', 'Top speed', 'Slow to recover'],
-    why: 'The heaviest thing here that still turns properly. More top speed, slower to get going after a knock, and nobody is moving you off your line — including, and this is rather the point, {rival}. Same rule underneath: the Rollers are doing the quiet work.',
+    why: 'Heavy, and still turns properly. More top speed, slower to get going after a knock, and nobody is moving you off your line. Same rule underneath: the Rollers are doing the quiet work, which is what stops this from being a barge.',
   },
 };
 
@@ -166,6 +173,64 @@ function setupPanel(id: ArchetypeId, t: (text: string) => string): HTMLElement {
   );
 }
 
+/**
+ * "Is heavier better?" — answered properly. (Riggs, 2026-08-12.)
+ *
+ * Jodi drives Pink Gold Peach because {rival} told her the heavier the character the better, and
+ * the temptation is to call that wrong and move on. It is not wrong, which is exactly why it has
+ * stuck: weight really does buy top speed, and it really does win the shoving matches. What it
+ * does not do is help the person who is getting hit six times a race at 100cc, and *that* is the
+ * correction.
+ *
+ * So the card concedes the point before turning it. A card that opened by telling her she has
+ * been driving the wrong character for two years on somebody else's bad advice would be
+ * technically useful and would land as a telling-off, and this is a present.
+ */
+function weightCard(t: (text: string) => string): HTMLElement {
+  return el(
+    'div',
+    { class: 'card', style: { borderLeft: '8px solid var(--trim)' } },
+    el('p', { class: 'eyebrow' }, 'The thing you were told'),
+    el('h3', null, t('"The heavier the character, the better"')),
+    prose(
+      [
+        '{rival} is not making this up, and it is worth saying so plainly: heavy characters really do have a higher top speed, and they really do win the bumping. If two karts touch, the heavier one keeps its line and the lighter one goes into the grass. That is all true.',
+        'It is also the answer to a different question. It is the right advice for somebody driving clean laps at 150cc who is rarely getting hit — and you are playing 100cc with items on, against a houseful of people throwing shells. **You are going to get hit.** The number that decides your race is not how fast you go, it is how long you spend not going.',
+        'Which is where heavy quietly costs you: Pink Gold Peach is one of the heaviest drivers in the game, and she is correspondingly one of the slowest to wind back up after a knock. Every shell costs you noticeably more than it costs the person who hit you.',
+        'So: keep the weight if you enjoy shoving people, it is a real strategy. But swap those standard tyres for **Rollers**, because that one change buys back most of the pick-up you are missing and costs you almost nothing you were using.',
+      ].map(t),
+    ),
+  );
+}
+
+/**
+ * The character-select fact nobody is told, and the reason this chapter can hand her a feminine
+ * pick without hedging: within a weight class the drivers are mechanically identical.
+ */
+function driverCard(t: (text: string) => string): HTMLElement {
+  const alts = sameClassAs('peach');
+
+  return el(
+    'div',
+    { class: 'card', style: { borderLeft: '8px solid var(--box)' } },
+    el('p', { class: 'eyebrow' }, 'And on who you drive as'),
+    el('h3', null, t('Peach, Daisy, Birdo and Yoshi are the same kart')),
+    prose(
+      [
+        'Genuinely. Not "roughly the same" — the game sorts every driver into a handful of weight groups, and inside a group they are identical in every number that exists. Different face, same kart.',
+        'So the answer to "which character should I be" is: **whichever one you like the look of.** Pick the character, then fix the weight class with the kart and the tyres, which is where all the real difference lives anyway.',
+      ].map(t),
+    ),
+    el(
+      'p',
+      { class: 'ms', style: { color: 'var(--ink-soft)', margin: '0' } },
+      t(
+        `Drives exactly like Peach: ${alts.map((item) => item.name).join(', ')}. Take your pick.`,
+      ),
+    ),
+  );
+}
+
 const content: ChapterContent = {
   concept(ctx: ChapterContext): Node {
     const line = (text: string): string => ctx.t(text);
@@ -193,6 +258,10 @@ const content: ChapterContent = {
           ),
         ),
       ),
+      weightCard(line),
+
+      driverCard(line),
+
       prose(
         [
           'One part does more work than the rest, and it is the part nobody ever changes: **the tyres**. The small Roller wheels — they look like something off a shopping trolley — add pick-up and turning to whatever they are bolted onto. Every setup below is wearing them. If you change one single thing after reading this page, change the tyres.',
