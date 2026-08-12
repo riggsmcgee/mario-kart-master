@@ -27,6 +27,8 @@
  * outright, which is the whole joke in a couple of places.
  */
 
+import { allSessionIds } from './regimen';
+
 /** One tickable line of the programme. */
 export interface PlanItem {
   /** Stable, semantic, append-only. See the file header before you touch one. */
@@ -34,16 +36,6 @@ export interface PlanItem {
   text: string;
   /** A quieter second line. Why it works, or what it will feel like. */
   detail?: string | undefined;
-}
-
-/** The Switch homework for one chapter of the course. */
-export interface SkillDrill {
-  /** The chapter this came from. Chapter 8 links straight back to it. */
-  chapterId: string;
-  skill: string;
-  /** The one line to remember if she reads nothing else. */
-  rule: string;
-  items: PlanItem[];
 }
 
 export interface CupStage {
@@ -72,172 +64,77 @@ export interface Combo {
 
 // --- the weekly rhythm ------------------------------------------------------
 
+/**
+ * How the grid is meant to be used, in four lines. (Rewritten 2026-08-12.)
+ *
+ * This used to carry its own tickable items — "pick which days are Mario Kart days" and so on.
+ * They are gone, because the grid in `regimen.ts` now *is* the schedule and a box that says "make
+ * a schedule" sitting above forty boxes containing the schedule is a box that makes the plan look
+ * like homework about homework.
+ */
 export const RHYTHM = {
-  sessions: 'Three or four sessions a week',
-  length: 'fifteen to twenty minutes each',
+  sessions: 'One session a day',
+  length: 'fifteen to twenty minutes, weekdays only',
   lines: [
-    'Three or four short sessions a week, fifteen to twenty minutes each. That is the whole time commitment. Anyone who tells you it takes more than that is enjoying themselves too much.',
-    'Short and often beats long and rare. This is hands learning a thing, and hands learn overnight — twenty minutes on four evenings will beat two hours on a Sunday, every time.',
-    'A session is one job off the list below, then a couple of races for fun. Never the other way round: once the fun races start, the practising is over for the night, and that is fine.',
-    '**This website is not the training.** The Switch is the training. Come back here when something has stopped making sense — and in week three, for the track deep dives.',
+    'One box a day, five days a week, weekends off. Forty boxes, so about two months — but there are no dates anywhere on this page and there never will be. Do two in an evening if it is going well. Miss a fortnight and nothing has gone wrong; the next box is still simply the next box.',
+    'Short and often beats long and rare. This is your hands learning a thing, and hands learn overnight — twenty minutes on four evenings will beat two hours on a Sunday, every time.',
+    'A session is the one job in the box, then a couple of races for fun. Never the other way round: once the fun races start, the practising is finished for the night, and that is completely fine.',
+    '**This website is not the training.** The Switch is the training. Come back here to find out what tonight is, and in week three for the track deep dives.',
   ],
-  items: [
-    {
-      id: 'plan.rhythm.days',
-      text: 'Pick which days are Mario Kart days, and tell somebody out loud.',
-      detail: 'It is much harder to skip a thing Bill knows about.',
-    },
-    {
-      id: 'plan.rhythm.first',
-      text: 'Do the first session within two days of finishing this course.',
-      detail: 'While the words are still warm. After a week, this is a website you once read.',
-    },
-  ] as PlanItem[],
 };
 
-// --- per-skill practice -----------------------------------------------------
+// --- the fundamentals -------------------------------------------------------
 
 /**
- * One entry per chapter of the course, each pointing back at the chapter that taught it.
+ * The whole course, one line per chapter. (Added 2026-08-12 for the printable sheet.)
  *
- * Chapter 0 is missing on purpose: it is a promise, not a skill, and there is nothing to go and
- * practise. Everything else in the course earns a line in this list, which is the check that the
- * course was never teaching anything the Switch could not use.
+ * Riggs asked for the fundamentals to go on paper alongside the grid and the kart, and this is
+ * that list — deliberately the *shortest* possible form of each chapter, because a printed sheet
+ * competes with a television and loses any argument that runs past one line.
+ *
+ * It is authored here rather than derived from the chapter hooks. The hooks are written to make
+ * her want to read on, which is a different job from reminding her of something she already
+ * knows; "there is free speed on the start line and most people never take it" sells the chapter,
+ * and "hold as the 2 vanishes" is what belongs on the fridge.
  */
-export const SKILL_DRILLS: SkillDrill[] = [
-  {
-    chapterId: 'ch1',
-    skill: 'Start boost',
-    rule: 'Every race. Start holding as the 2 vanishes.',
-    items: [
-      {
-        id: 'plan.skill.ch1.five',
-        text: 'Play five races in a row and go for the start boost in every single one — including the races you do not care about.',
-        detail: 'Getting it wrong costs nothing. There has never been a reason not to try.',
-      },
-      {
-        id: 'plan.skill.ch1.heard-it',
-        text: 'Get one start where you hear it and feel the lurch.',
-        detail: 'Once you have felt it once, you will never have to wonder whether it worked.',
-      },
-    ],
-  },
+export interface Fundamental {
+  chapterId: string;
+  skill: string;
+  /** Imperative, present tense, no more than a dozen words. */
+  rule: string;
+}
+
+export const FUNDAMENTALS: Fundamental[] = [
+  { chapterId: 'ch1', skill: 'Start boost', rule: 'Hold A as the 2 vanishes. Every single race.' },
   {
     chapterId: 'ch2',
     skill: 'Item smarts',
-    rule: 'One banana held behind you beats ten mid-pack heroics.',
-    items: [
-      {
-        id: 'plan.skill.ch2.defence-only',
-        text: 'Play one whole race where you never fire anything forwards. Everything you pick up gets held behind you instead.',
-        detail:
-          'Count how many times something hits the thing you were carrying instead of hitting you.',
-      },
-      {
-        id: 'plan.skill.ch2.red-shell',
-        text: 'Play one race where the only thing you ever fire is a red shell.',
-        detail:
-          'It steers itself. It is the only item that does not need you to aim, so it is the only one worth firing.',
-      },
-      {
-        id: 'plan.skill.ch2.free-slot',
-        text: 'Spend a junk item before the next item box, so you never drive through a box with both hands full.',
-        detail: 'A box you cannot take anything from is a box {rival} just got instead of you.',
-      },
-    ],
+    rule: 'Hold your item behind you. Fire nothing but red shells.',
   },
   {
     chapterId: 'ch3',
     skill: 'Ramp tricks',
-    rule: 'If the kart leaves the ground, press the button.',
-    items: [
-      {
-        id: 'plan.skill.ch3.every-ramp',
-        text: 'One lap of Mario Kart Stadium where you trick off every single ramp. Position does not matter.',
-      },
-      {
-        id: 'plan.skill.ch3.flourish',
-        text: 'Learn to spot the flourish — the flip or the spin. No flourish, no boost.',
-        detail: 'That is your feedback, and it is instant. You never have to look at a number.',
-      },
-    ],
+    rule: 'If the kart leaves the ground, press the trick button.',
   },
   {
     chapterId: 'ch4',
     skill: 'Boost pads',
-    rule: 'Go the long way if the long way is boosted.',
-    items: [
-      {
-        id: 'plan.skill.ch4.outer-lane',
-        text: 'On Mario Kart Stadium, drive the outer lane after the first turn until it stops feeling like a detour.',
-        detail: 'It is not a detour. It is the fast way, and it feels wrong for about four laps.',
-      },
-      {
-        id: 'plan.skill.ch4.four-maps',
-        text: 'One lap on each of the four Mushroom Cup tracks with a single goal: hit every orange arrow you can find.',
-        detail: 'You are drawing a map, not racing. Ignore your position completely.',
-      },
-    ],
+    rule: 'Go the long way if the long way is boosted. Outer lane on Stadium.',
   },
   {
     chapterId: 'ch5',
     skill: 'Lines and coins',
-    rule: 'Ten coins by the end of lap one. Every race.',
-    items: [
-      {
-        id: 'plan.skill.ch5.ten-coins',
-        text: 'One solo 100cc race where the only score that counts is finishing with ten coins.',
-        detail: 'Coins are speed and armour: you drop three every time something hits you.',
-      },
-      {
-        id: 'plan.skill.ch5.ghost-stadium',
-        text: 'Time Trial on Mario Kart Stadium. Save a ghost, then come back and beat it.',
-        detail: 'Not a record. Yesterday-you. That is a fair fight and you can win it.',
-      },
-      {
-        id: 'plan.skill.ch5.ghost-water-park',
-        text: 'Time Trial on Water Park. Same job: beat yesterday-you.',
-      },
-      {
-        id: 'plan.skill.ch5.boring',
-        text: 'Drive the same line three laps running until it feels boring.',
-        detail: 'Boring is the target. Kendahl is extremely boring and she wins.',
-      },
-    ],
+    rule: 'Wide, tight, wide. Ten coins by the end of lap one.',
   },
   {
     chapterId: 'ch6',
     skill: 'The drift',
-    rule: 'Long corners only. Blue sparks, then orange.',
-    items: [
-      {
-        id: 'plan.skill.ch6.sweepers',
-        text: 'Hold the drift button through the long sweeping corners on Sweet Sweet Canyon and watch for blue sparks.',
-      },
-      {
-        id: 'plan.skill.ch6.decide',
-        text: 'Decide, out loud, whether you are going to bother with drifting at all.',
-        detail:
-          'Either answer is correct. Kendahl does not drift, and Kendahl beats {rival} regularly.',
-      },
-    ],
+    rule: 'Long corners only. Blue sparks, then orange, then let go.',
   },
   {
     chapterId: 'ch7',
     skill: 'Your kart',
-    rule: 'Set it once. Never think about it again.',
-    items: [
-      {
-        id: 'plan.skill.ch7.set-combo',
-        text: 'Set your combo on the Switch: character, kart, tyres, glider.',
-        detail: 'It stays set. This is the only item on this entire list you do exactly once.',
-      },
-      {
-        id: 'plan.skill.ch7.roller',
-        text: 'Check the tyres say Roller.',
-        detail: 'If you change one single thing about your kart, change the tyres.',
-      },
-    ],
+    rule: 'Roller tyres. Set it once and never think about it again.',
   },
 ];
 
@@ -366,28 +263,35 @@ export const MILESTONES: Milestone[] = [
  */
 export const HEADLINE_COMBO: Combo = {
   name: 'The Comfy Speedster',
-  character: 'Yoshi',
+  character: 'Peach',
   kart: 'Teddy Buggy',
   tyres: 'Roller tyres',
   glider: 'Cloud Glider',
 };
 
-/** The three archetypes, for resolving whatever Chapter 7 saved back into a full combo. */
+/** The archetypes, for resolving whatever Chapter 7 saved back into a full combo. */
 const ARCHETYPES: Record<string, Combo> = {
   comfy: HEADLINE_COMBO,
   zippy: {
     name: 'The Zippy One',
-    character: 'Toad',
+    character: 'Toadette',
     kart: 'Biddybuggy',
     tyres: 'Roller tyres',
     glider: 'Cloud Glider',
   },
   steady: {
     name: 'The Steady One',
-    character: 'Waluigi',
+    character: 'Rosalina',
     kart: 'Wild Wiggler',
     tyres: 'Roller tyres',
-    glider: 'Cloud Glider',
+    glider: 'Super Glider',
+  },
+  muscle: {
+    name: 'The Muscle',
+    character: 'Waluigi',
+    kart: 'Mach 8',
+    tyres: 'Roller tyres',
+    glider: 'Super Glider',
   },
 };
 
@@ -483,8 +387,7 @@ export const RACE_DAY_RULES: string[] = [
  */
 export function allCheckIds(): string[] {
   return [
-    ...RHYTHM.items.map((item) => item.id),
-    ...SKILL_DRILLS.flatMap((drill) => drill.items.map((item) => item.id)),
+    ...allSessionIds(),
     ...CUP_TRAINING.stages.flatMap((stage) => stage.items.map((item) => item.id)),
     ...CUP_STEERING.items.map((item) => item.id),
     ...MILESTONES.map((milestone) => milestone.id),

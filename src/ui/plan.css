@@ -637,6 +637,276 @@
 }
 
 /* --- the fridge sheet ----------------------------------------------------- */
+/* --- the session grid (4b2) -------------------------------------------------
+ *
+ * The brief was "grid and box on one computer screen", which is a layout constraint before it is
+ * a style, and it drives every number below. Eight week-rows at 2.9rem plus a header row is about
+ * 27rem of board; the panel beside it takes the height it is given rather than setting it. That
+ * fits a 13" laptop at default zoom with the site header and the page title above it, which is
+ * the machine this will actually be used on.
+ *
+ * The cells are deliberately terse — two or three words and a track name. A cell that tried to
+ * hold the whole job would make the grid unreadable *and* make the panel pointless, and between
+ * the two the grid is the thing that has to survive being glanced at.
+ */
+
+/* `.session-grid`, not `.plan-grid` — that name was already taken by the card layout further up
+ * this file, and two rules of the same name doing different jobs is a bug waiting for whoever
+ * edits it next. */
+.session-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(17rem, 1fr);
+  gap: var(--gap);
+  align-items: start;
+  margin: var(--gap) 0 var(--gap-lg);
+}
+
+@media (max-width: 62rem) {
+  .session-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.grid-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.grid-head h2 {
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.grid-count {
+  color: var(--ink-soft);
+}
+
+.grid-board {
+  display: grid;
+  grid-template-columns: max-content repeat(5, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.grid-corner,
+.grid-day {
+  font-family: var(--display);
+  font-size: var(--t-label);
+  color: var(--ink-faint);
+  text-align: center;
+  padding-bottom: 0.15rem;
+}
+
+.grid-corner {
+  text-align: left;
+}
+
+.grid-week {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 0.6rem;
+  min-width: 5.5rem;
+}
+
+.grid-week-no {
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.grid-week-name {
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  line-height: 1.15;
+}
+
+.grid-cell-wrap {
+  position: relative;
+}
+
+.grid-cell {
+  /* Reset, because this is a button pretending to be a table cell. */
+  appearance: none;
+  border: 2px solid var(--rule-soft);
+  background: var(--card);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  min-height: 2.9rem;
+  border-radius: 10px;
+  /* Right padding clears the tick, which is absolutely positioned over this corner. */
+  padding: 0.3rem 1.35rem 0.3rem 0.45rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.1rem;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.grid-cell:hover {
+  border-color: var(--rule);
+}
+
+.grid-cell-label {
+  font-family: var(--display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+/*
+ * Sized so "Water Park" — the longest of the four short names — fits without an ellipsis at the
+ * narrowest the grid ever gets. The ellipsis rule stays as a backstop for a track added later
+ * with a longer name, but nothing in the cup hits it.
+ */
+.grid-cell-track {
+  font-size: 0.58rem;
+  letter-spacing: -0.01em;
+  color: var(--ink-faint);
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Done and selected are different signals and must not be confused: one is history, the other is
+ * where she is looking. Done fills the cell; selected outlines it. Never colour alone — a done
+ * cell also gets its tick, and the selected one is the only cell with a heavy border (3e1).
+ */
+.grid-cell[data-done='true'] {
+  background: var(--turf-wash);
+  border-color: var(--turf);
+}
+
+.grid-cell[data-selected='true'] {
+  border-color: var(--track);
+  border-width: 3px;
+  padding: calc(0.3rem - 1px) calc(1.35rem - 1px) calc(0.3rem - 1px) calc(0.45rem - 1px);
+}
+
+.grid-cell:focus-visible,
+.grid-tick:focus-visible {
+  outline: 3px solid var(--boost);
+  outline-offset: 2px;
+}
+
+.grid-tick {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--turf);
+}
+
+/* --- the session panel ---------------------------------------------------- */
+
+.session-panel {
+  background: var(--card);
+  border: 3px solid var(--track);
+  border-radius: var(--round);
+  padding: 1.1rem 1.2rem;
+  box-shadow: var(--lift);
+  position: sticky;
+  top: 1rem;
+}
+
+.session-title {
+  font-size: 1.35rem;
+  margin: 0.15rem 0 0.6rem;
+}
+
+.session-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.session-chip {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  background: var(--rule-soft);
+  border-radius: var(--round-pill);
+  padding: 0.22em 0.7em;
+}
+
+.session-chip-mode {
+  background: var(--trim-wash);
+}
+
+.session-job {
+  margin: 0 0 0.7rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.session-why {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  border-left: 3px solid var(--trim);
+  padding-left: 0.7rem;
+}
+
+.session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.session-actions .btn {
+  font-size: 0.85rem;
+  padding: 0.5em 1em;
+}
+
+/* --- the strip under the grid --------------------------------------------- */
+
+.plan-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--gap);
+}
+
+.plan-strip-card {
+  background: var(--card);
+  border-radius: var(--round);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--lift);
+}
+
+.plan-strip-card p {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.plan-strip-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.plan-strip-links .btn {
+  font-size: 0.8rem;
+  padding: 0.45em 0.9em;
+}
+
+.plan-page-head {
+  margin-bottom: 0;
+}
+
 /*
  * Never on screen. Everything about it is aimed at paper: no colour it cannot afford to lose,
  * nothing that depends on a hover, and every block set to stay whole across a page break.
@@ -761,5 +1031,54 @@
   .sheet-tick {
     font-family: var(--mono);
     margin-right: 0.2rem;
+  }
+
+  /*
+   * The wall chart. Forty boxes on paper, sized so the whole programme lands on one side of A4
+   * with the fundamentals and the kart under it — which is the entire brief for this sheet, and
+   * the reason the cell text is two lines of nothing but a label and a track name.
+   *
+   * `page-break-inside: avoid` on the block matters more here than anywhere else on the sheet: a
+   * grid split across two pages is not a wall chart, it is two halves of one.
+   */
+  .sheet-block-grid {
+    page-break-inside: avoid;
+  }
+
+  .sheet-grid {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .sheet-grid th,
+  .sheet-grid td {
+    border: 1px solid #000;
+    padding: 0.22rem 0.3rem;
+    vertical-align: top;
+    font-size: 7.5pt;
+    line-height: 1.2;
+  }
+
+  .sheet-grid th {
+    width: 15%;
+    text-align: left;
+    font-size: 8pt;
+  }
+
+  .sheet-grid-no {
+    font-weight: 700;
+  }
+
+  .sheet-grid-label {
+    font-weight: 600;
+  }
+
+  .sheet-grid-track {
+    display: block;
+    /* Grey rather than black: on a printed chart the track is a reminder, and it must not compete
+     * with the job. Mid-grey survives a domestic inkjet; anything lighter does not. */
+    color: #555;
+    font-size: 6.5pt;
   }
 }

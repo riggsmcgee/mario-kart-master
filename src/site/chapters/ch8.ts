@@ -33,16 +33,18 @@ import type { VideoRef } from '../../data/chapters';
 import {
   CUP_STEERING,
   CUP_TRAINING,
+  FUNDAMENTALS,
   MILESTONES,
   RACE_DAY_RULES,
   RHYTHM,
-  SKILL_DRILLS,
   allCheckIds,
   readCombo,
 } from '../../data/plan';
-import type { PlanItem, SkillDrill } from '../../data/plan';
+import type { PlanItem } from '../../data/plan';
+import { WEEKS } from '../../data/regimen';
 import { CUP, NOT_FOR_YOU_INTRO, TRACKS } from '../../data/tracks';
 import type { MushroomTrack } from '../../data/tracks';
+import { createPlanGrid } from '../../ui/plan-grid';
 import { PIN_KIND_LABEL, createTrackMap } from '../../ui/track-map';
 import type { TrackMap } from '../../ui/track-map';
 import { el, prose, rich } from '../dom';
@@ -55,9 +57,9 @@ type Fill = (text: string) => string;
 function lede(t: Fill): Node {
   return prose([
     'Everything up to here was the classroom. This is the part you keep.',
-    'Below: what to practise and how often, the one cup you are going to know better than anybody in your house, a map of all four of its tracks, and a ladder of things to beat — ending with the only one that counts.',
+    'Forty short sessions with one job each, the one cup you are going to know better than anybody in your house, a map of all four of its tracks, and a ladder of things to beat — ending with the only one that counts.',
     t(
-      'Tick the boxes as you go. They save themselves, on every device you own, whether or not the wifi is behaving. And there is a **Print** button, because this belongs on the fridge, not in a tab you will lose by Thursday.',
+      'Tick the boxes as you go. They save themselves, on every device you own, whether or not the wifi is behaving. And there is a **Print** button, because a blank version of that grid belongs on the fridge, not in a tab you will lose by Thursday.',
     ),
   ]);
 }
@@ -151,64 +153,29 @@ const content: ChapterContent = {
       return el('li', null, tick, ' ', rich(t(item.text)));
     }
 
-    // --- section 1: the week -------------------------------------------------
+    // --- section 1: the grid -------------------------------------------------
+    //
+    // The programme, and the first thing on the page after the lede. It replaced two sections —
+    // "the rhythm" and "what to practise" — that between them described a schedule without ever
+    // being one. Forty boxes and tonight's job is the same material, answering the question she
+    // actually arrives with.
 
-    const rhythm = el(
-      'section',
-      { class: 'card plan-card' },
-      el('p', { class: 'eyebrow' }, 'The rhythm'),
-      el('h2', null, `${RHYTHM.sessions}, ${RHYTHM.length}`),
-      prose(RHYTHM.lines.map((line) => t(line))),
-      checkList(RHYTHM.items),
-    );
-
-    // --- section 2: what to practise ----------------------------------------
-
-    function drillCard(drill: SkillDrill): HTMLElement {
-      const meta = getChapter(drill.chapterId);
-      const card = el(
-        'section',
-        { class: 'card plan-card plan-drill' },
-        el(
-          'p',
-          { class: 'eyebrow' },
-          meta ? `Chapter ${meta.number} · ${drill.skill}` : drill.skill,
-        ),
-        el('p', { class: 'plan-rule' }, rich(t(drill.rule))),
-        checkList(drill.items),
-      );
-
-      if (meta) {
-        const link = el(
-          'a',
-          { class: 'plan-back-link', href: `#/chapter/${meta.id}` },
-          t(`Read Chapter ${meta.number} again: ${meta.title}`),
-        );
-        link.addEventListener('click', (event) => {
-          event.preventDefault();
-          ctx.sfx.play('page');
-          go({ name: 'chapter', id: meta.id });
-        });
-        card.append(link);
-      }
-
-      return card;
-    }
+    const grid = createPlanGrid({
+      progress: ctx.progress,
+      t,
+      chapterTitle: (id) => getChapter(id)?.skill ?? 'the chapter',
+      onOpenChapter: (id) => {
+        ctx.sfx.play('page');
+        go({ name: 'chapter', id });
+      },
+    });
 
     const programme = el(
       'section',
       { class: 'plan-section' },
-      el('h2', null, 'What to practise'),
-      el(
-        'p',
-        { class: 'plan-lede' },
-        rich(
-          t(
-            'One job per chapter, phrased as a thing you do **once**. Tick it the first time you manage it; after that it is simply how you play.',
-          ),
-        ),
-      ),
-      el('div', { class: 'plan-grid' }, ...SKILL_DRILLS.map((drill) => drillCard(drill))),
+      el('h2', null, `The programme — ${RHYTHM.sessions}, ${RHYTHM.length}`),
+      prose(RHYTHM.lines.map((line) => t(line))),
+      grid.root,
     );
 
     // --- section 3: own the cup ---------------------------------------------
@@ -589,26 +556,58 @@ const content: ChapterContent = {
           ),
         ),
       ),
+      // The grid, as a table she can fill in with a pen.
+      //
+      // The boxes print empty rather than mirroring what she has ticked on screen, and that is a
+      // decision rather than an oversight: this sheet goes on the fridge on day one and stays
+      // there for two months, so it has to be a *blank* wall chart. A snapshot of her ticks as of
+      // the afternoon she printed it would be out of date by that evening and wrong for the rest
+      // of its life.
       el(
         'section',
-        { class: 'sheet-block' },
-        el('h2', null, `The week — ${RHYTHM.sessions}, ${RHYTHM.length}`),
-        el('ul', { class: 'sheet-list' }, ...RHYTHM.items.map((item) => sheetLine(item))),
+        { class: 'sheet-block sheet-block-grid' },
+        el('h2', null, `The programme — ${RHYTHM.sessions}, ${RHYTHM.length}`),
+        el(
+          'table',
+          { class: 'sheet-grid' },
+          el(
+            'tbody',
+            null,
+            ...WEEKS.map((week) =>
+              el(
+                'tr',
+                null,
+                el(
+                  'th',
+                  { attrs: { scope: 'row' } },
+                  el('span', { class: 'sheet-grid-no' }, String(week.number)),
+                  ' ',
+                  week.title,
+                ),
+                ...week.sessions.map((item) =>
+                  el(
+                    'td',
+                    null,
+                    el('span', { class: 'sheet-tick' }, '☐'),
+                    ' ',
+                    el('span', { class: 'sheet-grid-label' }, t(item.label)),
+                    el('span', { class: 'sheet-grid-track' }, item.track),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
       el(
         'section',
         { class: 'sheet-block' },
-        el('h2', null, 'What to practise'),
+        el('h2', null, 'The fundamentals'),
         el(
-          'div',
-          { class: 'sheet-practice' },
-          ...SKILL_DRILLS.map((drill) =>
-            el(
-              'div',
-              { class: 'sheet-drill' },
-              el('h3', null, `${drill.skill} — ${t(drill.rule)}`),
-              el('ul', { class: 'sheet-list' }, ...drill.items.map((item) => sheetLine(item))),
-            ),
+          'ul',
+          { class: 'sheet-rules' },
+          ...FUNDAMENTALS.map((item) =>
+            el('li', null, el('strong', null, `${item.skill}. `), rich(t(item.rule))),
           ),
         ),
       ),
@@ -705,7 +704,6 @@ const content: ChapterContent = {
       // repeating them printed the chapter title and its hook twice on screen.
       lede(t),
       el('div', { class: 'plan-toolbar' }, counter, printButton),
-      rhythm,
       programme,
       cupTraining,
       cupGuide,
@@ -734,6 +732,7 @@ const content: ChapterContent = {
       dispose() {
         cancelAnimationFrame(frameRequest);
         unsubscribe();
+        grid.dispose();
         for (const map of maps) map.dispose();
       },
     };
