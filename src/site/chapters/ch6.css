@@ -1,0 +1,233 @@
+/* Chapter 6: the drift diagram. (2b7)
+
+   Everything animated in here is decoration on top of a picture that is already complete, which
+   is the rule theme.css's prefers-reduced-motion block assumes. Note how the keyframes are
+   written: each one *returns to* the element's resting style rather than arriving at a new one,
+   and none of them use a fill mode. Kill the animations and every element sits at full opacity,
+   full size, with the charge trail drawn — which is the version that has to teach the lesson,
+   because it is the version some readers will only ever see.
+
+   Colours are hard-coded in the SVG rather than themed, for the same reason quiz-diagram.ts does
+   it: this is a picture of a place. Tarmac that changed colour with the UI would stop being
+   tarmac. */
+
+.drift-h {
+  font-size: var(--t-section);
+  margin: var(--gap-lg) 0 0.8rem;
+}
+
+/* --- the corner ----------------------------------------------------------- */
+
+.drift-figure {
+  margin: 0 0 var(--gap-lg);
+  max-width: 46rem;
+}
+
+.drift-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--card);
+  border-radius: var(--round-lg);
+  box-shadow: var(--lift);
+}
+
+/* One short bright dash walking the corner: where you are, if the drawing had a "now". */
+@keyframes drift-sweep {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.drift-pulse {
+  animation: drift-sweep 3.4s linear infinite;
+}
+
+/* Sparks never drop below legible. They dip, they do not disappear. */
+@keyframes drift-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.3;
+  }
+}
+
+.drift-spark {
+  animation: drift-flicker 3.4s ease-in-out infinite;
+}
+
+.drift-spark[data-stage='orange'] {
+  animation-delay: 0.5s;
+}
+
+@keyframes drift-burst {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  55% {
+    transform: scale(1.16);
+  }
+}
+
+.drift-boost {
+  /* Without fill-box the origin is the whole SVG's corner and the burst swings across the page. */
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: drift-burst 3.4s ease-in-out infinite;
+}
+
+/* --- the numbered steps under it ------------------------------------------ */
+
+.drift-steps {
+  list-style: none;
+  margin: var(--gap) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.drift-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+
+.drift-step-badge {
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #ffffff;
+  background: var(--ink-faint);
+}
+
+.drift-steps li[data-stage='blue'] .drift-step-badge {
+  background: #2f9bff;
+}
+
+.drift-steps li[data-stage='orange'] .drift-step-badge {
+  background: var(--boost);
+  color: #3a1c00;
+}
+
+.drift-steps li[data-stage='boost'] .drift-step-badge {
+  background: var(--kerb);
+}
+
+/* --- what the sparks are worth -------------------------------------------- */
+
+.spark-values {
+  display: grid;
+  gap: 1.1rem;
+  max-width: 40rem;
+}
+
+.spark-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.8rem;
+  align-items: start;
+}
+
+.spark-dot {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  margin-top: 0.45rem;
+}
+
+.spark-row[data-stage='blue'] .spark-dot {
+  background: #2f9bff;
+}
+
+.spark-row[data-stage='orange'] .spark-dot {
+  background: var(--boost);
+}
+
+.spark-row[data-stage='purple'] .spark-dot {
+  background: #a55bff;
+}
+
+.spark-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+
+.spark-seconds {
+  color: var(--kerb);
+  font-size: 1.05rem;
+}
+
+.spark-of {
+  font-family: var(--body);
+  font-weight: 400;
+  font-size: var(--t-small);
+  color: var(--ink-faint);
+}
+
+.spark-body {
+  grid-column: 2;
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+}
+
+/* The purple row is the one she cannot have. Dimmed and struck through, so it reads as
+   information rather than as an instruction. */
+.spark-row[data-off='true'] {
+  opacity: 0.72;
+}
+
+.spark-row[data-off='true'] .spark-name,
+.spark-row[data-off='true'] .spark-seconds {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+/* --- the drafting aside --------------------------------------------------- */
+
+.draft-card {
+  max-width: 40rem;
+  margin: var(--gap-lg) 0;
+  background: var(--trim-wash);
+}
+
+.draft-svg {
+  display: block;
+  width: 100%;
+  max-width: 22rem;
+  height: auto;
+  margin: 0 0 0.9rem;
+}
+
+@keyframes draft-stream {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.draft-stream {
+  animation: draft-stream 0.7s linear infinite;
+}

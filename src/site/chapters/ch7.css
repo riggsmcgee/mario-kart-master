@@ -1,0 +1,208 @@
+/* Chapter 7: the recommender. (2b8)
+
+   The whole card is the button. Three separate hit targets per card — a heading, a body, and a
+   little "select" link — is three chances to click the wrong thing with a trackpad, and this is
+   a course whose reader navigates with a keyboard: one focusable element per option means Tab
+   moves between *builds* rather than between fragments of builds.
+
+   Chosen state is carried by colour AND by wording AND by aria-pressed. Design principle: no
+   information by colour alone (3e1), and "which one did I pick" is exactly the sort of thing
+   somebody comes back to this page a week later to find out. */
+
+.combo-rule {
+  max-width: 40rem;
+  background: var(--trim-wash);
+  margin: var(--gap-lg) 0;
+}
+
+.combo-rule p:last-child {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+/* --- the three cards ------------------------------------------------------ */
+
+.combo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--gap);
+  align-items: stretch;
+}
+
+.combo-card {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: left;
+  cursor: pointer;
+  padding: 1.6rem 1.4rem 1.3rem;
+  background: var(--card);
+  border: 3px solid var(--rule);
+  border-radius: var(--round-lg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: var(--t-small);
+  box-shadow: var(--lift);
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.combo-card:hover {
+  border-color: var(--boost);
+  transform: translateY(-3px);
+}
+
+.combo-card[data-headline='true'] {
+  border-color: var(--boost);
+}
+
+.combo-card[data-picked='true'] {
+  border-color: var(--turf);
+  background: var(--turf-wash);
+}
+
+/* The ribbon on the recommended one. Angled, because a straight one reads as a form field. */
+.combo-flag {
+  position: absolute;
+  top: -0.85rem;
+  left: 1.2rem;
+  padding: 0.25em 0.75em;
+  border-radius: var(--round-pill);
+  background: var(--boost);
+  color: #3a1c00;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transform: rotate(-3deg);
+}
+
+.combo-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.combo-tagline {
+  color: var(--ink-soft);
+  font-style: italic;
+  margin-top: -0.35rem;
+}
+
+/* --- the four parts ------------------------------------------------------- */
+
+.combo-parts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.9rem;
+  padding: 0.8rem 0;
+  border-top: 2px dashed var(--rule);
+  border-bottom: 2px dashed var(--rule);
+}
+
+.combo-slot {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  align-self: center;
+}
+
+.combo-part {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.combo-why {
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.combo-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: auto;
+  padding-top: 0.3rem;
+}
+
+.combo-tag {
+  padding: 0.25em 0.7em;
+  border-radius: var(--round-pill);
+  background: var(--rule-soft);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.combo-choose {
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.7em 1.2em;
+  border-radius: var(--round-pill);
+  background: var(--boost);
+  color: #3a1c00;
+  box-shadow: 0 3px 0 #c9670c;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+.combo-card[data-picked='true'] .combo-choose {
+  background: var(--turf);
+  color: #ffffff;
+  box-shadow: 0 3px 0 #2f8438;
+}
+
+/* --- what to do about it -------------------------------------------------- */
+
+.combo-setup {
+  margin-top: var(--gap-lg);
+}
+
+.combo-prompt {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.combo-setup-card {
+  max-width: 42rem;
+  border: 3px solid var(--turf);
+}
+
+.combo-setup-card h4 {
+  font-size: var(--t-section);
+  margin-bottom: 0.6rem;
+}
+
+.combo-steps {
+  margin: 0 0 1.2rem;
+  padding-left: 1.3em;
+}
+
+.combo-steps li + li {
+  margin-top: 0.55em;
+}
+
+.combo-bridge {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  line-height: 1.35;
+}
+
+.combo-change {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--ink-faint);
+}

@@ -1,0 +1,765 @@
+/**
+ * Chapter 8: the programme, the track guides, and the thing that comes out of a printer. (4d1)
+ *
+ * Its own file because it is the only page in the site with a second, physical life. Everything
+ * here exists to serve one of two readers: the person scrolling it once, and the person squinting
+ * at a sheet of paper stuck to a fridge in a kitchen from four feet away.
+ *
+ * **Two renderings, one stylesheet.** `.plan-screen` is everything on screen; `.plan-sheet` is
+ * hidden until the print stylesheet swaps them over. That is a deliberate step past what
+ * `theme.css` already does — it hides navigation and buttons for print, which is right for the
+ * other eight chapters, but "the same page with the furniture removed" is not a fridge sheet.
+ * A fridge sheet is smaller, denser, has no pictures and no explanations, and is set in two
+ * columns so the whole programme lands on one page.
+ *
+ * **The checkboxes are native `<input type="checkbox">`, enlarged.** Rebuilding them as styled
+ * spans would have bought a prettier tick and cost keyboard support, the space bar, screen reader
+ * state, and the browser's own focus ring — for the one control on the site she will use most,
+ * on a machine where the keyboard is her only input device. `accent-color` gets 90% of the look
+ * for none of the risk.
+ *
+ * **Pin colours are shared between the diagram and the list beside it** through one custom
+ * property per callout kind, so the numbered list is genuinely a legend rather than a second
+ * palette that drifts out of step. Colour is never the only signal: every pin carries a number
+ * and every list row spells the kind out in words (3e1).
+ */
+
+@import './theme.css';
+
+/* --- page frame ----------------------------------------------------------- */
+
+.plan-lede {
+  color: var(--ink-soft);
+  max-width: 44rem;
+}
+
+.plan-section {
+  margin-bottom: var(--gap-xl);
+}
+
+.plan-section > h2 {
+  font-size: var(--t-title);
+  margin-bottom: 0.6rem;
+}
+
+.plan-headline {
+  font-family: var(--display);
+  font-size: var(--t-section);
+  color: var(--kerb);
+  margin-bottom: 0.8rem;
+}
+
+.plan-card {
+  margin-bottom: var(--gap);
+}
+
+.plan-card h2 {
+  font-size: var(--t-section);
+  margin-bottom: 0.8rem;
+}
+
+/* Two up on a wide screen, one up on a laptop. The cards are read, not scanned, so they never
+   go narrower than a comfortable line length. */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+  gap: var(--gap);
+  align-items: start;
+}
+
+.plan-rule {
+  font-family: var(--display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  border-left: 5px solid var(--trim);
+  padding-left: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.plan-back-link {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+}
+
+.plan-steering {
+  background: var(--kerb-wash);
+}
+
+/* --- the toolbar: how far through the programme she is -------------------- */
+
+.plan-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap);
+  margin: var(--gap-lg) 0;
+  padding-bottom: var(--gap);
+  border-bottom: 3px dashed var(--rule);
+}
+
+.plan-count {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 1;
+  min-width: 14rem;
+}
+
+.plan-count-label {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.plan-count-bar {
+  flex: 1;
+  height: 12px;
+  min-width: 6rem;
+  border-radius: var(--round-pill);
+  background: var(--rule-soft);
+  overflow: hidden;
+}
+
+.plan-count-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--round-pill);
+  background: var(--turf);
+  transition: width 0.4s cubic-bezier(0.3, 0.9, 0.3, 1);
+}
+
+/* --- tickable lines ------------------------------------------------------- */
+
+.plan-checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.plan-item {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  padding: 0.55rem 0;
+}
+
+.plan-item + .plan-item {
+  border-top: 1px solid var(--rule-soft);
+}
+
+.plan-box {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0.2rem 0 0;
+  accent-color: var(--turf);
+  cursor: pointer;
+}
+
+.plan-item-text {
+  cursor: pointer;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.plan-box:checked + .plan-item-text {
+  color: var(--ink-faint);
+}
+
+.plan-item-detail {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+/* --- track cards ---------------------------------------------------------- */
+
+.plan-track {
+  margin-bottom: var(--gap-lg);
+}
+
+.plan-track h3 {
+  font-size: var(--t-section);
+}
+
+.plan-track-blurb {
+  color: var(--ink-soft);
+  max-width: 42rem;
+  margin-bottom: 1.2rem;
+}
+
+.plan-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 3px solid var(--rule);
+  margin-bottom: var(--gap);
+}
+
+.plan-tab {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: 0.7em 1.1em;
+  border-radius: var(--round) var(--round) 0 0;
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  /* The selected tab sits on the rule rather than under it. */
+  margin-bottom: -3px;
+  border-bottom: 3px solid transparent;
+}
+
+.plan-tab:hover {
+  background: var(--rule-soft);
+  color: var(--ink);
+}
+
+.plan-tab[aria-selected='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--kerb);
+}
+
+/* "week 3" is a schedule, not a warning — it reads as a timetable stamp rather than a lock. */
+.plan-tab-when {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #14776c;
+  background: var(--box-wash);
+  border-radius: var(--round-pill);
+  padding: 0.25em 0.6em;
+}
+
+.plan-panel[hidden] {
+  display: none;
+}
+
+/* --- the schematic -------------------------------------------------------- */
+
+.track-map {
+  background: var(--paper);
+  border-radius: var(--round);
+  padding: 0.5rem;
+  margin-bottom: var(--gap);
+  /* Pins are placed a frame after mount; fading in hides the jump from the corner. */
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.track-map[data-placed='true'] {
+  opacity: 1;
+}
+
+.tm-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.tm-verge {
+  fill: none;
+  stroke: var(--turf-wash);
+  stroke-width: 46;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.tm-road {
+  fill: none;
+  stroke: #c3ccdb;
+  stroke-width: 30;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.tm-dash {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 3;
+  stroke-dasharray: 16 20;
+  opacity: 0.9;
+}
+
+.tm-branch {
+  fill: none;
+  stroke-width: 16;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 2 26;
+}
+
+.tm-branch[data-tone='take'] {
+  stroke: var(--boost);
+}
+
+.tm-branch[data-tone='either'] {
+  stroke: #9aa4b5;
+}
+
+.tm-arrow {
+  fill: var(--track);
+  opacity: 0.55;
+}
+
+.tm-pin circle {
+  fill: var(--pin, var(--ink-soft));
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+.tm-pin text {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  fill: var(--pin-ink, #ffffff);
+}
+
+/* Halo underneath, ink on top, so a label stays readable over road, verge or paper. */
+.tm-label {
+  font-family: var(--body);
+  font-size: 23px;
+  font-weight: 700;
+  fill: var(--ink);
+  stroke: var(--paper);
+  stroke-width: 5;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+.tm-branch-label {
+  font-size: 22px;
+}
+
+.tm-branch-label[data-tone='take'] {
+  fill: #a24d00;
+}
+
+.tm-branch-label[data-tone='either'] {
+  fill: var(--ink-soft);
+}
+
+/* --- callout list: the legend, and the accessible copy of the picture ----- */
+
+.plan-callouts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.plan-callout {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.plan-callout p {
+  margin: 0.1rem 0 0;
+  max-width: 42rem;
+}
+
+.plan-callout-number {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  background: var(--pin, var(--ink-soft));
+  color: var(--pin-ink, #ffffff);
+  font-family: var(--display);
+  font-weight: 700;
+}
+
+.plan-callout-kind {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* One definition of each kind's colour, used by the pin and by its list row. */
+.track-map .tm-pin[data-kind='pad'],
+.plan-callout[data-kind='pad'] {
+  --pin: var(--boost);
+  --pin-ink: #3a1c00;
+}
+
+.track-map .tm-pin[data-kind='coins'],
+.plan-callout[data-kind='coins'] {
+  --pin: var(--trim);
+  --pin-ink: #4a3600;
+}
+
+.track-map .tm-pin[data-kind='trick'],
+.plan-callout[data-kind='trick'] {
+  --pin: var(--box);
+  --pin-ink: #06322c;
+}
+
+.track-map .tm-pin[data-kind='hazard'],
+.plan-callout[data-kind='hazard'] {
+  --pin: var(--kerb);
+  --pin-ink: #ffffff;
+}
+
+.track-map .tm-pin[data-kind='split'],
+.plan-callout[data-kind='split'] {
+  --pin: var(--turf);
+  --pin-ink: #ffffff;
+}
+
+.track-map .tm-pin[data-kind='line'],
+.plan-callout[data-kind='line'] {
+  --pin: var(--track);
+  --pin-ink: #ffffff;
+}
+
+/* --- the deep dive -------------------------------------------------------- */
+
+.plan-panel h4 {
+  font-size: 1.25rem;
+  margin: var(--gap-lg) 0 0.7rem;
+}
+
+.plan-panel h5 {
+  font-size: 1.05rem;
+  margin-bottom: 0.2rem;
+}
+
+.plan-week3 {
+  background: var(--trim-wash);
+  border: 3px solid var(--trim);
+  border-radius: var(--round);
+  padding: 0.9rem 1.1rem;
+  max-width: none;
+}
+
+.plan-choice {
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--rule-soft);
+}
+
+.plan-choice-take {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  color: var(--kerb);
+  margin-bottom: 0.4rem;
+}
+
+.plan-line {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.plan-line li {
+  margin-bottom: 0.7rem;
+}
+
+.plan-line p {
+  margin: 0.1rem 0 0;
+}
+
+.plan-line-where {
+  font-family: var(--display);
+  font-weight: 600;
+}
+
+.plan-list {
+  margin: 0;
+  padding-left: 1.3em;
+}
+
+.plan-list li + li {
+  margin-top: 0.5em;
+}
+
+.plan-tt {
+  margin: var(--gap) 0;
+}
+
+.plan-tt ul {
+  margin: 0;
+  padding-left: 1.3em;
+}
+
+.plan-tt li + li {
+  margin-top: 0.5em;
+}
+
+/* The one paragraph on each track that is about her rather than about the road. */
+.plan-versus {
+  border-left: 6px solid var(--kerb);
+  padding-left: 1.1rem;
+  font-size: 1.1rem;
+  max-width: 42rem;
+}
+
+.plan-notfor {
+  background: var(--rule-soft);
+  border-radius: var(--round);
+  padding: 1.1rem 1.3rem;
+  margin: var(--gap) 0;
+}
+
+.plan-notfor h4 {
+  margin-top: 0;
+}
+
+.plan-video {
+  margin-top: var(--gap);
+}
+
+/* --- the ladder ----------------------------------------------------------- */
+
+.plan-ladder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: rung;
+}
+
+.plan-rung {
+  display: flex;
+  gap: var(--gap);
+  align-items: flex-start;
+  background: var(--card);
+  border-radius: var(--round-lg);
+  box-shadow: var(--lift);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 0.9rem;
+}
+
+.plan-rung-number {
+  flex: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  background: var(--trim-wash);
+  color: #8a6a00;
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.plan-rung-body p {
+  margin: 0.4rem 0 0;
+}
+
+.plan-rung-title {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.plan-revisit {
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+}
+
+/* --- race day ------------------------------------------------------------- */
+
+.plan-raceday {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--gap-lg);
+  background: var(--track);
+  color: #eef2f8;
+}
+
+.plan-raceday .eyebrow {
+  color: #9fb0c8;
+}
+
+.plan-raceday h3 {
+  color: var(--trim);
+  font-size: var(--t-section);
+}
+
+.plan-combo-parts {
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+}
+
+.plan-combo-parts li {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.plan-combo-note {
+  font-size: var(--t-small);
+  color: #b9c6d8;
+  margin-top: 0.9rem;
+}
+
+.plan-rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.plan-rules li {
+  padding: 0.5rem 0 0.5rem 1.6rem;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.plan-rules li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--boost);
+}
+
+/* --- the fridge sheet ----------------------------------------------------- */
+/*
+ * Never on screen. Everything about it is aimed at paper: no colour it cannot afford to lose,
+ * nothing that depends on a hover, and every block set to stay whole across a page break.
+ */
+
+.plan-sheet {
+  display: none;
+}
+
+@media print {
+  .plan-screen {
+    display: none !important;
+  }
+
+  .plan-sheet {
+    display: block;
+    font-size: 9.5pt;
+    line-height: 1.35;
+    color: #000;
+  }
+
+  .plan {
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+
+  /*
+   * The chapter template draws the heading, the hook and the voiceover player above this page,
+   * which is right on screen and wrong on paper — the sheet carries its own title, and a
+   * printed play button is just an inkblot. Hidden from here rather than by adding `no-print`
+   * to the shared template, because this is the only chapter anybody prints.
+   *
+   * `:has()` is the mechanism; where it is unsupported the sheet simply prints under the
+   * chapter heading, which is untidy rather than broken.
+   */
+  .page:has(.plan-sheet) {
+    width: auto;
+    margin: 0;
+    padding: 0;
+  }
+
+  .page:has(.plan-sheet) .page-head,
+  .page:has(.plan-sheet) .chapter-hook,
+  .page:has(.plan-sheet) .vo {
+    display: none !important;
+  }
+
+  .sheet-head {
+    border-bottom: 2px solid #000;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .sheet-head h1 {
+    font-size: 20pt;
+    margin: 0;
+  }
+
+  .sheet-head p {
+    margin: 0.2rem 0 0;
+    font-size: 9pt;
+  }
+
+  .sheet-block {
+    break-inside: avoid;
+    margin-bottom: 0.55rem;
+  }
+
+  .sheet-block > h2 {
+    font-size: 11pt;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #999;
+    margin-bottom: 0.25rem;
+  }
+
+  .sheet-drill {
+    break-inside: avoid;
+    margin-bottom: 0.4rem;
+  }
+
+  .sheet-drill h3 {
+    font-size: 9.5pt;
+    margin: 0 0 0.1rem;
+  }
+
+  /* Two columns is what turns the programme from three pages into one. */
+  .sheet-practice {
+    column-count: 2;
+    column-gap: 1.2rem;
+  }
+
+  .sheet-list,
+  .sheet-ladder,
+  .sheet-rules {
+    margin: 0;
+    padding: 0 0 0 0.2rem;
+    list-style: none;
+  }
+
+  .sheet-list li,
+  .sheet-ladder li,
+  .sheet-rules li {
+    margin: 0 0 0.1rem;
+    max-width: none;
+    break-inside: avoid;
+  }
+
+  .sheet-ladder {
+    counter-reset: rung;
+  }
+
+  .sheet-ladder li {
+    font-weight: 700;
+  }
+
+  .sheet-rules li::before {
+    content: '▸ ';
+  }
+
+  .sheet-tick {
+    font-family: var(--mono);
+    margin-right: 0.2rem;
+  }
+}
