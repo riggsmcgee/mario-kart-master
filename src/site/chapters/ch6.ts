@@ -1,17 +1,28 @@
 /**
  * Chapter 6: the drift, explained once. (2b7)
  *
- * The only chapter in the course with no drill, and that is a decision rather than an omission
- * (Riggs, 2026-08-06). Drifting is analogue: it is a held button plus a stick angle plus a feel
- * for how long a corner is going to last, and a keyboard has none of that. A browser drill would
- * teach the *button* and quietly lie about the skill.
+ * **This chapter used to have no drill, and used to argue she barely needed the skill. Both were
+ * wrong.** (Riggs, 2026-08-12.)
  *
- * So this chapter argues instead, and the argument it has to win is an unusual one: **this is the
- * famous skill, and it is the one she needs least.** Every tutorial on the internet opens with
- * drifting; none of them mention that a tidy line beats a mistimed drift every lap. If the chapter
- * left her feeling behind for not having it, it would have done real damage — so it says out loud
- * that Kendahl does not drift and beats the rival anyway, which is the same existence proof
- * Chapter 5 runs on.
+ * The original reasoning was that drifting is analogue — a held button plus a stick angle plus a
+ * feel for how long a corner lasts — and that a keyboard drill would teach the *button* while
+ * quietly lying about the skill. That is a real risk and it is not what happened. What happened
+ * is that the chapter talked her out of a core mechanic: Bayesic's intro video, which is now the
+ * anchor of the whole course, files drifting under **essential mechanics** and has a
+ * thirteen-minute video of its own about it. Telling her it is the thing she needs least, while
+ * sending her to a man who plainly thinks otherwise, is the course disagreeing with itself in
+ * front of her.
+ *
+ * So drifting is implemented (`engine/drift.ts`), the chapter has a drill, and the argument has
+ * changed shape rather than volume. It is no longer "you do not need this". It is **"here is what
+ * it actually is, and here is the one condition under which it pays"** — long corners, where
+ * there is room to reach orange. That condition is the genuinely useful thing nobody says out
+ * loud, and it survives from the original chapter intact.
+ *
+ * What the keyboard can honestly teach turns out to be exactly the sequence: hop, hold, watch the
+ * colour, release. The timing of a real stick is not in here and the chapter does not pretend it
+ * is — the drill is a rehearsal of the shape, and the programme sends her to Sweet Sweet Canyon
+ * for the feel.
  *
  * **Why a diagram and not a video alone.** The thing that has to land is a *sequence over time*:
  * hold, blue, orange, release. A single picture of a sliding kart says none of that, and the video
@@ -27,9 +38,14 @@
  * no asset can enter the repo if there is no asset.
  */
 
+import { createKartDrill } from '../../ui/kart-drill';
 import { el, frag, prose, rich } from '../dom';
-import type { ChapterContent, ChapterContext } from '../types';
+import type { ChapterContent, ChapterContext, Mounted } from '../types';
 import './ch6.css';
+
+/** Six chances across two laps of the test circuit's three corners. */
+const TARGET = 6;
+const LAPS = 2;
 
 // --- the drawing -----------------------------------------------------------
 
@@ -440,7 +456,12 @@ const SPARK_ROWS: readonly SparkRow[] = [
     stage: 'purple',
     name: 'Purple sparks',
     seconds: '2.633s',
-    line: 'Your steering assist — the setting that keeps you pointed down the track — switches this one off, along with a lot of headaches. Blue and orange still work exactly as normal; you are only missing the third one.',
+    // Corrected 2026-08-12. This row used to claim her steering assist switches purple off, which
+    // is not something anybody has verified and is probably not true — the assist makes a long
+    // tight drift harder to hold, which is a different statement. What *is* checkable is where
+    // Bayesic puts it: "Advanced Drifting Tech", from 7:45, well past the point this chapter tells
+    // her to stop watching. So the row now says the thing we actually know.
+    line: 'Two and a half seconds of unbroken drift, which is longer than any corner in your cup. This is competitive-player territory — the video files it under advanced tech, after the point where we tell you to stop watching. Ignore it entirely.',
     off: true,
   },
 ];
@@ -516,8 +537,8 @@ const content: ChapterContent = {
     return frag(
       prose(
         [
-          'Here is the honest version, before anybody else gets to you. Drifting is the most talked-about skill in this game, and it is the one you need least. Every video opens with it. Not one of them mentions that a tidy line and ten coins will beat a mistimed drift on every lap of every race.',
-          'So read this once. Try it on the Switch when you fancy it. And if it never quite clicks, nothing at all is lost — Kendahl does not drift, and Kendahl beats {rival} regularly.',
+          'This is the most talked-about skill in the game, and for once the fuss is fair. Here is the thing nobody says out loud though: **a drift is not a way of taking a corner. It is a way of manufacturing a boost out of a corner you had to take anyway.**',
+          'That distinction is the whole chapter. Get it and you will know exactly which corners to drift and which to leave alone — which is the part that separates people who drift from people who drift *usefully*.',
         ].map(line),
       ),
       el('h3', { class: 'drift-h' }, 'What a drift actually is'),
@@ -546,10 +567,93 @@ const content: ChapterContent = {
       el('h3', { class: 'drift-h' }, 'Where this goes on your list'),
       prose(
         [
-          'Last. If you have got ten minutes to practise, spend them on the start boost, on coins, and on your line — those three win races on their own. Come back to this when all three are automatic, and if you never do come back, you will still be an absolute nightmare to race.',
+          'After the other five, and before the racing. The start boost, your line and your coins win races on their own, and they are easier — so they came first. But this is not an optional extra you can safely never learn: it is free speed on every long corner of every lap, and there are more of those in your cup than you think.',
+          'Next page you get six corners to try it on. Nothing is at stake, a fluffed one costs you nothing, and you can go round as many times as you like.',
         ].map(line),
       ),
     );
+  },
+
+  /**
+   * Six corners, two laps, count the mini-turbos.
+   *
+   * The test circuit already has exactly the right furniture for this and it is not furniture at
+   * all — a long U-turn, a chicane and a hairpin, which between them are one corner worth
+   * drifting, one that is arguable and one that is not. That is the lesson the chapter just spent
+   * four paragraphs on, and driving it is a better teacher than reading it.
+   *
+   * The track is deliberately **empty**: no coins, no pads, no ramps. Every other kart drill in
+   * the course asks her to collect something, and putting anything collectable here would split
+   * her attention at the exact moment the instruction is "watch the back wheels".
+   */
+  interactive(mount: HTMLElement, ctx: ChapterContext): Mounted {
+    let oranges = 0;
+    let lapSeen = 1;
+    let saidFirst = false;
+    let saidOrange = false;
+
+    return createKartDrill({
+      mount,
+      sfx: ctx.sfx,
+      layout: [],
+      drift: true,
+      goal: 'Drift the long corners',
+      unit: 'mini-turbos',
+      target: TARGET,
+      laps: LAPS,
+      keys: 'Arrow keys to steer · hold Space through the corner, let go on the way out',
+
+      onTick(tick, api) {
+        if (tick.lap < lapSeen) {
+          oranges = 0;
+          saidFirst = false;
+          saidOrange = false;
+        }
+        lapSeen = tick.lap;
+
+        const released = tick.drift?.released ?? 'none';
+        if (released === 'none') return;
+
+        if (released === 'orange') oranges++;
+        api.add();
+
+        if (!saidFirst) {
+          saidFirst = true;
+          api.say('That is a mini-turbo. Five more.', 'good');
+          return;
+        }
+        if (released === 'orange' && !saidOrange) {
+          saidOrange = true;
+          api.say('Orange. Worth nearly three of the blue ones.', 'good');
+        }
+      },
+
+      onFinish(score) {
+        ctx.finish({ score });
+      },
+
+      verdict(score) {
+        if (score === 0) {
+          return {
+            title: 'No mini-turbos yet.',
+            detail:
+              'The sequence is: steer into the corner first, then hold Space and keep holding it. If you let go before the sparks light up you get nothing — and if you straighten the wheel, the drift ends. Go round again; the long left-hander is the friendly one.',
+          };
+        }
+        if (oranges > 0) {
+          return {
+            title: `${score} mini-turbos, ${oranges} of them orange.`,
+            detail:
+              'The orange ones are the whole game. Now do the other half of the skill: on the tight corners, do not bother — you spend the whole thing charging a spark that never arrives and you come out slower than if you had just driven round.',
+          };
+        }
+        return {
+          title: `${score} mini-turbos, all blue.`,
+          detail:
+            'Good — now hold on longer. Blue arrives fast and is worth very little; orange takes about a second and a half and is worth nearly three of them. The long sweeping left is the one corner here with room for it.',
+        };
+      },
+    });
   },
 };
 

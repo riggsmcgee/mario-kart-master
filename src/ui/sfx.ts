@@ -30,7 +30,9 @@ export type SfxName =
   /** A wrong quiz answer. Not a buzzer — the plan is explicit that nothing here marks her. */
   | 'nudge'
   /** Moving between chapters. */
-  | 'page';
+  | 'page'
+  /** A mini-turbo firing. Chapter 6's only feedback that the release actually paid. */
+  | 'boost';
 
 interface Note {
   /** Semitone-free: plain frequencies, because these are effects rather than music. */
@@ -66,6 +68,12 @@ const SOUNDS: Record<SfxName, Note[]> = {
   // something happened without passing judgement on it.
   nudge: [{ from: 420, to: 380, ms: 150, type: 'sine', gain: 0.045 }],
   page: [{ from: 520, to: 640, ms: 70, type: 'sine', gain: 0.035 }],
+  // A short upward whoosh. Sawtooth rather than triangle because a boost should have some grit
+  // to it — every other sound here is a chime, and this one is the kart doing something.
+  boost: [
+    { from: 180, to: 900, ms: 220, type: 'sawtooth', gain: 0.045 },
+    { from: 900, to: 1300, ms: 160, type: 'triangle', gain: 0.035, at: 150 },
+  ],
 };
 
 export class Sfx {
