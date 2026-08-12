@@ -17,13 +17,14 @@ import { getProgressStore } from '../backend/progress';
 import { CHAPTERS, getChapter } from '../data/chapters';
 import { getSfx } from '../ui/sfx';
 import { turboJodi } from '../ui/mascot';
-import { renderChapter } from './chapter-page';
+import { renderChapter, renderTry } from './chapter-page';
 import { loadChapter } from './chapter-registry';
+import { renderPlanPage } from './plan-page';
 import { renderDoorman, doormanAnswered, forgetDoorman } from './doorman';
 import { el } from './dom';
 import { renderHome } from './home';
 import { playerFor, fill } from './player';
-import { Router, go, type Route } from './router';
+import { Router, go, hrefFor, type Route } from './router';
 import { renderSettings } from './settings';
 import type { Mounted, Player } from './types';
 
@@ -178,7 +179,17 @@ export function startApp(root: HTMLElement): void {
         );
         break;
 
-      case 'chapter': {
+      case 'plan': {
+        if (locked()) {
+          go({ name: 'home' });
+          break;
+        }
+        swap(renderPlanPage(main, { player, progress, sfx }));
+        break;
+      }
+
+      case 'chapter':
+      case 'try': {
         const meta = route.id ? getChapter(route.id) : undefined;
         if (!meta) {
           swap(notFound());
@@ -188,18 +199,25 @@ export function startApp(root: HTMLElement): void {
           go({ name: 'home' });
           break;
         }
+        // A practice URL for a chapter that has no practice page is a wrong turn, not a blank
+        // page. Typing it is the only way to get here, so saying so is the honest answer.
+        if (route.name === 'try' && !meta.drill) {
+          swap(notFound());
+          break;
+        }
 
         loading();
         const content = await loadChapter(meta.id);
         // She may have navigated on while the chunk was in the air. Only paint if this is still
         // the route she is looking at.
-        if (window.location.hash !== `#/chapter/${meta.id}`) return;
+        if (window.location.hash !== hrefFor(route)) return;
 
         if (!content) {
           swap(notBuilt(fill(meta.title, player)));
           break;
         }
-        swap(renderChapter(main, meta, content, { player, progress, sfx }));
+        const render = route.name === 'try' ? renderTry : renderChapter;
+        swap(render(main, meta, content, { player, progress, sfx }));
         break;
       }
 
@@ -227,8 +245,9 @@ export function startApp(root: HTMLElement): void {
           showingDoorman = false;
           // Render whatever the address bar already says. That is home on a normal first visit,
           // and the chapter she was linked to if she arrived on a deep link — without this file
-          // needing to know which case it is in.
-          router.start();
+          // needing to know which case it is in. `landing` adds the one exception: a finished
+          // course opens on the plan instead of the contents page.
+          landing();
         },
       }),
     );
@@ -251,6 +270,31 @@ export function startApp(root: HTMLElement): void {
     paintHeader();
   });
 
+  /**
+   * Once the course is finished, the front door is the plan. (Riggs, 2026-08-12.)
+   *
+   * The home page is a table of contents for nine chapters she has already read, and after the
+   * last one it is the wrong thing to open onto — the training programme is what she will be
+   * coming back for, most likely daily, for two months. So a finished course changes what the
+   * bare URL means.
+   *
+   * Only the *bare* URL, and only on arrival. A deep link still goes where it points, and the
+   * mark in the header still goes home, so nothing about this traps her on one page or hides the
+   * chapters she paid for with an evening.
+   */
+  function landing(): void {
+    const hash = window.location.hash;
+    const atFrontDoor = hash === '' || hash === '#' || hash === '#/';
+    const finished = CHAPTERS.every((c) => progress.getChapter(c.id).status === 'done');
+    if (atFrontDoor && finished) {
+      go({ name: 'plan' });
+      // `go` only sets the hash, and setting it from the boot path does not always fire
+      // `hashchange` before the first render. Starting the router explicitly means the plan is
+      // painted either way, and the second call is harmless — it re-reads the same URL.
+    }
+    router.start();
+  }
+
   // Someone arriving on a deep link with the doorman unanswered gets asked first, and the link
   // is honoured afterwards simply because nothing here touches the hash — `router.start()` in
   // `onChosen` reads whatever the address bar still says.
@@ -260,7 +304,7 @@ export function startApp(root: HTMLElement): void {
   // time she opened any chapter it silently threw her back to the home page. Worth remembering
   // as a shape of bug — the restore fired on a navigation it was never meant to be about.
   if (!doormanAnswered()) openDoorman();
-  else router.start();
+  else landing();
 
   // Small courtesy: `fill` is exported for chapter modules, and the title should say her name
   // once she has one.

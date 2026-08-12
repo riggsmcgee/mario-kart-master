@@ -11,8 +11,8 @@
  */
 
 export interface Route {
-  name: 'home' | 'chapter' | 'settings' | 'not-found';
-  /** Chapter id, on the chapter route. */
+  name: 'home' | 'chapter' | 'try' | 'plan' | 'settings' | 'not-found';
+  /** Chapter id, on the chapter and try routes. */
   id?: string;
 }
 
@@ -20,6 +20,13 @@ export function parseHash(hash: string): Route {
   const path = hash.replace(/^#\/?/, '').replace(/\/+$/, '');
   if (path === '') return { name: 'home' };
   if (path === 'settings') return { name: 'settings' };
+  if (path === 'plan') return { name: 'plan' };
+
+  // `/try` is the practice page for a chapter — the same chapter, second half. Matched before the
+  // bare chapter pattern because `[\w-]+` would otherwise happily swallow neither, and keeping
+  // them as two patterns means a typo'd suffix 404s instead of silently rendering the lesson.
+  const practice = /^chapter\/([\w-]+)\/try$/.exec(path);
+  if (practice?.[1]) return { name: 'try', id: practice[1] };
 
   const chapter = /^chapter\/([\w-]+)$/.exec(path);
   if (chapter?.[1]) return { name: 'chapter', id: chapter[1] };
@@ -33,8 +40,12 @@ export function hrefFor(route: Route): string {
       return '#/';
     case 'settings':
       return '#/settings';
+    case 'plan':
+      return '#/plan';
     case 'chapter':
       return `#/chapter/${route.id ?? ''}`;
+    case 'try':
+      return `#/chapter/${route.id ?? ''}/try`;
     default:
       return '#/';
   }
