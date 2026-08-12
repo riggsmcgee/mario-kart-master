@@ -1,0 +1,155 @@
+[
+  {
+    "id": "start-boost",
+    "situation": "The lights are counting down. 3… 2… and the 2 is starting to fade.",
+    "prompt": "When do you press accelerate?",
+    "diagram": {
+      "road": "straight",
+      "caption": "The line, the countdown, and nobody has moved yet.",
+      "markers": [
+        { "kind": "pack", "at": 0.6, "lane": 0.5 },
+        { "kind": "pack", "at": 0.6, "lane": -0.5 },
+        { "kind": "you", "at": 0.6, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "two-fades",
+        "label": "As the 2 disappears — and hold it",
+        "correct": true,
+        "response": "That is the one. Start holding as the 2 fades and keep holding through GO, and the kart launches instead of pulling away. It is the first thing in the video and the first thing in this course, because it happens before anybody's reactions matter."
+      },
+      {
+        "id": "on-go",
+        "label": "The instant GO appears",
+        "response": "That is a perfectly normal start, and a normal start is what everybody else gets. The boost lives slightly earlier than feels right — as the 2 vanishes, not when GO lands."
+      },
+      {
+        "id": "on-three",
+        "label": "Straight away, on 3",
+        "response": "Too early, and the kart bogs down and spins its wheels — you actually come off the line slower. There is a window, and it opens as the 2 fades."
+      }
+    ],
+    "takeaway": "Hold as the 2 vanishes. Free speed, every single race."
+  },
+  {
+    "id": "coins-cap",
+    "situation": "Halfway round lap two, and you are carrying nine coins.",
+    "prompt": "How many coins are actually worth collecting?",
+    "diagram": {
+      "road": "bend-right",
+      "caption": "A line of coins round the outside of the bend.",
+      "markers": [
+        { "kind": "coin", "at": 0.45, "lane": 0.3 },
+        { "kind": "coin", "at": 0.6, "lane": 0.45 },
+        { "kind": "coin", "at": 0.75, "lane": 0.5 },
+        { "kind": "you", "at": 0.25, "lane": 0.1, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "ten",
+        "label": "Ten. After that they stop helping",
+        "correct": true,
+        "response": "Ten is the cap. Every coin up to ten makes your kart slightly faster; the eleventh does nothing at all for your speed. So the goal is ten by the end of lap one, and then simply keeping them — which is a much easier job than it sounds, and almost nobody bothers."
+      },
+      {
+        "id": "all",
+        "label": "As many as possible, forever",
+        "response": "Past ten they stop making you faster — they only go toward unlocking parts. Going out of your way for an eleventh coin is a detour that buys you nothing."
+      },
+      {
+        "id": "none",
+        "label": "They are just points, ignore them",
+        "response": "This is the single most common thing people get wrong. Coins are speed: ten of them is a real, measurable difference to your top speed, and it lasts the whole race."
+      }
+    ],
+    "takeaway": "Ten coins by the end of lap one. Then just keep them."
+  },
+  {
+    "id": "trick-tell",
+    "situation": "You went off a ramp and you are not sure whether the trick came out.",
+    "prompt": "How do you know it worked?",
+    "answers": [
+      {
+        "id": "flourish",
+        "label": "The kart does a visible flip or spin",
+        "correct": true,
+        "response": "That flourish is the whole feedback system. No flip, no boost — and you never have to look at a number or listen for anything. Press the button at the top of the ramp and watch what the kart does."
+      },
+      {
+        "id": "sound",
+        "label": "There is a noise",
+        "response": "There is, but you will be listening past the music, the engine and whoever is talking at you on the sofa. Watch the kart instead: the flip is unmissable once you know to look for it."
+      },
+      {
+        "id": "cannot",
+        "label": "You cannot really tell",
+        "response": "You can, and it is the nicest thing about this skill — the kart does an obvious little flip. That flourish means the boost is coming when you land."
+      }
+    ],
+    "takeaway": "If the kart leaves the ground, press the button. The flip is the receipt."
+  },
+  {
+    "id": "drift-when",
+    "situation": "A long, lazy left-hander coming up — and after it, a sharp little right.",
+    "prompt": "Which of the two is worth drifting?",
+    "diagram": {
+      "road": "bend-left",
+      "caption": "The long one first, the tight one after.",
+      "markers": [{ "kind": "you", "at": 0.2, "lane": 0.4, "label": "You" }]
+    },
+    "answers": [
+      {
+        "id": "long",
+        "label": "The long one",
+        "correct": true,
+        "response": "Long corners only. A drift needs about a second and a half of holding to reach orange sparks, and a long sweeper is the only place you get that. On the tight one you would spend the whole corner charging a spark that never arrives and come out slower than if you had just driven round it."
+      },
+      {
+        "id": "tight",
+        "label": "The tight one — that is what drifting is for",
+        "response": "The opposite, in fact. Drifting is a slide, and a slide is slower than driving straight — you only get that back if you hold it long enough to earn a boost. A tight corner is over before the sparks arrive."
+      },
+      {
+        "id": "both",
+        "label": "Both, always",
+        "response": "Drifting everything is the most common way to be slower while looking faster. It pays on long corners and costs you on short ones, and knowing which is which is most of the skill."
+      }
+    ],
+    "takeaway": "Long corners only. Blue sparks, then orange, then let go."
+  },
+  {
+    "id": "hold-it",
+    "situation": "You have a green shell, and there is nobody in front of you worth aiming at.",
+    "prompt": "What is it for?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Nothing ahead. Something is probably behind.",
+      "markers": [
+        { "kind": "shell-green", "at": 0.3, "lane": 0 },
+        { "kind": "you", "at": 0.45, "lane": 0, "label": "You" },
+        { "kind": "rival", "at": 0.12, "lane": 0.2, "label": "{rival}" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "armour",
+        "label": "Armour. Hold it behind you",
+        "correct": true,
+        "response": "An item held behind the kart blocks whatever arrives at your back bumper, every time, with no aiming at all. It costs nothing to carry and it is the single habit that will win you the most races. This is the whole of Chapter 2, and you have just worked it out on your own."
+      },
+      {
+        "id": "fire",
+        "label": "Fire it anyway, something might happen",
+        "response": "Something might. Meanwhile your back is bare, and the back is where shells arrive from. An item you are carrying is doing a job; an item you have thrown at nobody in particular is a hope."
+      },
+      {
+        "id": "save",
+        "label": "Save it in the slot for later",
+        "response": "Close, but there is a difference between having an item and *holding* it — you need to keep the button held down so it trails along behind the kart. Sitting in the slot, it protects nothing."
+      }
+    ],
+    "takeaway": "One banana held behind you beats ten mid-pack heroics."
+  }
+]

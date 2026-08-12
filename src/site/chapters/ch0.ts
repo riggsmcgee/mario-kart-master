@@ -21,13 +21,43 @@
  * the exact moment trust is being built. The count in the sentence is computed for the same
  * reason.
  *
- * No interactive. The one chapter where the honest thing to sell is that the browser part is
- * small should not open with a browser exercise.
+ * **The practice page is five questions about the video.** (Riggs, 2026-08-12.) This chapter used
+ * to have nothing to do at all, on the argument that a chapter selling "the browser part is small"
+ * should not open with a browser exercise. That argument survives — the lesson page is still pure
+ * pitch, and nothing moves on it.
+ *
+ * What changed is the video's job. It used to be one of eight; it is now the anchor of the whole
+ * course, covering in twelve minutes what Chapters 1 to 4 then take slowly. That makes "did she
+ * watch it" a question worth asking, and the five cards are drawn one per section from the
+ * uploader's own chapter markers — the start line, coins, tricks, drifting, items — so a right
+ * answer confirms she watched and a wrong one teaches the thing anyway.
+ *
+ * It is not a gate and it is not marked. Every wrong answer explains itself warmly and she can
+ * walk straight past it, which is the rule everywhere else in this course too.
  */
 
 import { CHAPTERS } from '../../data/chapters';
-import { el, prose } from '../dom';
-import type { ChapterContent, ChapterContext } from '../types';
+import fromTheVideo from '../../data/quiz/from-the-video.json';
+import { Quiz, fillQuiz, parseQuiz } from '../../ui/quiz';
+import '../../ui/quiz.css';
+import { el, prose, rich } from '../dom';
+import type { ChapterContent, ChapterContext, Mounted } from '../types';
+
+/**
+ * `quiz.css` was written for the Phase 1 testbed and reaches for its palette variables. Mapping
+ * them onto the house tokens here scopes the bridge to the element the quiz renders into, exactly
+ * as Chapter 2 does — one deck, two chapters, one mapping each and no global override.
+ */
+const QUIZ_TOKENS = [
+  '--accent: var(--boost)',
+  '--line: var(--rule)',
+  '--muted: var(--ink-soft)',
+  '--fg: var(--ink)',
+  '--bg: #3a1c00',
+].join('; ');
+
+/** Parsed at import, so a typo in the deck fails loudly rather than drawing a blank card. */
+const DECK = parseQuiz(fromTheVideo);
 
 /** Everything after this chapter. Chapter 0 is the pitch, not one of the eight things. */
 const SKILLS = CHAPTERS.filter((chapter) => chapter.number > 0);
@@ -110,6 +140,56 @@ const content: ChapterContent = {
         'One condition. When it works — and it is going to work — I want to hear exactly how {rival} took it. That is the whole fee.',
       ]),
     );
+  },
+
+  interactive(mount: HTMLElement, ctx: ChapterContext): Mounted {
+    const t = (text: string): string => ctx.t(text);
+
+    const heading = el('h3', null, t('Five things he mentioned'));
+    const comment = el(
+      'p',
+      null,
+      rich(
+        t(
+          'One from each part of the video. **Nothing here is marked** — get one wrong and it just tells you the answer, which is the entire point of a first chapter.',
+        ),
+      ),
+    );
+    const board = el(
+      'div',
+      { class: 'card stack' },
+      el('p', { class: 'eyebrow' }, 'Straight off the video'),
+      heading,
+      comment,
+    );
+
+    const quizMount = el('div', { attrs: { style: QUIZ_TOKENS } });
+    let completed = false;
+
+    const quiz = new Quiz({
+      mount: quizMount,
+      questions: fillQuiz(DECK, t),
+      // Never a buzzer on a wrong answer. The plan is explicit that nothing here marks her, and
+      // this is the chapter where that promise is being made rather than kept.
+      onAnswer: (result) => ctx.sfx.play(result.correct ? 'right' : 'nudge'),
+      onComplete: (summary) => {
+        if (completed) return;
+        completed = true;
+        heading.textContent = t('That is the hard part over');
+        comment.replaceChildren(
+          rich(
+            t(
+              `**${summary.correct} of ${summary.total}**, and it genuinely does not matter which — every one of those five gets a chapter of its own from here, at a quarter of the speed. Chapter 1 is the start line, and it is the easiest free speed in the game.`,
+            ),
+          ),
+        );
+        ctx.finish({ score: summary.correct });
+      },
+    });
+
+    mount.replaceChildren(board, quizMount);
+
+    return { dispose: () => quiz.dispose() };
   },
 };
 
