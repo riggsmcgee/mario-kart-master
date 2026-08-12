@@ -31,6 +31,11 @@ import {
 } from '../engine/track';
 import { TEST_TRACK_CONTROL, TEST_TRACK_HALF_WIDTH } from '../data/test-track';
 import { STEER_ASSIST_CONFIG, computeSteerAssist } from '../engine/steer-assist';
+import { lineError, type LineError, type RacingLine } from '../engine/racing-line';
+// No charge bar in the HUD, deliberately: the sparks on the kart are the feedback, and the
+// chapter's whole instruction is "watch for them to turn orange". A bar in the corner would teach
+// her to watch the bar, which is not a thing her Switch has.
+import { DRIFT_CONFIG, createDrift, resetDrift, stepDrift, type DriftResult } from '../engine/drift';
 import { ChaseCamera, CHASE_CAMERA_CONFIG } from '../engine/chase-camera';
 import { createKartScene } from './kart-scene';
 import { el } from '../site/dom';
@@ -44,6 +49,10 @@ export interface DrillTick {
   lap: number;
   /** Coins currently held, straight from the track run. */
   coins: number;
+  /** How far off the racing line, when one was supplied. Null otherwise. */
+  line: LineError | null;
+  /** Drift state this tick, when drifting is enabled. Null otherwise. */
+  drift: DriftResult | null;
 }
 
 export interface DrillApi {
@@ -72,12 +81,34 @@ export interface KartDrillOptions {
   goal: string;
   /** What the counter counts, e.g. "tricks". Shown beside the number. */
   unit: string;
+  /**
+   * Override the counter's wording. Defaults to `score / target unit`, which is right for the
+   * drills that count things and wrong for Chapter 5, where the score is a percentage and
+   * "62 / 100 % on the line" reads like a fraction of a percentage.
+   */
+  format?: (score: number, target: number, unit: string) => string;
   /** Reaching this ends the drill. */
   target: number;
   /** Laps allowed before it ends anyway. Generous — nothing here is a time trial. */
   laps?: number;
   /** Key hint for the bar. */
   keys?: string;
+
+  /**
+   * Paint a racing line on the road and report how far off it the kart is. Chapter 5 only.
+   *
+   * Passed as a whole {@link RacingLine} rather than as a bare function so the drill can both
+   * draw it and measure against it from one source — a scene painting one line while the scorer
+   * measured a different one is the sort of bug that reads as "the drill is unfair".
+   */
+  racingLine?: RacingLine;
+
+  /**
+   * Enable drifting: hop plus a held steer starts one, sparks charge, releasing pays a boost.
+   * Chapter 6 only — the other drills share the hop key for tricks and must never start a drift
+   * they do not know about, which is why this is opt-in rather than always on.
+   */
+  drift?: boolean;
 
   /** Called every sim tick. Where a chapter decides what counts. */
   onTick: (tick: DrillTick, api: DrillApi) => void;
@@ -99,6 +130,9 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
     target,
     laps = 2,
     keys = 'Arrow keys to steer · Space to hop',
+    format = (score, max, label) => `${score} / ${max} ${label}`,
+    racingLine,
+    drift: driftEnabled = false,
     onTick,
     onFinish,
     verdict,
@@ -115,6 +149,8 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
   const kart = createKart(surface.startPose.x, surface.startPose.y, surface.startPose.heading);
   const input = new Input();
   const chase = new ChaseCamera();
+  const drift = createDrift();
+  const driftConfig = { ...DRIFT_CONFIG };
 
   const kartConfig = { ...KART_CONFIG };
   const cameraConfig = { ...CHASE_CAMERA_CONFIG };
@@ -138,7 +174,7 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
   const stage = el('div', { class: 'drill-stage' }, canvas);
 
   const goalText = el('span', null, goal);
-  const counter = el('span', { class: 'ms' }, `0 / ${target} ${unit}`);
+  const counter = el('span', { class: 'ms' }, format(0, target, unit));
   const lapText = el('span', { class: 'ms' }, `lap 1 / ${laps}`);
   const toast = el('div', {
     class: 'drill-toast',
@@ -189,7 +225,13 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
   const root = el('div', { class: 'drill' }, stage, bar);
   mount.replaceChildren(root);
 
-  const view = createKartScene(canvas, surface, path, items);
+  const view = createKartScene(
+    canvas,
+    surface,
+    path,
+    items,
+    racingLine ? { racingLine: (t) => racingLine.offsetAt(t) } : {},
+  );
 
   // --- state ---------------------------------------------------------------
 
@@ -200,9 +242,11 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
   let toastUntil = 0;
   /** Last hop press, whether or not still held. Tricks are taps; live key state misses them. */
   let lastHopAt: number | null = null;
+  let driftTier: 'none' | 'blue' | 'orange' = 'none';
+  let driftSide = 0;
 
   function refresh(): void {
-    counter.textContent = `${score} / ${target} ${unit}`;
+    counter.textContent = format(score, target, unit);
     lapText.textContent = `lap ${Math.min(lap, laps)} / ${laps}`;
   }
 
@@ -260,6 +304,9 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
     lap = 1;
     lastIndex = 0;
     lastHopAt = null;
+    resetDrift(drift);
+    driftTier = 'none';
+    driftSide = 0;
     running = true;
     result.hidden = true;
     refresh();
@@ -278,8 +325,38 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
 
     if (!running) return;
 
+    // Drifting is stepped before the kart, because its yaw is an input to the same physics tick.
+    // `assistYaw` is the seam: `stepKart` adds it to the player's steering without touching the
+    // velocity vector, and heading rotating faster than the kart is travelling *is* the slide.
+    let driftResult: DriftResult | null = null;
+    if (driftEnabled) {
+      driftResult = stepDrift(
+        drift,
+        driftConfig,
+        {
+          steer: input.steer(),
+          held: input.isDown('hop'),
+          hopped: input.justPressed('hop'),
+          speed: last.speed,
+          airborne: last.airborne,
+        },
+        dt,
+      );
+      if (driftResult.boost > 0) {
+        kart.boostRemaining = Math.max(kart.boostRemaining, driftResult.boost);
+        sfx.play('boost');
+      }
+    }
+
     const assist = computeSteerAssist(kart, path, surface.halfWidth, assistConfig);
-    last = stepKart(kart, kartConfig, input.steer(), surface, dt, assist.yawRate);
+    last = stepKart(
+      kart,
+      kartConfig,
+      input.steer(),
+      surface,
+      dt,
+      assist.yawRate + (driftResult?.yaw ?? 0),
+    );
 
     const events = track.update(
       kart,
@@ -289,6 +366,10 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
     );
 
     if (events.coinsCollected > 0) sfx.play('coin');
+
+    // Measured before the lap bookkeeping below, so the tick that crosses the start line still
+    // reports where the kart actually is rather than being skipped.
+    const line = racingLine ? lineError(racingLine, path, kart.x, kart.y) : null;
 
     // Lap counting off the centreline index. The kart passes the start when its nearest sample
     // wraps from the end of the array back to the beginning; a plain "is it near the start
@@ -300,7 +381,7 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
       if (lastIndex > count * 0.75 && index < count * 0.25) {
         lap++;
         if (lap > laps) {
-          onTick({ events, step: last, lap, coins: track.coins }, api);
+          onTick({ events, step: last, lap, coins: track.coins, line, drift: driftResult }, api);
           end();
           return;
         }
@@ -308,7 +389,13 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
       lastIndex = index;
     }
 
-    onTick({ events, step: last, lap, coins: track.coins }, api);
+    onTick({ events, step: last, lap, coins: track.coins, line, drift: driftResult }, api);
+
+    // Stashed for the renderer, which runs on its own clock and cannot re-derive them.
+    if (driftEnabled) {
+      driftTier = driftResult?.tier ?? 'none';
+      driftSide = drift.direction;
+    }
   }
 
   function render(alpha: number, stats: LoopStats): void {
@@ -330,6 +417,7 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
     view.kart.rotation.y = -poseHeading;
     view.syncFurniture(items, time);
     view.setBoosting(kart.boostRemaining > 0, time);
+    view.setSparks(driftTier, driftSide, time);
     view.syncKart(last.speed, poseAltitude, kart.steerAmount, dt);
 
     chase.update(

@@ -6,100 +6,116 @@
  * a bad day. A line does not. It is the one skill here with a high floor rather than a high
  * ceiling, which is exactly the shape of skill that beats a faster opponent over four races.
  *
- * The concept leads with Kendahl and does not bury her, because she is the strongest evidence
- * this project has and she is not a statistic — she is at the same kitchen table. An argument
- * from a family member who already wins this way lands somewhere a paragraph about apex theory
- * never will.
+ * **Kendahl is one sentence now.** (Riggs, 2026-08-12.) She used to open the chapter in a card of
+ * her own, and on playtest that was too much of her: the point of the chapter is the racing line,
+ * and a case study running above the teaching turned the lesson into an argument about somebody
+ * else's daughter. She is still here, because she is genuinely the best evidence this project has
+ * — she is just a remark at the end of the section rather than the frame around it.
  *
- * **The painted line, and what replaced it.** The plan asked for an ideal line painted on the
- * road that fades as she improves. `createKartDrill` cannot paint one, and adding line-rendering
- * to a component three chapters share — to serve one of them — is the wrong trade for a feature
- * that is only a teaching aid. So the coins ARE the painted line. Every coin below sits on the
- * line she should be driving, so following the trail and driving well are the same action, and
- * unlike a painted stripe the trail rewards her for being on it. It also fades exactly the way
- * the plan wanted, and for a better reason than a difficulty setting: a collected coin does not
- * come back, so by lap three the guide has genuinely disappeared from the parts of the track she
- * has already got right, and only the corners she has been missing are still lit up.
+ * **The line is real now.** The plan always asked for an ideal line painted on the road; the first
+ * build talked itself out of it and laid a trail of coins along the good line instead, on the
+ * argument that the coins *were* the line. Riggs played that and asked for the real thing, and he
+ * is right for a reason the first version missed: collecting a coin is a discrete event, so the
+ * old drill rewarded **touching** the line fifteen times rather than **staying on** it. Those are
+ * different skills and only one of them is this chapter.
  *
- * **Why the layout is shaped like this.** The trail traces wide-in / tight-at-the-apex / wide-out
- * through the U-turn, the chicane and the hairpin, with the two boost pads deliberately bracketing
- * the U-turn rather than sitting in the middle of it. That is the "route pad-to-pad" lesson made
- * physical: the pads are the easy part, and the twenty seconds of driving between them is the part
- * that is actually being taught. Nothing sits further than 5 units off the centreline, because the
- * steer assist starts objecting at 5.5 (`startFraction` 0.55 of a 10-unit half-width) and a trail
- * that fights her own smart-steering setting would teach her that the good line feels wrong.
+ * So `engine/racing-line.ts` owns the line, the scene paints it, and the score is the share of the
+ * lap she spends within a couple of metres of it. The coins stay, sitting *on* the line, doing the
+ * job they are good at — pulling the eye toward where she should be going next.
+ *
+ * **Why the shape is what it is.** Wide-in / tight-at-the-apex / wide-out through the U-turn, the
+ * chicane and the hairpin, with the two boost pads bracketing the U-turn rather than sitting in
+ * the middle of it. That is the "route pad-to-pad" lesson made physical: the pads are the easy
+ * part, and the twenty seconds of driving between them is what is actually being taught. Nothing
+ * sits further than 5 units off the centreline, because the steer assist starts objecting at 5.5
+ * (`startFraction` 0.55 of a 10-unit half-width) and a line that fights her own smart-steering
+ * setting would teach her that the good line feels wrong.
  *
  * **No ramps, on purpose.** Chapter 3 owns tricks. A ramp here would be a second thing to think
  * about, and the one instruction this drill wants to give is "stop thinking and follow the line".
  * The key hint says so too: steering is the only input that does anything.
- *
- * **Why `set` and not `add`.** The counter is coins *held*, read back off the track run each tick,
- * not a tally we keep ourselves. In the real game that number goes down — three coins every time
- * something hits her — and the drill's counter should be the same kind of number as the one on her
- * Switch, even though nothing in this particular drill can knock them off her. The cost is that
- * `set` does not end the drill at target the way `add` does, so we end it explicitly; without that
- * she would keep driving an empty track after the win, which is the one ending the plan forbids.
  */
 
+import { buildRacingLine, LineTracker, type LinePoint } from '../../engine/racing-line';
 import type { FurnitureSpec } from '../../engine/track';
 import { createKartDrill } from '../../ui/kart-drill';
 import { el, frag, prose, rich } from '../dom';
 import type { ChapterContent, ChapterContext, Mounted } from '../types';
 
-const TARGET = 10;
 const LAPS = 3;
+/** Percent of the lap on the line. Three stars is 75 — see `chapters.ts` for why not higher. */
+const TARGET = 100;
+
+/**
+ * The line itself: metres off the centreline at each fraction of the lap.
+ *
+ * These are the same control points the coin trail used, because that shape was already tuned and
+ * the change was never about the shape. Section boundaries on the test circuit: 0–0.28 main
+ * straight, 0.28–0.58 the wide U-turn, 0.58–0.84 back straight and chicane, 0.84–1 the hairpin.
+ */
+const CH5_LINE: LinePoint[] = [
+  // Main straight: drift out to the outside edge before the corner arrives. The move that feels
+  // most wrong and matters most.
+  { t: 0.0, offset: 0 },
+  { t: 0.11, offset: 2 },
+  { t: 0.21, offset: 4 },
+
+  // The U-turn. Wide and patient to 0.31, across to the apex by 0.44, then unwinding back out.
+  { t: 0.31, offset: 4 },
+  { t: 0.36, offset: 1 },
+  { t: 0.44, offset: -4.5 },
+  { t: 0.48, offset: -4 },
+  { t: 0.53, offset: -1 },
+  { t: 0.58, offset: 3.5 },
+
+  // The chicane: left, right, left. One apex each, which is the only way through it that is not
+  // a series of panicky corrections.
+  { t: 0.63, offset: 4 },
+  { t: 0.69, offset: -4 },
+  { t: 0.76, offset: 2.5 },
+
+  // The hairpin. Wide entry, late apex — the same three-part shape as the U-turn at a quarter of
+  // the size, so it reads as the same idea rather than a new one.
+  { t: 0.84, offset: 3.5 },
+  { t: 0.92, offset: -4.5 },
+  { t: 0.97, offset: -1 },
+];
+
+const CH5_RACING_LINE = buildRacingLine(CH5_LINE);
 
 function coin(t: number, offset: number): FurnitureSpec {
   return { kind: 'coin', t, offset };
 }
 
 /**
- * The trail. Fifteen coins for a target of ten, so three laps is comfortable even if she misses
- * a whole corner every time round — the plan's "generous difficulty, ends on a win" rule costed
- * out in coins rather than argued about.
+ * Coins, sitting *on* the line rather than being it.
  *
- * `t` is distance around the lap and `offset` is metres off the centreline, negative toward the
- * infield. Section boundaries on the test circuit: 0–0.28 main straight, 0.28–0.58 the wide
- * U-turn, 0.58–0.84 back straight and chicane, 0.84–1 the tight hairpin.
+ * They are no longer the score — the line is — so their job here is purely to pull the eye
+ * forward. A coin fifteen metres ahead makes her look at where the line goes next, which is
+ * exactly the instruction the concept section ends on and the one thing that stops her sawing at
+ * the wheel. Every offset below is `CH5_RACING_LINE.offsetAt(t)` rounded, so a coin can never sit
+ * off the line it is advertising.
  */
+const COIN_TS = [
+  // Main straight, sparse — the line here is obvious.
+  0.05, 0.11, 0.16,
+  // The U-turn, and the reason this drill exists. Dense through the apex, because this corner is
+  // long and the mistake she will make is turning in early and running out of road.
+  0.26, 0.31, 0.36, 0.4, 0.44, 0.48, 0.53,
+  // The chicane: left, right, left. One per apex.
+  0.63, 0.69, 0.76,
+  // The hairpin.
+  0.84, 0.92,
+];
+
+/** The two boost pads, bracketing the U-turn rather than sitting in the middle of it. */
+const PAD_TS = [0.21, 0.58];
+
 const CH5_LAYOUT: FurnitureSpec[] = [
-  // Main straight. The line here is obvious, so the coins are sparse and their only job is to
-  // walk her out to the outside edge before the corner arrives — the move that feels most wrong
-  // and matters most.
-  coin(0.05, 0),
-  coin(0.11, 2),
-  coin(0.16, 3.5),
-
-  // Boost one, sitting where the line already wanted to be. A pad she has to leave the line to
-  // reach is Chapter 4's lesson; this chapter's point is the opposite one.
-  { kind: 'pad', t: 0.21, offset: 4 },
-
-  // The U-turn, and the reason this drill exists. Wide and patient to 0.31, cutting across to
-  // the apex by 0.44, then unwinding back out. Held at the apex for two coins rather than one:
-  // this corner is long, and the mistake she will make is turning in early and running out of
-  // road, not turning in late.
-  coin(0.26, 4.5),
-  coin(0.31, 4),
-  coin(0.36, 1),
-  coin(0.4, -2.5),
-  coin(0.44, -4.5),
-  coin(0.48, -4),
-  coin(0.53, -1),
-
-  // Boost two, on the exit. Getting here at speed is the whole reward for the eight coins above,
-  // and the wide exit flows straight into the chicane's first apex without another correction.
-  { kind: 'pad', t: 0.58, offset: 3.5 },
-
-  // The chicane: left, right, left. One coin per apex, which is the only way through it that is
-  // not a series of panicky corrections.
-  coin(0.63, 4),
-  coin(0.69, -4),
-  coin(0.76, 2.5),
-
-  // The hairpin. Wide entry, late apex — the same three-part shape as the U-turn, at a quarter
-  // of the size, so it reads as the same idea rather than a new one.
-  coin(0.84, 3.5),
-  coin(0.92, -4.5),
+  ...COIN_TS.map((t) => coin(t, CH5_RACING_LINE.offsetAt(t))),
+  // Sitting where the line already wanted to be. A pad she has to leave the line to reach is
+  // Chapter 4's lesson; this chapter's point is the opposite one.
+  ...PAD_TS.map((t): FurnitureSpec => ({ kind: 'pad', t, offset: CH5_RACING_LINE.offsetAt(t) })),
 ];
 
 function heading(text: string): HTMLElement {
@@ -131,24 +147,10 @@ function beat(step: string, title: string, body: string, wash: string, edge: str
 const content: ChapterContent = {
   concept(ctx: ChapterContext): Node {
     return frag(
-      el(
-        'div',
-        { class: 'card', style: { borderLeft: '8px solid var(--kerb)' } },
-        el('p', { class: 'eyebrow' }, 'The case study'),
-        el(
-          'h2',
-          { style: { fontSize: 'var(--t-section)', margin: '0 0 0.9rem' } },
-          ctx.t('Kendahl does none of this, and she beats {rival} anyway'),
-        ),
-        prose([
-          ctx.t("Before anything else, we need to talk about {rival}'s big sister."),
-          'Kendahl does not drift. She does not carry a banana behind her. She takes no risks at all — no ambitious overtakes, no cutting a corner and hoping. She drives a tidy line and she picks up coins. That is the entire act.',
-          ctx.t('And she beats {rival}. Not once as a fluke. Regularly.'),
-          'That is the argument for this chapter, and it is already sitting at your kitchen table. **Everything else in this course is a knack you have to catch** — a button at the right instant, an item held at the right moment — and a knack has bad days. This one has none. This one is deciding where on the road you want to be, and then being there.',
-          'Which makes it the most valuable half hour in the whole course. It is the skill with the highest floor: it pays on your sharpest day, and it still pays on the evening you are tired and your tea has gone cold. **If you only remember one chapter, remember this one.**',
-          'Your role model here is your own daughter. Do what Kendahl does.',
-        ]),
-      ),
+      prose([
+        '**Everything else in this course is a knack you have to catch** — a button at the right instant, an item held at the right moment. Knacks have bad days.',
+        'This one does not. This one is deciding where on the road you want to be, and then being there. It is the skill with the highest floor in the whole course: it pays on your sharpest evening and it still pays on the one where you are tired and your tea has gone cold. **If you only remember one chapter, remember this one.**',
+      ]),
 
       heading('So what is a racing line?'),
       prose([
@@ -194,6 +196,9 @@ const content: ChapterContent = {
         '**Wide, tight, wide.** It is a longer path on paper and a faster one in the kart, because you never have to slow down as much and you finish the corner facing the right way.',
         'And here is the unglamorous bit holding all of it up: **be smooth.** Most of the speed people lose is not lost in corners at all. It is lost sawing left-right-left-right down a straight, trying to sit in the exact middle of the road. Every one of those little corrections shaves a sliver off your speed, and there are hundreds of them in a race.',
         'Pick a line. Sit on it. Stop fiddling. Boring is fast.',
+        ctx.t(
+          'Which is, incidentally, exactly what Kendahl does. No drifting, no items, no risks — a tidy line and her coins, and she beats {rival} regularly. Make of that what you like.',
+        ),
       ]),
 
       heading('Coins are speed. Ten of them.'),
@@ -235,40 +240,49 @@ const content: ChapterContent = {
       ]),
 
       prose([
-        'So: the practice track, with a trail of coins laid along the good line and two boost pads sitting on it. Three laps, ten coins, and steering is the only control that does anything.',
-        'Follow the coins. If the trail seems to be taking you the long way round a corner, good — that is the lesson. And do not lunge at them one at a time, because that is what makes you saw at the wheel. Look at where the trail goes *next* and let the kart run to it.',
+        'So: the practice track, with the good line painted straight onto the road in teal, coins sitting along it, and two boost pads where it already wanted to go. Three laps, and steering is the only control that does anything.',
+        '**Your score is the share of the lap you spend on the line** — not how much of it you touch. Sitting on it is the whole exercise, so smooth beats quick here in a way it does not anywhere else in this course.',
+        'If the line seems to be taking you the long way round a corner, good. That is the lesson. And do not lunge at it, because lunging is what makes you saw at the wheel — look at where it goes *next*, aim there, and let the kart run to it.',
       ]),
     );
   },
 
   interactive(mount: HTMLElement, ctx: ChapterContext): Mounted {
+    const tracker = new LineTracker();
+
     // Coaching lines are one-shot per attempt. The drill owns its own "try it again" button and
-    // gives us no restart hook, so a restart is inferred from the only thing that can possibly
-    // mean one: the coin count going *down*. Within a run coins never come back, so a fall can
-    // only be a fresh start.
-    let coinsSeen = 0;
+    // gives us no restart hook, so a restart is inferred from the only thing that can mean one:
+    // the lap counter going back to 1 after it has been higher.
+    let lapSeen = 1;
     let padsCalled = 0;
-    let saidHalfway = false;
-    let saidOneMore = false;
+    let saidSettled = false;
+    let offSince: number | null = null;
+    let strayCalled = false;
 
     return createKartDrill({
       mount,
       sfx: ctx.sfx,
       layout: CH5_LAYOUT,
-      goal: 'Follow the coins',
-      unit: 'coins',
+      racingLine: CH5_RACING_LINE,
+      goal: 'Stay on the line',
+      unit: '% on the line',
+      format: (score) => `${score}% on the line`,
       target: TARGET,
       laps: LAPS,
       keys: 'Arrow keys to steer — that is the whole control scheme',
 
       onTick(tick, api) {
-        if (tick.coins < coinsSeen) {
+        if (tick.lap < lapSeen) {
+          tracker.reset();
           padsCalled = 0;
-          saidHalfway = false;
-          saidOneMore = false;
+          saidSettled = false;
+          strayCalled = false;
+          offSince = null;
         }
-        coinsSeen = tick.coins;
-        api.set(tick.coins);
+        lapSeen = tick.lap;
+
+        const on = tracker.sample(tick.line);
+        api.set(tracker.percent());
 
         // Only the first two pads get a word. She drives over six across three laps, and a drill
         // that congratulates her six times for the same thing stops being congratulation.
@@ -276,23 +290,31 @@ const content: ChapterContent = {
           padsCalled++;
           api.say(
             padsCalled === 1
-              ? 'Boost one. Now drive the line to boost two.'
+              ? 'Boost one — the line put you there.'
               : 'Both of them. The bit in between was the lap.',
             'good',
           );
         }
 
-        if (!saidHalfway && tick.coins >= 5 && tick.coins < TARGET - 1) {
-          saidHalfway = true;
-          api.say('Halfway. Stay smooth.');
-        }
-        if (!saidOneMore && tick.coins >= TARGET - 1 && tick.coins < TARGET) {
-          saidOneMore = true;
-          api.say('One more.');
+        // One nudge, the first time she is properly off it for a while. A drill that comments
+        // every time she wanders becomes a drill that nags.
+        const now = performance.now();
+        if (!on && tick.line) {
+          offSince ??= now;
+          if (!strayCalled && now - offSince > 1600) {
+            strayCalled = true;
+            api.say(
+              tick.line.side < 0 ? 'Too tight — let it run wider.' : 'Drifting wide. Ease in.',
+            );
+          }
+        } else {
+          offSince = null;
         }
 
-        // `set` does not end the drill the way `add` does, so the win has to be declared here.
-        if (tick.coins >= TARGET) api.finish();
+        if (!saidSettled && tick.lap >= 2 && tracker.percent() >= 60) {
+          saidSettled = true;
+          api.say('That is it. Now just keep doing nothing.', 'good');
+        }
       },
 
       onFinish(score) {
@@ -300,25 +322,25 @@ const content: ChapterContent = {
       },
 
       verdict(score) {
-        if (score >= TARGET) {
+        if (score >= 75) {
           return {
-            title: 'Ten coins. That is your kart at full speed.',
+            title: `${score}% of the lap on the line.`,
             detail: ctx.t(
-              'And you did it without one clever move — which is exactly the point, and exactly the lap Kendahl drives. Now go and do it on the Switch, where it counts against {rival}.',
+              'That is a driver, not a passenger — and you did it without one clever move, which is exactly the point. Now go and be that boring against {rival}.',
             ),
           };
         }
-        if (score >= 6) {
+        if (score >= 55) {
           return {
-            title: `${score} coins, and a tidy line.`,
+            title: `${score}% on the line. Solidly on it.`,
             detail:
-              'The ones you missed are almost certainly the coins on the inside of a corner, where being there feels wrong. Go round again and trust the trail — it is not lost, it knows where it is going.',
+              'The part you are losing is almost certainly the corner entries, where going wide feels like going the wrong way. Go round again and commit to the wide bit — the line is not lost, it knows where it is going.',
           };
         }
         return {
-          title: `${score} coins.`,
+          title: `${score}% on the line.`,
           detail:
-            'Try it once more, and this time stop steering at the coins. Look at where the trail goes next, aim there, and let the kart carry you across the ones in between. Smooth picks up more than quick does.',
+            'Try once more, and this time stop steering at the line. Look at where it goes next, aim there, and let the kart carry you along the bit in between. Every little correction costs you speed, and there are hundreds of them in a race.',
         };
       },
     });

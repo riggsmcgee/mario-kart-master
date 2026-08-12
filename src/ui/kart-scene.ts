@@ -51,6 +51,11 @@ const PALETTE = {
   helmet: 0xffd23f,
   pad: 0xff8a1f,
   padChevron: 0xfff6de,
+  // The racing line. Teal rather than white or yellow: the road already uses white for its edges
+  // and yellow for coins, and a guide she is meant to follow must not read as either.
+  line: 0x2fc4b2,
+  sparkBlue: 0x5ad1ff,
+  sparkOrange: 0xff8a1f,
   ramp: 0x9b6cff,
   rampStripe: 0xffd23f,
   coin: 0xffcf33,
@@ -157,6 +162,52 @@ function decalMaterial(color: number, order: number): THREE.MeshLambertMaterial 
     polygonOffsetFactor: -order,
     polygonOffsetUnits: -order * 2,
   });
+}
+
+/**
+ * The racing line, painted on the road. (Chapter 5.)
+ *
+ * A ribbon like the road markings, except its offset from the centreline varies per sample rather
+ * than being constant — which is the whole point of it. Built as one geometry so the entire line
+ * is a single draw call however long the lap is.
+ *
+ * Dashed rather than solid, and the dashes are made by *dropping quads* rather than by a dashed
+ * material: a line texture would stretch and bunch through the corners, where the outer edge of a
+ * curved ribbon covers more ground than the inner one. Skipping every third pair of samples gives
+ * dashes that stay the same length everywhere, because the path is already sampled at even
+ * distances (`buildLoopPath` guarantees it).
+ */
+function racingLineGeometry(
+  points: PathPoint[],
+  offsetAt: (t: number) => number,
+  width: number,
+  y: number,
+): THREE.BufferGeometry {
+  const count = points.length;
+  const quads: Array<[number, number, number][]> = [];
+  const half = width / 2;
+
+  for (let i = 0; i < count; i++) {
+    // Two on, one off. Long enough to read as a continuous line at speed, broken enough that it
+    // reads as a guide rather than as a kerb.
+    if (i % 3 === 2) continue;
+
+    const current = points[i];
+    const next = points[(i + 1) % count];
+    if (!current || !next) continue;
+
+    const a = offsetAt(i / count);
+    const b = offsetAt(((i + 1) % count) / count);
+
+    quads.push([
+      [current.x + current.nx * (a - half), y, current.y + current.ny * (a - half)],
+      [current.x + current.nx * (a + half), y, current.y + current.ny * (a + half)],
+      [next.x + next.nx * (b + half), y, next.y + next.ny * (b + half)],
+      [next.x + next.nx * (b - half), y, next.y + next.ny * (b - half)],
+    ]);
+  }
+
+  return quadsGeometry(quads);
 }
 
 /** A ramp: flat at the back, rising to a lip at +x (the direction of travel). */
@@ -619,6 +670,35 @@ function buildKart(): KartParts {
 }
 
 /**
+ * Drift sparks, off the inside rear wheel. (Chapter 6.)
+ *
+ * Two clusters, one per side, and only the inside one is ever shown — which is what makes the
+ * sparks read as *coming from* the slide rather than being an effect bolted onto the kart. The
+ * colour is the charge tier and is the entire feedback mechanism for the drill, so it is the one
+ * thing in this scene that must be unmistakable at a glance: blue, then a hot orange.
+ *
+ * Built from small spheres rather than a particle system. There are eight of them, they live for
+ * as long as the drift does, and a full particle engine to animate eight blobs would be a lot of
+ * machinery for something a sine wave does adequately.
+ */
+function buildSparks(): { group: THREE.Group; blobs: THREE.Mesh[] } {
+  const group = new THREE.Group();
+  const blobs: THREE.Mesh[] = [];
+
+  for (let i = 0; i < 8; i++) {
+    const blob = new THREE.Mesh(
+      new THREE.SphereGeometry(0.16 + (i % 3) * 0.05, 6, 5),
+      new THREE.MeshBasicMaterial({ color: PALETTE.sparkBlue, transparent: true, opacity: 0.9 }),
+    );
+    group.add(blob);
+    blobs.push(blob);
+  }
+
+  group.visible = false;
+  return { group, blobs };
+}
+
+/**
  * A soft blob under the kart. Cheaper than a shadow map and better for this look — and while
  * airborne it is the only cue for how high the kart actually is.
  */
@@ -892,9 +972,22 @@ export interface KartScene {
   setThreat(behind: number | null, time: number): void;
   /** Expanding ring at the kart: 0 to 1, or null for none. (1e) */
   setBurst(progress: number | null, hit: boolean): void;
+  /**
+   * Drift sparks off the inside rear wheel. `direction` is -1 or 1 and picks the side; `tier` is
+   * the charge colour. Pass `'none'` to hide them. (Chapter 6)
+   */
+  setSparks(tier: 'none' | 'blue' | 'orange', direction: number, time: number): void;
   resize(width: number, height: number): void;
   render(): void;
   dispose(): void;
+}
+
+export interface KartSceneOptions {
+  /**
+   * Paint a racing line on the road: metres off the centreline at each fraction of the lap.
+   * Chapter 5 only — every other drill leaves the road unmarked.
+   */
+  racingLine?: (t: number) => number;
 }
 
 export function createKartScene(
@@ -902,6 +995,7 @@ export function createKartScene(
   surface: PathSurface,
   path: TrackPath,
   items: PlacedFurniture[],
+  options: KartSceneOptions = {},
 ): KartScene {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -968,6 +1062,17 @@ export function createKartScene(
     ),
   );
 
+  // Above the edge lines in the decal stack, so it stays visible where it runs near them, and
+  // below the kerbs and the start line, which are part of the track rather than an overlay on it.
+  if (options.racingLine) {
+    scene.add(
+      new THREE.Mesh(
+        racingLineGeometry(points, options.racingLine, 1.5, 0.03),
+        decalMaterial(PALETTE.line, 4),
+      ),
+    );
+  }
+
   scene.add(buildKerbs(points, halfWidth));
   scene.add(buildStartLine(surface, points));
   scene.add(buildBarriers(points, halfWidth));
@@ -985,7 +1090,8 @@ export function createKartScene(
   const heldBanana = buildHeldBanana();
   const seeker = buildSeeker();
   const burst = buildBurst();
-  kart.add(heldBanana, seeker, burst);
+  const sparks = buildSparks();
+  kart.add(heldBanana, seeker, burst, sparks.group);
 
   const droppedBanana = buildDroppedBanana();
   scene.add(droppedBanana);
@@ -1093,6 +1199,30 @@ export function createKartScene(
       // Grows as it closes, on top of getting nearer. Perspective alone is a weak signal when
       // the thing is behind you and the camera is low.
       seeker.scale.setScalar(1 + Math.max(0, 1 - behind / 18) * 0.5);
+    },
+    setSparks(tier, direction, time) {
+      sparks.group.visible = tier !== 'none';
+      if (tier === 'none') return;
+
+      const colour = tier === 'orange' ? PALETTE.sparkOrange : PALETTE.sparkBlue;
+      // Inside rear wheel: the side the kart is rotating toward is the one loaded up.
+      const side = direction >= 0 ? 1.05 : -1.05;
+
+      sparks.blobs.forEach((blob, i) => {
+        const material = blob.material as THREE.MeshBasicMaterial;
+        material.color.setHex(colour);
+
+        // Streaming backwards and outwards, on staggered phases so the cluster shimmers rather
+        // than pulsing as one lump.
+        const phase = (time * 6 + i * 0.7) % 1;
+        blob.position.set(
+          -1.4 - phase * 1.6,
+          0.25 + Math.sin(time * 18 + i) * 0.16,
+          side + Math.sin(time * 11 + i * 2) * 0.22,
+        );
+        blob.scale.setScalar(1 - phase * 0.7);
+        material.opacity = 0.95 * (1 - phase);
+      });
     },
     setBurst(progress, hit) {
       burst.visible = progress !== null;
