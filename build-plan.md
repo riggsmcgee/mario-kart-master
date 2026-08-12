@@ -118,7 +118,7 @@ The first version of the site is a bare lab, deliberately nothing like the final
 - [x] **1a2** Keyboard input layer: action map (`steer`, `hop`, `item`, `uiConfirm`), rebindable, with a live input readout widget for the testbed. *(Opus)* — done 2026-08-07, confirmed working by Riggs. Added a fifth slot, `accelerate`, for Ch1's start-boost drill; see Q9.
 - [x] **1a3** Game loop: fixed-timestep sim (120Hz), interpolated render, pause on tab blur, FPS readout. *(Opus)* — done 2026-08-07, confirmed working by Riggs.
 - [x] **1a4** Tuning panel framework: live sliders bound to any config object, copy-config-to-clipboard, and a `TUNING.md` log (what changed, why, before/after). *(Sonnet)* — done 2026-08-07. Also emits a paste-ready `TUNING.md` entry diffed against the shipped baseline, so the log writes itself.
-- [ ] **1a5** GitHub Pages deploy action (Actions workflow on push to `main`). **Deferred by Riggs 2026-08-06** — testbed runs on localhost for now. Pick this up whenever a live URL is wanted; `base` is already configured. *(Sonnet)*
+- [x] **1a5** GitHub Pages deploy action (Actions workflow on push to `main`). **Deferred by Riggs 2026-08-06**, picked up 2026-08-12 when he asked for the site to go live. `.github/workflows/deploy.yml` typechecks and lints before building, and passes the Supabase URL + anon key in from repository secrets. **Outstanding human step:** those two secrets have to be added in the repo settings, and Pages has to be switched to "GitHub Actions" as its source; without them the build still succeeds and the site simply runs local-only. *(Sonnet)*
 
 **Acceptance:** `npm run dev` loads on Mac Chrome; input readout responds; loop holds 60fps idle. (Deployed-URL check moves to 1a5.)
 
@@ -152,7 +152,7 @@ The first version of the site is a bare lab, deliberately nothing like the final
 
 - [x] **1f1** Supabase setup. Human prerequisite first: Riggs creates the Supabase project (free tier) and puts the project URL + anon key in `.env.local` (gitignored) and in the repo's Actions secrets for the Pages build. Then: schema from Tech decisions as SQL migrations checked into `supabase/migrations`, RLS policies, seed a test user. *(Opus)* — done 2026-08-08. Migration written with RLS on all three tables and a signup trigger that creates the profile row. **Two things still outstanding:** Riggs must run `npx supabase db push` (see `supabase/README.md`), and the Actions secrets are not set because Pages is still deferred (1a5). No test user is seeded on purpose — the first magic-link sign-in at 1f2 creates the real one, and a hand-inserted auth row would not match what the flow actually produces.
 - [x] **1f2** Auth prototype on the testbed: magic-link sign-in page, session persistence, signed-in state readout, sign-out. *(Opus)* — done 2026-08-08. Also reads and writes the profile row, which is the real end-to-end test: it proves the signup trigger fired and RLS permits own-row read *and* write. Needs `http://localhost:5173/**` on the dashboard's redirect allow-list or links silently fail.
-- [ ] **1f3** Progress sync module: typed read/write API for chapter progress and plan checks, write-through localStorage cache, retry on reconnect, "last synced" readout on the testbed. *(Opus)*
+- [x] **1f3** Progress sync module: typed read/write API for chapter progress and plan checks, write-through localStorage cache, retry on reconnect, "last synced" readout on the testbed. *(Opus)* — done 2026-08-12. `src/backend/progress.ts`. The decision worth recording is that chapter progress merges **best-of rather than last-write-wins**: two devices with no coordination means a stale laptop under LWW would silently delete stars earned elsewhere, so status/stars/best-score each take the better value and the merge is order-independent and idempotent. Plan checks stay last-write-wins, because "best of" would make unticking a box impossible — which is why a local untick is carried as an explicit `checked: false` with a timestamp rather than as a deletion.
 - [ ] **1f4 GATE (Riggs):** sign in from a fresh incognito window using only an email. Checks: the flow would not confuse Jodi; progress written on one browser appears on another; the site still works with wifi off (and syncs after). Log any friction.
 
 ### 1g. Phase gate
@@ -167,21 +167,21 @@ Build the real linear site out of the proven pieces. Content quality is the poin
 
 ### 2a. Course shell
 
-- [ ] **2a1** Linear navigation: chapter list, progress bar, done stamps, "continue where you left off," all persisted via the 1f3 sync module (works across her devices). Settings page: display name, mute, sign-out. *(Opus)*
-- [ ] **2a2** Chapter page template implementing the standard flow (hook → concept → video → interactive → On-the-Switch card → done stamp). *(Sonnet)*
+- [x] **2a1** Linear navigation: chapter list, progress bar, done stamps, "continue where you left off," all persisted via the 1f3 sync module (works across her devices). Settings page: display name, mute, sign-out. *(Opus)*
+- [x] **2a2** Chapter page template implementing the standard flow (hook → concept → video → interactive → On-the-Switch card → done stamp). *(Sonnet)*
 
 ### 2b. Chapters
 
 Each chapter step includes drafting its copy (plain, warm, funny; Jodi and Kayla named), wiring its interactive element from the Phase 1 pieces, embedding its verified video, and writing its On-the-Switch card.
 
-- [ ] **2b1** Ch0 intro: "So you want to beat Kayla at Mario Kart? Here's how." Sets the promise and the tone. Placeholder animation slot for Phase 3. *(Opus)*
-- [ ] **2b2** Ch1 start boost: concept + timing mini-game (1c piece). Confirmed to work with her auto-accelerate setting. *(Opus)*
-- [ ] **2b3** Ch2 item smarts: Shield Up drill (1e piece) + item decision quiz (1d piece, 8 to 12 situations: what to use, when, from 1st vs from 8th, why holding a banana behind you wins races) + a short "mushrooms are for straightaways" concept bit. *(Opus)*
-- [ ] **2b4** Ch3 ramp tricks: concept + drill: trick off every ramp on the loop, score = clean tricks, feedback in milliseconds. *(Opus)*
-- [ ] **2b5** Ch4 boost pads: concept + drill: hit every pad on the lap, with some of them deliberately off the line she would naturally take, so the goal is planning the lap rather than reacting to what appears. The lesson is straight out of Mario Kart Stadium's outer lane (see Appendix): the dash panels are in the wide lane, so the fast way round is not the tight way round, and the only way to know that is to know the track — which is the strategic thesis in miniature. Quiz cards show track schematics and ask where the pads are and which line takes them. *(Opus)*
-- [ ] **2b6** Ch5 racing lines and coins: concept + drill: painted ideal line that routes pad-to-pad and through coin clusters (the "paths between boosts"), line fades as she improves, goal is 10 coins held at lap end. Scored generously, 1 to 3 stars. The concept section leads with the Kendahl case study: she doesn't drift, doesn't defend with items, never takes risks, just holds very good lines, and she often beats Kayla. Lines are the highest-floor skill in this family, and Jodi's role model is her own daughter. *(Opus)*
-- [ ] **2b7** Ch6 the drift, explained: concept only. Animated diagram of when a drift helps (long corners), what blue and orange sparks mean, why her assist setup still allows them, plus a 30-second drafting/slipstream aside. Video embed. On-the-Switch card sends the practice to the real game. No browser drill. *(Opus)*
-- [ ] **2b8** Ch7 pick your weapon: character + kart recommender, decided by research (2026-08-06). At 100cc with items on, acceleration and handling beat top speed (she gets knocked around and needs to recover fast), and Roller-class tires carry every build. Present as three named personalities, not a stats table:
+- [x] **2b1** Ch0 intro: "So you want to beat Kayla at Mario Kart? Here's how." Sets the promise and the tone. Placeholder animation slot for Phase 3. *(Opus)*
+- [x] **2b2** Ch1 start boost: concept + timing mini-game (1c piece). Confirmed to work with her auto-accelerate setting. *(Opus)*
+- [x] **2b3** Ch2 item smarts: Shield Up drill (1e piece) + item decision quiz (1d piece, 8 to 12 situations: what to use, when, from 1st vs from 8th, why holding a banana behind you wins races) + a short "mushrooms are for straightaways" concept bit. *(Opus)*
+- [x] **2b4** Ch3 ramp tricks: concept + drill: trick off every ramp on the loop, score = clean tricks, feedback in milliseconds. *(Opus)*
+- [x] **2b5** Ch4 boost pads: concept + drill: hit every pad on the lap, with some of them deliberately off the line she would naturally take, so the goal is planning the lap rather than reacting to what appears. The lesson is straight out of Mario Kart Stadium's outer lane (see Appendix): the dash panels are in the wide lane, so the fast way round is not the tight way round, and the only way to know that is to know the track — which is the strategic thesis in miniature. Quiz cards show track schematics and ask where the pads are and which line takes them. *(Opus)*
+- [x] **2b6** Ch5 racing lines and coins: concept + drill: painted ideal line that routes pad-to-pad and through coin clusters (the "paths between boosts"), line fades as she improves, goal is 10 coins held at lap end. Scored generously, 1 to 3 stars. The concept section leads with the Kendahl case study: she doesn't drift, doesn't defend with items, never takes risks, just holds very good lines, and she often beats Kayla. Lines are the highest-floor skill in this family, and Jodi's role model is her own daughter. *(Opus)*
+- [x] **2b7** Ch6 the drift, explained: concept only. Animated diagram of when a drift helps (long corners), what blue and orange sparks mean, why her assist setup still allows them, plus a 30-second drafting/slipstream aside. Video embed. On-the-Switch card sends the practice to the real game. No browser drill. *(Opus)*
+- [x] **2b8** Ch7 pick your weapon: character + kart recommender, decided by research (2026-08-06). At 100cc with items on, acceleration and handling beat top speed (she gets knocked around and needs to recover fast), and Roller-class tires carry every build. Present as three named personalities, not a stats table:
   - **The Comfy Speedster (headline pick): Yoshi + Teddy Buggy + Roller (or Azure Roller) tires + Cloud Glider.** The widely recommended forgiving build: quick recovery, easy handling, strong mini-turbo.
   - **The Zippy One: Toad (or any baby character) + Biddybuggy + Roller.** Maximum acceleration; tradeoff is being light enough for Kayla to bump around.
   - **The Steady One: Waluigi + Wild Wiggler + Roller.** Heavier and harder to shove, slightly slower to recover.
@@ -198,13 +198,13 @@ Each chapter step includes drafting its copy (plain, warm, funny; Jodi and Kayla
 
 Theme, motion, voice, sound. This is the "make her smile" phase.
 
-- [ ] **3a1** Style guide: bright arcade palette, chunky rounded type and buttons, original mascot (suggestion: "Turbo Jodi," a grandma-fast tortoise in a kart), zero Nintendo IP. One page, then applied site-wide. *(Opus)*
+- [x] **3a1** Style guide: bright arcade palette, chunky rounded type and buttons, original mascot (suggestion: "Turbo Jodi," a grandma-fast tortoise in a kart), zero Nintendo IP. One page, then applied site-wide. *(Opus)*
 - [ ] **3b1** Intro animation for Ch0 (the site's one big animated moment) + light micro-animations per chapter: concept diagrams that move, done-stamp thunk, confetti on 3 stars. Respect `prefers-reduced-motion`. *(Opus)*
-- [ ] **3b2** Kart drill facelift: themed track, kart, and sky replacing placeholder shapes. *(Sonnet)*
-- [ ] **3c1** Voiceover scripts: 60 to 90 seconds per chapter, written to be read aloud by Riggs, conversational, teasing, personal. *(Opus)*
+- [x] **3b2** Kart drill facelift: themed track, kart, and sky replacing placeholder shapes. *(Sonnet)* — done 2026-08-07, ahead of its phase; see the Session 5–7 index.
+- [x] **3c1** Voiceover scripts: 60 to 90 seconds per chapter, written to be read aloud by Riggs, conversational, teasing, personal. *(Opus)*
 - [ ] **3c2** Record voiceovers *(human: Riggs, QuickTime or Voice Memos, quiet room, phone mic is fine)*. Fallback if recording stalls: a warm TTS voice, but Riggs's actual voice is the gift here.
-- [ ] **3c3** Audio integration: per-chapter player with a big play button, auto-pause when a drill starts, full transcript visible beneath (accessibility + skimmers). *(Sonnet)*
-- [ ] **3d1** SFX: engine hum, coin ping, star fanfare, shield thunk. Original, subtle, mutable. *(Sonnet)*
+- [x] **3c3** Audio integration: per-chapter player with a big play button, auto-pause when a drill starts, full transcript visible beneath (accessibility + skimmers). *(Sonnet)*
+- [x] **3d1** SFX: engine hum, coin ping, star fanfare, shield thunk. Original, subtle, mutable. *(Sonnet)*
 - [ ] **3e1** Readability pass: large type everywhere, contrast check, focus states, no information carried by color alone. *(Sonnet)*
 - [ ] **3f1 GATE (Riggs):** click through the whole site cold. Question: would you be proud to send her this link as a present? Lighthouse performance stays 90+.
 
@@ -234,7 +234,7 @@ Runner-up: Flower Cup (Toad Harbor's trams add a mild moving-obstacle element). 
 
 ### 4b. The program
 
-- [ ] **4b1** Author the program. *(Opus)* Contents:
+- [x] **4b1** Author the program. *(Opus)* Contents:
   - **Weekly rhythm:** 3 to 4 Switch sessions per week, 15 to 20 minutes each. The website is revisited only as a refresher.
   - **Per-skill Switch practice:** for every chapter, the exact real-game exercise. Examples: Ch1 → every race, hold A on the "2"; Ch5 → Time Trials vs her own ghost on Mario Kart Stadium and Water Park (the cup's two gentlest tracks), goal is beating her ghost, not lap records; one solo 100cc race where the only goal is finishing with 10 coins; Ch2 → one race using items defensively only.
   - **Own-the-cup training:** run the Mushroom Cup vs Hard CPU at 100cc until top-3 is routine, then until winning it is routine.
@@ -246,12 +246,12 @@ Runner-up: Flower Cup (Toad Harbor's trams add a mild moving-obstacle element). 
 
 Original schematic diagrams only (subway-map style, no Nintendo artwork). One guide per Mushroom Cup track. Research seeds for all four tracks are in the Appendix; these steps turn the seeds into finished guide content written in the site's warm coaching voice, addressed to Jodi.
 
-- [ ] **4c1** Stage 1, overview cards: per track, the layout schematic with 3 or 4 callouts from the Appendix seeds: real boost pads, coin clusters, the one hazard that matters, where ramp tricks live. Visible from day one of the program. *(Opus)*
-- [ ] **4c2** Stage 2, deep dives: per track, the memorization payload from the Appendix seeds: path choices with reasons, full recommended line per section, hazard timing notes, what to do in Time Trial on this track, and the verified track video embed. Labeled "come back to this in week 3": visible but explicitly scheduled for the midpoint of training, when she has the vocabulary and reps to absorb it. *(Opus)*
+- [x] **4c1** Stage 1, overview cards: per track, the layout schematic with 3 or 4 callouts from the Appendix seeds: real boost pads, coin clusters, the one hazard that matters, where ramp tricks live. Visible from day one of the program. *(Opus)*
+- [x] **4c2** Stage 2, deep dives: per track, the memorization payload from the Appendix seeds: path choices with reasons, full recommended line per section, hazard timing notes, what to do in Time Trial on this track, and the verified track video embed. Labeled "come back to this in week 3": visible but explicitly scheduled for the midpoint of training, when she has the vocabulary and reps to absorb it. *(Opus)*
 
 ### 4d. Build
 
-- [ ] **4d1** Build Ch8: program with checkboxes (synced via 1f3), cup guide with overview/deep-dive tabs, printable one-pager (weekly plan + milestone ladder, print stylesheet, for the fridge). *(Sonnet)*
+- [x] **4d1** Build Ch8: program with checkboxes (synced via 1f3), cup guide with overview/deep-dive tabs, printable one-pager (weekly plan + milestone ladder, print stylesheet, for the fridge). *(Sonnet)*
 
 ### 4e. The doorman (deliberately one of the last things implemented)
 
@@ -264,8 +264,8 @@ On first visit after sign-in, before Ch0, the site asks: **"Who's training?"** F
 
 Steps:
 
-- [ ] **4e1** Copy templating pass: all chapter copy renders through a `{name}` template; audit every hardcoded "Jodi." *(Sonnet)*
-- [ ] **4e2** Doorman screen + role behaviors, including the Kayla lockout and the Other combo browser (parts data JSON sourced from a stats reference, checked into `src/data`). *(Opus)*
+- [x] **4e1** Copy templating pass: all chapter copy renders through a `{name}` template; audit every hardcoded "Jodi." *(Sonnet)*
+- [x] **4e2** Doorman screen + role behaviors, including the Kayla lockout and the Other combo browser (parts data JSON sourced from a stats reference, checked into `src/data`). *(Opus)*
 - [ ] **4e3 GATE (family):** the gag lands as funny, not mean. Ideal test: show Riggs first, then let Kayla actually find the lockout organically after launch.
 
 ### 4f. Launch
@@ -406,4 +406,12 @@ Raw material for steps 4c1/4c2. Everything below is filtered for Jodi's settings
 - **2026-08-07** (playtest): first outside driver (Riggs's girlfriend) tried the kart drill and it came back **much slower** — top speed 20 → 11.5, below even the original guess. The number moved opposite to the author's own instinct, because familiarity reads as control. Jodi is a first-time driver on every drill she meets, so **when the author and a newcomer disagree, prefer the newcomer.** Applies to the trick window, the steer-assist guardrail (1b4) and how punishing grass is. Gate 1b6 should be run with someone who has never seen it.
 - **2026-08-07** (Riggs, correcting the plan): **Mario Kart has no decoy boost pads.** Half-pipes are real ramps that give real trick boosts; what they cost you is your racing line, and they are typically blue. Chapter 4 is rewritten accordingly: the lesson stops being "spot the fake" and becomes the judgement call "is that boost worth the detour?" — which pays on a straight and loses in a corner. Implemented in 1b3 as a `halfpipe` kind that boosts normally and throws the kart outward on launch. Affects the Ch4 row, 1b3, 1b5, 1b6's checklist and 2b5.
 - **2026-08-07** (Claude, deciding Q6 as delegated by Riggs): track content is a plain typed array; each item is positioned by `t` (0..1 around the lap) and lateral `offset`, resolved to world space once at load. No editor, no file format, no validation layer. Phase 2's drill layouts are four arrays.
+- **2026-08-12** (Riggs): **gating suspended for the assembly.** He playtested the Phase 1 pieces, found them good, and asked for the whole project to be built out in one sitting rather than gate by gate. 1b6/1c2/1d2/1e2 are therefore cleared informally and `protos.ts` marks all eight pieces signed off. The remaining gates (2c1, 3f1, 4e3, 4f2) are still his and are still unplayed.
+- **2026-08-12** (Riggs, answering Q5): **names yes, artwork no.** The IP rule is reworded: no Nintendo *artwork, audio, logos or fonts*; character, kart, part and track names used as plain factual references are fine, and the eight verified YouTube tutorials are embedded as standard embeds. Without this, Chapter 7's recommender and the whole of Chapter 8's cup guide cannot exist. The project is a private present, never monetised.
+- **2026-08-12** (Riggs): **GitHub Pages is on** (1a5) and the work is pushed. Two human steps remain: add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to the repo's Actions secrets, and set Pages' source to "GitHub Actions". Without them the build still succeeds and the site runs local-only.
+- **2026-08-12** (Riggs): **voiceover ships as scripts plus a silent player.** All nine scripts are written (3c1) and the transcript is always visible; the play button does not exist until an mp3 is present in `public/audio/`. A placeholder voice was rejected — his actual voice is the gift, and a placeholder that ships is worse than silence.
+- **2026-08-12** (Claude, answering Q7 because it blocked every drill): **one star for finishing, two and three at per-chapter thresholds**, all in one table in `src/data/chapters.ts`. One star for turning up is the plan's "every interactive ends on a win" made concrete; three stars is set at "clearly got it" rather than at mastery, because a third star she can never reach is a third star that tells her she failed.
+- **2026-08-12** (Claude, deviating from the plan's ordering, stated in advance): **the style guide (3a1) was built before the chapters rather than after.** Building nine chapters plain and restyling them is the same work twice and the second pass is the one that gets rushed. The palette is lifted from the Three.js scene the drills already render, because those drills sit inside these pages.
+- **2026-08-12** (Claude): **the course is now the root URL; the Phase 1 testbed moved to `/testbed/`.** The lab is kept rather than deleted — the tuning panels live there and nowhere else, and the course imports the components rather than those pages.
+- **2026-08-12** (Claude, settling Q8): **hash routing.** Static Pages has no SPA fallback, so a refresh on a chapter URL would 404; a hash never reaches the server. URLs read `#/chapter/ch3`, which nobody in this story will ever type.
 - **2026-08-07** (Riggs): section 1a acceptance met — dev server loads, input readout responds, loop runs clean. Verified on Chrome/Windows, not yet on Chrome/macOS; macOS remains a launch-QA risk (4f1) until someone runs it there.

@@ -17,18 +17,92 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 | | |
 |---|---|
-| Current phase | Phase 1: The Testing Ground |
-| Current step | **1f3** — progress sync module, the last unbuilt piece in Phase 1 |
-| Last gate passed | none yet (1a carries an acceptance check, not a gate — met 2026-08-07) |
-| Next gate | four are open and none has been played: **1b6** kart · **1c2** timing · **1d2** quiz · **1e2** Shield Up |
-| Repo state | 1a1–1a4, 1b1–1b5, 1c1, 1d1, 1e1, 1f1–1f2 done; seven prototypes run under `npm run dev` |
-| Deferred | **1a5** GitHub Pages deploy |
-| Needs an answer | **Q5** IP wording · **Q7** star scoring · **Q9** accelerate slot (all can wait for 1g1) |
-| Not pushed | 24 commits ahead of `origin/main`; nothing has ever left this machine |
+| Current phase | Phase 4, most of the way through — the whole course exists end to end |
+| Current step | **4f1** final QA, blocked on a Mac; **2b9** video tone-watching; **3c2** recording |
+| Last gate passed | Riggs playtested the Phase 1 pieces and cleared them in one go (2026-08-12), rather than gate by gate |
+| Next gate | **2c1** full run-through · **3f1** cold click-through · **4f2** Jodi, watched silently |
+| Repo state | All of Phase 1 built; Phase 2 assembled; Phase 3 done except the intro animation and the recording; Phase 4 done except launch QA |
+| Deferred | nothing — 1a5 landed 2026-08-12 |
+| Needs an answer | **Q9** accelerate slot (cosmetic now); ~~Q5~~ ~~Q7~~ ~~Q6~~ ~~Q8~~ answered |
+| Not pushed | resolved 2026-08-12 — see the session entry below |
 
 ---
 
 ## Log
+
+### 2026-08-12 — Session 9 (Opus 5)
+
+**Steps touched:** **1f3** · **1a5** · **2a1** · **2a2** · **2b1–2b8** · **3a1** · **3b2** (ticked) ·
+**3c1** · **3c3** · **3d1** · **4b1** · **4c1** · **4c2** · **4d1** · **4e1** · **4e2**
+
+Riggs's instruction was to ignore gating and get the whole thing standing up in one sitting, having
+playtested the Phase 1 pieces himself and found them good. So this session is the assembly.
+
+**Four decisions he made at the start**, all of which unblocked something that had been sitting:
+
+- **Push and deploy.** 1a5 is built and Pages is on. (Two human steps remain: add the two Supabase
+  secrets to the repo, and set Pages' source to "GitHub Actions".)
+- **Q5, the IP rule, is answered:** names are fine, artwork is not. That unblocked the Chapter 7
+  recommender and the whole Chapter 8 cup guide, neither of which can work without naming things.
+- **The database is live** — confirmed by screenshot, so 1f3 was written against the real schema.
+- **Voiceover: scripts and a silent player**, waiting for his voice rather than substituting one.
+
+**The shape of the build.** The foundation was written by hand — the sync module, the theme, the
+chapter contract, the shell, the template, the reusable kart drill — and then the nine chapters were
+authored in parallel against that frozen contract, eight agents on disjoint files. That split was
+deliberate: the contract is the thing that had to be coherent, and chapters are content.
+
+**Q7 is answered, because it blocked every drill.** One star for finishing, two and three at
+per-chapter thresholds in `data/chapters.ts`. Three stars is set at "clearly got it" rather than at
+mastery — a third star she can never reach is a third star that tells her she failed.
+
+**Two deviations from the plan's ordering, both stated up front:**
+
+- **The style guide (3a1) was built before the chapters, not after.** Nine chapters built plain and
+  then restyled is the same work twice, and the second pass is the one that gets rushed.
+- **The root URL is now the course; the Phase 1 lab moved to `/testbed/`.** The lab is kept rather
+  than deleted, because the tuning panels live there and nowhere else — the course imports the
+  components, not those pages.
+
+**What the screenshots caught that the compiler could not.**
+
+This is the part worth reading. Three real defects, none of which a typecheck or a lint could ever
+have seen, and one of them was hidden by a *bad test I had just written*:
+
+1. **Every chapter was serving the home page.** The doorman remembered the hash it booted on and
+   restored it on the first `hashchange` after it closed — and on a normal visit that hash is `#/`,
+   so the first chapter she opened threw her straight back home. The fix is smaller than the bug:
+   after the doorman closes, just render whatever the address bar already says.
+2. **My own render check passed while that was broken**, because it only asserted the page was not
+   blank. Something always renders. Every route now carries a string it must actually contain, and
+   that column is the entire value of the file.
+3. **Chapter 8 was rendering the standard template** — no programme, no checkboxes, no cup guide,
+   with the copy still promising "tick the boxes" above nothing at all. `custom` was in the contract
+   and nothing ever called it. Then wiring it in naively printed the title and hook twice, because
+   the custom page had been built to own its whole layout, as the contract said it would.
+
+A fourth was a self-inflicted false alarm worth recording: chapter 5 failed the check because the
+drill chapters dynamically import Three.js, `networkidle` can fire during a gap in that module
+waterfall, and a fixed sleep sampled the page mid-"Loading…". Waiting for the expected text instead
+of for a number of milliseconds fixed a bug in the test, not in the site.
+
+**One design decision reversed by seeing it.** The header carried a miniature of the lap map. On
+screen it is a grey squiggle with markers too small to read — it competed with the signature element
+instead of supporting it. Replaced with a bar and a count, which is the only question a header has
+to answer. The map earns its space at full size on the home page and nowhere else.
+
+**Verified, and the word is doing real work here:** typecheck, lint and production build are clean;
+all twelve routes render the page they are supposed to under real Chromium, asserted by content;
+all four doorman roles behave, and the Kayla lockout genuinely refuses `#/chapter/ch1`. Code
+splitting works — the shell is 18.8KB gzipped and Three.js only arrives for the four chapters that
+drive a kart.
+
+**Not verified, and still carried:** nothing has ever run on macOS, which is Jodi's only platform,
+and the 60fps check is still outstanding (4f1). No Safari pass. The print stylesheet has never met a
+printer. Nobody has played the course end to end for time, so the 30-to-45-minute target is a
+target. `npm run shoot` is the tool for the first of those the moment a Mac is available.
+
+---
 
 ### 2026-08-11 — Session 8 (Opus 5)
 

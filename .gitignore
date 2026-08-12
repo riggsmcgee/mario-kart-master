@@ -12,6 +12,9 @@ dist-ssr
 supabase/.temp
 supabase/.branches
 
+# Render checks from scripts/shoot.mjs. Useful to look at, pointless to version.
+screenshots
+
 .DS_Store
 Thumbs.db
 

@@ -32,8 +32,9 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   {
-    // Config files are plain JS and live outside the TS projects.
-    files: ['**/*.js'],
+    // Config files and the Node-side scripts are plain JS and live outside the TS projects, so
+    // the type-aware rules have no program to consult and would error on the file itself.
+    files: ['**/*.js', '**/*.mjs'],
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: { globals: globals.node },
   },

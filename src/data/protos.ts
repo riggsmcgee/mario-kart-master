@@ -5,6 +5,11 @@
  * Vite discovers those pages automatically, this list is what the index page shows.
  * Add the entry when the step starts, flip `status` to 'built' when it runs,
  * and to 'signed-off' only when its GATE is checked in build-plan.md.
+ *
+ * All eight are signed off as of 2026-08-12: Riggs playtested the pieces and cleared them in one
+ * go rather than gate by gate, which is why 1b6/1c2/1d2/1e2 never got individual write-ups. The
+ * lab is kept rather than deleted because the tuning panels live here and nowhere else — the
+ * course imports the components, not these pages, so this is still where feel values get changed.
  */
 
 export type ProtoStatus = 'planned' | 'built' | 'signed-off';
@@ -28,14 +33,14 @@ export const PROTOS: Proto[] = [
     step: '1a2',
     blurb:
       'Action map (steer, hop, item, accelerate, uiConfirm), rebindable, with a live key readout.',
-    status: 'built',
+    status: 'signed-off',
   },
   {
     id: 'loop',
     title: 'Game loop',
     step: '1a3',
     blurb: 'Fixed 120Hz sim, interpolated render, pause on tab blur, FPS readout.',
-    status: 'built',
+    status: 'signed-off',
   },
   {
     id: 'tuning',
@@ -43,7 +48,7 @@ export const PROTOS: Proto[] = [
     step: '1a4',
     blurb:
       'Live sliders bound to any config object, copy-config-to-clipboard, copy-TUNING.md-entry.',
-    status: 'built',
+    status: 'signed-off',
   },
   {
     id: 'kart',
@@ -52,8 +57,8 @@ export const PROTOS: Proto[] = [
     gate: '1b6',
     blurb:
       'Hand-rolled 2D physics under a Three.js chase camera. Pads, ramps with trick timing, ' +
-      'half-pipes, coins, smart-steering guardrail, and a real circuit. Ready for gate 1b6.',
-    status: 'built',
+      'coins, smart-steering guardrail, and a real circuit.',
+    status: 'signed-off',
   },
   {
     id: 'timing',
@@ -63,7 +68,7 @@ export const PROTOS: Proto[] = [
     blurb:
       'Countdown-and-hold component for the Ch1 start boost. Shows where you pressed against ' +
       'the window, not just how far off you were.',
-    status: 'built',
+    status: 'signed-off',
   },
   {
     id: 'quiz',
@@ -73,7 +78,7 @@ export const PROTOS: Proto[] = [
     blurb:
       'Situation diagram + big answer buttons + a warm reply to every option, right or wrong. ' +
       "Loaded with Chapter 2's ten item-decision cards. Questions and pictures both plain JSON.",
-    status: 'built',
+    status: 'signed-off',
   },
   {
     id: 'shield',
@@ -83,7 +88,7 @@ export const PROTOS: Proto[] = [
     blurb:
       'The kart piece with something chasing it. Bananas from item boxes, hold to keep one ' +
       'behind your bumper, and a locked-on shell that never misses if you do not.',
-    status: 'built',
+    status: 'signed-off',
   },
   {
     id: 'auth',
@@ -93,6 +98,6 @@ export const PROTOS: Proto[] = [
     blurb:
       'Magic-link sign in, session persistence, and the profile row — which is the real test: ' +
       'it proves the signup trigger and row-level security both work.',
-    status: 'built',
+    status: 'signed-off',
   },
 ];

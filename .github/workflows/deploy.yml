@@ -1,0 +1,73 @@
+# GitHub Pages deploy. (1a5)
+#
+# Deferred since 2026-08-06 while everything ran on localhost; picked up now that there is a
+# course worth looking at. Vite's `base` has been Pages-correct since 1a1, so this is the one
+# file that was missing.
+#
+# The Supabase values come from repository secrets and are baked into the bundle at build time,
+# because Vite inlines `import.meta.env.*` — there is no server here to read them at runtime.
+# That is safe for these two specifically: the anon key identifies the project, not a person,
+# and every table has row-level security scoped to `auth.uid()`. The service key must never
+# appear in this file, in a secret used here, or anywhere else in the repo.
+#
+# If the secrets are absent the build still succeeds and the site runs local-only: progress is
+# kept in localStorage and simply does not follow her to a second device. That is a deliberate
+# property of `getSupabase()` returning null rather than throwing.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # So a deploy can be re-run without an empty commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a run finish rather than cancelling it: a half-deployed Pages site is worse than a slightly
+# stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Typecheck and lint before building. A deploy is the worst place to find out the build
+      # was broken, and these take seconds.
+      - run: npm run typecheck
+      - run: npm run lint
+
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
