@@ -231,3 +231,52 @@
 .draft-stream {
   animation: draft-stream 0.7s linear infinite;
 }
+
+/* --- the three stick positions ---------------------------------------------
+ *
+ * The fact that turns a drift from something that happens to you into something you are doing:
+ * once it has started, the stick stops steering and starts shaping. Three arrows, because "away
+ * from the corner" is a direction and directions want a picture rather than a sentence.
+ */
+.stick-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.9rem;
+  margin: 0 0 1.2rem;
+}
+
+.stick-state {
+  background: var(--card);
+  border: 2px solid var(--rule);
+  border-radius: var(--round);
+  padding: 1rem 1.1rem;
+  text-align: center;
+}
+
+.stick-arrow {
+  color: var(--track);
+  margin-bottom: 0.4rem;
+}
+
+.stick-state h4 {
+  font-size: 1.05rem;
+  margin: 0 0 0.35rem;
+}
+
+.stick-state p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* Spans the grid, because it is true of all three and not a fourth state. */
+.stick-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  background: var(--trim-wash);
+  border-radius: var(--round);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}

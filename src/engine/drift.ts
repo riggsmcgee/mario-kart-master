@@ -25,9 +25,11 @@
  * Her steering still does something, but it *modulates* the arc rather than driving it: hold into
  * the drift to tighten, ease off to run wide.
  *
- * **Neutral steering keeps the drift alive.** The first version ended it the moment she was not
- * actively holding the corner, which meant she could never settle into one. Only three things stop
- * a drift now: letting go, dropping below walking pace, or steering the other way.
+ * **The stick has three positions, and all three keep the drift alive.** Into the corner tightens
+ * it, centred holds the natural arc, away from the corner widens it — which is what the real game
+ * does and what Chapter 6 now teaches on the page. Only letting go of the button ends a drift (or
+ * dropping below walking pace). The first version ended it the moment she stopped actively holding
+ * into the corner, which meant she could never settle into one at all.
  *
  * **Three tiers in the game, two here.** Blue sparks (mini-turbo) and orange (super mini-turbo)
  * are in. Purple is not, and Chapter 6 says why out loud: Bayesic's own video files it under
@@ -209,14 +211,15 @@ export function stepDrift(
   const wasDrifting = drift.direction !== 0;
 
   // --- release ---
-  // Three things end a drift: letting go of the key, dropping below walking pace, and steering
-  // the *other* way. Neutral steering does not, which is the point — a drift she has to keep
-  // actively holding into is a drift she can never settle into, and settling into one is the
-  // skill. Counter-steering ends it because that is her saying she wants the corner over.
+  // Only two things end a drift: letting go of the button, and dropping below walking pace.
+  //
+  // Counter-steering used to end it as well, and that was wrong twice over. It is not what the
+  // real game does — pushing away from the corner *widens* a drift rather than cancelling it —
+  // and Chapter 6 now teaches the three stick positions explicitly (Riggs, 2026-08-12), so an
+  // engine that cancelled on the third one would be contradicting the page it sits under.
   if (wasDrifting) {
     const tooSlow = input.speed < config.minSpeed;
-    const counterSteered = input.steer !== 0 && Math.sign(input.steer) !== drift.direction;
-    if (!input.held || tooSlow || counterSteered) {
+    if (!input.held || tooSlow) {
       const tier = tierFor(drift.charge, config);
       drift.released = tier;
       drift.releasedBoost =

@@ -479,6 +479,104 @@ const STEPS: ReadonlyArray<{ stage: string; text: string }> = [
   { stage: 'boost', text: 'Let go on the way out, and it fires you down the next straight.' },
 ];
 
+/**
+ * The three stick positions, drawn. (Riggs, 2026-08-12: "an explanation of the different stick
+ * states in drift might help her".)
+ *
+ * This is the thing every drifting tutorial assumes you already know, and the reason drifting
+ * feels uncontrollable to a beginner: once the drift has started, the stick stops steering and
+ * starts *shaping*. Push into the corner and the arc tightens, let go and it holds, push away and
+ * it opens out. All three keep the drift going — only the button ends it — which is the single
+ * fact that turns a drift from something that happens to you into something you are doing.
+ *
+ * Drawn as three arrows rather than described, because "away from the corner" is a direction and
+ * directions want a picture. The arrow is an SVG path so it inherits the text colour and needs no
+ * asset (design principle 5).
+ */
+function stickArrow(direction: 'left' | 'centre' | 'right'): SVGSVGElement {
+  const box = svg('svg', {
+    viewBox: '0 0 48 48',
+    width: 48,
+    height: 48,
+    'aria-hidden': 'true',
+    class: 'stick-arrow',
+  });
+
+  // The stick's gate: a circle it moves inside, so a centred stick reads as "resting" rather
+  // than as "no picture here".
+  box.append(svg('circle', { cx: 24, cy: 24, r: 17, fill: 'none', stroke: '#d7e0ec', 'stroke-width': 3 }));
+
+  if (direction === 'centre') {
+    box.append(svg('circle', { cx: 24, cy: 24, r: 6, fill: 'currentColor' }));
+    return box;
+  }
+
+  const sign = direction === 'left' ? -1 : 1;
+  box.append(
+    svg('path', {
+      d: `M 24 24 L ${24 + sign * 13} 24`,
+      stroke: 'currentColor',
+      'stroke-width': 5,
+      'stroke-linecap': 'round',
+    }),
+  );
+  box.append(
+    svg('path', {
+      d: `M ${24 + sign * 8} 17 L ${24 + sign * 16} 24 L ${24 + sign * 8} 31 Z`,
+      fill: 'currentColor',
+    }),
+  );
+  box.append(svg('circle', { cx: 24, cy: 24, r: 5, fill: 'currentColor' }));
+  return box;
+}
+
+function stickCard(t: (text: string) => string): HTMLElement {
+  const states: ReadonlyArray<{
+    dir: 'left' | 'centre' | 'right';
+    name: string;
+    body: string;
+  }> = [
+    {
+      dir: 'left',
+      name: 'Into the corner',
+      body: 'The drift **tightens**. For when the bend is sharper than the slide you are on.',
+    },
+    {
+      dir: 'centre',
+      name: 'Let it sit',
+      body: 'The drift **holds its curve**. This is where your thumb should be most of the time.',
+    },
+    {
+      dir: 'right',
+      name: 'Away from the corner',
+      body: 'The drift **opens out**. For when the bend straightens up before you are done.',
+    },
+  ];
+
+  return el(
+    'div',
+    { class: 'stick-card' },
+    ...states.map((state) =>
+      el(
+        'div',
+        { class: 'stick-state' },
+        stickArrow(state.dir),
+        el('h4', null, t(state.name)),
+        el('p', null, rich(t(state.body))),
+      ),
+    ),
+    el(
+      'p',
+      { class: 'stick-note' },
+      rich(
+        t(
+          'All three keep you drifting. **Only letting go of the button ends it** — and that is the moment you get your boost.',
+        ),
+      ),
+    ),
+  );
+}
+
 const content: ChapterContent = {
   concept(ctx: ChapterContext): Node {
     const line = (text: string): string => ctx.t(text);
@@ -537,38 +635,26 @@ const content: ChapterContent = {
     return frag(
       prose(
         [
-          'This is the most talked-about skill in the game, and for once the fuss is fair. Here is the thing nobody says out loud though: **a drift is not a way of taking a corner. It is a way of manufacturing a boost out of a corner you had to take anyway.**',
-          'That distinction is the whole chapter. Get it and you will know exactly which corners to drift and which to leave alone — which is the part that separates people who drift from people who drift *usefully*.',
-        ].map(line),
-      ),
-      el('h3', { class: 'drift-h' }, 'What a drift actually is'),
-      prose(
-        [
-          'A drift is a slide you do **on purpose**. You hold down the same shoulder button you use for tricks — hold it, rather than tapping it — and steer into the corner. The kart hops, and then the back end swings wide while the nose stays aimed into the bend.',
-          'Keep holding, and sparks start coming off the back wheels. The sparks are a charge meter you can see, which is a kindness: you never have to count. Let go while they are lit, and the kart fires forward.',
+          '**A drift is not a way of taking a corner. It is a way of making a boost out of a corner you had to take anyway.** That is the whole chapter.',
+          'You hold the same shoulder button you tap for tricks — hold it, rather than tapping — and steer into the bend. The kart hops, the back end swings wide, and sparks start coming off the back wheels. Let go while they are lit and you fire forward.',
         ].map(line),
       ),
       figure,
+      el('h3', { class: 'drift-h' }, 'What your thumb is doing'),
+      stickCard(line),
       el('h3', { class: 'drift-h' }, 'What the sparks are worth'),
       sparkCard,
+      el('h3', { class: 'drift-h' }, 'Long corners only'),
       prose(
         [
-          "Those are the game's own numbers, from its own tutorial. The gap between them is the entire point: waiting for orange is worth roughly three blues, so a corner that only ever gives you blue is a corner that was barely worth drifting.",
-        ].map(line),
-      ),
-      el('h3', { class: 'drift-h' }, 'Long corners only. This is the bit people skip'),
-      prose(
-        [
-          'A drift costs you something while you are doing it. You are sliding, which is slower than driving straight, and you have given up some of your steering to the slide. On a quick flick of a corner you spend the whole thing charging a spark that never arrives, and you come out slower than if you had simply driven round it.',
-          'On a long sweeping corner you have room for blue, and then orange, and you leave the corner faster than you entered it. That is the only situation where any of this pays. Sweet Sweet Canyon, in your cup, is full of exactly those corners. The tight stuff at Thwomp Ruins is not — drive that normally and keep your line.',
+          'This is the bit people skip. Drifting through a quick flick of a corner spends the whole thing charging a spark that never arrives, and you come out slower than if you had just driven round it.',
+          '**Long, sweeping corners only.** Sweet Sweet Canyon is full of them. The tight stuff at Thwomp Ruins is not — drive that normally and keep your line.',
         ].map(line),
       ),
       drafting,
-      el('h3', { class: 'drift-h' }, 'Where this goes on your list'),
       prose(
         [
-          'After the other five, and before the racing. The start boost, your line and your coins win races on their own, and they are easier — so they came first. But this is not an optional extra you can safely never learn: it is free speed on every long corner of every lap, and there are more of those in your cup than you think.',
-          'Next page you get six corners to try it on. Nothing is at stake, a fluffed one costs you nothing, and you can go round as many times as you like.',
+          'Next page: six corners. A fluffed one costs you nothing and you can go round as many times as you like.',
         ].map(line),
       ),
     );
