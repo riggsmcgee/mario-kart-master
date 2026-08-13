@@ -541,3 +541,94 @@ kbd {
     aspect-ratio: 4 / 3;
   }
 }
+
+/* --- the one-screen practice page -------------------------------------------
+ *
+ * Riggs, 2026-08-12: "everything should fit on one computer screen with no scrolling."
+ *
+ * He is right, and the practice page is the one page in the site where it is achievable *today*
+ * rather than after a content pass — it has a fixed set of parts and only one of them is allowed
+ * to be big. Measured before and after at 1440x900: ch3 was 1.52 screens, ch6 1.60, ch7 1.75.
+ *
+ * The budget is spent on the drill. Everything else shrinks: the heading drops from hero size to
+ * something nearer a section title, the blurb goes from `--t-body` to plain body text, and the
+ * page loses most of its top padding. The stage then takes whatever is left, via `svh` rather
+ * than `vh` so a mobile browser's disappearing toolbar cannot push the bottom of it off screen.
+ *
+ * The floor matters as much as the cap. A drill squeezed under about 300px stops being playable,
+ * so on a short window the page scrolls rather than shrinking the one thing she came for.
+ */
+
+.page-practice {
+  padding-top: 1.1rem;
+}
+
+.page-practice .page-head {
+  margin-bottom: 0.3rem;
+}
+
+.page-practice .page-head h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  margin: 0.1rem 0 0;
+}
+
+.page-practice .chapter-hook {
+  font-size: 1rem;
+  line-height: 1.45;
+  max-width: 52rem;
+  margin: 0 0 0.6rem;
+  padding-left: 0.9rem;
+}
+
+.page-practice .section {
+  margin: 0;
+}
+
+/* The drill takes the rest of the window. `aspect-ratio` is dropped rather than fought: with a
+ * height this explicit, a ratio would only add a second constraint for the browser to resolve. */
+.page-practice .drill-stage {
+  aspect-ratio: auto;
+  height: clamp(290px, 48svh, 620px);
+  min-height: 0;
+}
+
+.page-practice .chapter-end {
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+/* The quiz is the tallest thing that can appear on a practice page, and it has its own two-column
+ * treatment in `quiz.css`. Here it only needs its own vertical rhythm tightened. */
+.page-practice .quiz {
+  margin-top: 0;
+}
+
+/*
+ * Footer and end-row, on a practice page only.
+ *
+ * On a lesson page a generous footer is fine — she has already scrolled to reach it. On a
+ * practice page it is 136px of the one-screen budget spent on a line she has read eight times,
+ * so it shrinks rather than disappears: the "not affiliated with Nintendo" line is a deliberate
+ * disclaimer and does not get hidden to win a layout argument.
+ *
+ * `:has()` lets this live here rather than making `app.ts` know which route is showing. Where it
+ * is unsupported the page simply scrolls a little, which is where it started.
+ */
+main:has(.page-practice) ~ .site-footer {
+  padding: 1rem 0 1.4rem;
+}
+
+.page-practice .chapter-end {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+}
+
+.site-footer {
+  padding: 3rem 0;
+  color: var(--ink-faint);
+}
+
+/* A practice page spends its budget on the drill, so the page's own bottom padding goes too. */
+.page-practice {
+  padding-bottom: 0.6rem;
+}

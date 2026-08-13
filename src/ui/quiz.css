@@ -197,3 +197,70 @@
     transition: none;
   }
 }
+
+/* --- two columns on a wide screen -------------------------------------------
+ *
+ * Riggs, 2026-08-12: the Chapter 0 quiz needed scrolling, and it was the worst page in the site
+ * for it — 2.03 screens at 1440x900.
+ *
+ * The card stacks six things down a 34rem column: progress, diagram, situation, question,
+ * answers, and the reply. On a laptop that is a tall thin ribbon down the middle of a wide empty
+ * page, which is the shape most likely to overflow and the least likely to need to. So above
+ * 62rem the picture and its situation move to the left and the question and its answers to the
+ * right, which costs nothing and roughly halves the height.
+ *
+ * `align-items: start` matters: without it the diagram stretches to match a tall answer list and
+ * the road turns into a smear.
+ */
+@media (min-width: 62rem) {
+  .quiz {
+    max-width: 62rem;
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    grid-template-areas:
+      'dots      dots'
+      'figure    prompt'
+      'situation options'
+      'situation reply';
+    column-gap: 1.8rem;
+    align-items: start;
+  }
+
+  .quiz-dots {
+    grid-area: dots;
+  }
+  .quiz-figure {
+    grid-area: figure;
+  }
+  .quiz-situation {
+    grid-area: situation;
+  }
+  .quiz-prompt {
+    grid-area: prompt;
+  }
+  .quiz-answers {
+    grid-area: options;
+  }
+  .quiz-reply {
+    grid-area: reply;
+  }
+
+  /*
+   * Questions with no picture — there is one in the Chapter 0 deck — should not leave a column of
+   * white space. `:has()` is the mechanism; where it is unsupported the layout simply keeps an
+   * empty cell, which is untidy rather than broken.
+   */
+  .quiz:not(:has(.quiz-diagram)) {
+    max-width: 42rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'dots'
+      'situation'
+      'prompt'
+      'options'
+      'reply';
+  }
+
+  .quiz:not(:has(.quiz-diagram)) .quiz-figure {
+    display: none;
+  }
+}

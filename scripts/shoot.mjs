@@ -49,7 +49,7 @@ const ROUTES = [
   ['home', '/#/', 'A present, with homework'],
   ['settings', '/#/settings', 'Bits and pieces'],
   ['plan', '/#/plan', 'Forty sessions'],
-  ['ch0-intro', '/#/chapter/ch0', 'Chapter 0 · The promise'],
+  ['ch0-intro', '/#/chapter/ch0', 'Chapter 0 · The goal'],
   ['ch1-start-boost', '/#/chapter/ch1', 'Chapter 1 · Start boost'],
   ['ch2-items', '/#/chapter/ch2', 'Chapter 2 · Item smarts'],
   ['ch3-tricks', '/#/chapter/ch3', 'Chapter 3 · Ramp tricks'],

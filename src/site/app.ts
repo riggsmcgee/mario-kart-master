@@ -79,9 +79,12 @@ export function startApp(root: HTMLElement): void {
 
   const main = el('main', { attrs: { id: 'main' } });
 
+  // Padding lives in `site.css`, not here. It used to be an inline style, which quietly outranks
+  // every stylesheet rule — so the practice pages' attempt to shrink the footer for their
+  // one-screen budget did nothing at all, and the measurement said so.
   const footer = el(
     'footer',
-    { class: 'site-footer wrap', style: { padding: '3rem 0', color: 'var(--ink-faint)' } },
+    { class: 'site-footer wrap' },
     el(
       'p',
       { class: 'eyebrow' },
