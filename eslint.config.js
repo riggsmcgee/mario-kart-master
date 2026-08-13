@@ -13,10 +13,7 @@ export default tseslint.config(
       'src/backend/database.types.ts',
       // Root-level scratch drivers (see .gitignore). Throwaway by definition, and a lint error in
       // one of them should never be able to fail the project's lint.
-      '.drive*.mjs',
-      '.probe.mjs',
-      '.play.mjs',
-      '.beat.mjs',
+      '.*.mjs',
     ],
   },
   js.configs.recommended,
