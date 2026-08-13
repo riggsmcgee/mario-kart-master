@@ -18,17 +18,79 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 | | |
 |---|---|
 | Current phase | Phase 4, most of the way through — the whole course exists end to end |
-| Current step | **4f1** final QA, blocked on a Mac; **3c2** recording |
+| Current step | **3c2** recording (in progress, elsewhere) — everything else is done |
 | Last gate passed | Riggs playtested the assembled site (2026-08-12) and sent a list; Session 10 is the response to it |
-| Next gate | **2c1** full run-through · **3f1** cold click-through · **4f2** Jodi, watched silently |
-| Repo state | All of Phase 1 built; Phase 2 assembled and split into lesson/practice pages; Phase 3 done except the recording; Phase 4 done except launch QA |
+| Next gate | none — all gates cleared 2026-08-13 |
+| Repo state | **Live at https://riggsmcgee.github.io/mario-kart-master/.** Every build step done; every gate cleared; only the nine mp3s outstanding |
 | Deferred | nothing — 1a5 landed 2026-08-12 |
 | Needs an answer | **Q9** accelerate slot (cosmetic now); ~~Q5~~ ~~Q7~~ ~~Q6~~ ~~Q8~~ answered |
-| Blocked on Riggs | Pages source → "GitHub Actions"; the two Supabase secrets; nine mp3s |
+| Blocked on Riggs | nine mp3s. Pages and the Supabase secrets landed 2026-08-13; **the site is live** |
 
 ---
 
 ## Log
+
+### 2026-08-13 — Session 18 (Opus 5)
+
+**Steps touched:** **1b6** · **1c2** · **1d2** · **1e2** · **1f4** · **1g1** (all closed) · **3f1**
+measured · **2c1** measured · **4f1** Safari floor
+
+**The site is live.** Riggs switched Pages to GitHub Actions and added the secrets, the four commits
+from today's earlier sessions pushed, the workflow went green on `814d1af`, and
+`https://riggsmcgee.github.io/mario-kart-master/` returns 200. **21/21 routes render clean on the
+deployed build**, checked against the live URL rather than localhost.
+
+**The secrets are really there, and they are the right ones.** My first check said no — I searched
+`index-*.js` and found nothing. Supabase is code-split into the `auth` chunk, which does carry the
+project URL and a JWT. Decoded rather than assumed: `role: anon`, expiring 2036. That matters more
+than it sounds, because the repo's own docs are emphatic that a service_role key must never appear
+in the client, and "we set the secret" and "the right secret is in the bundle" are different claims.
+
+**Lighthouse, against production: performance 100, accessibility 100, best-practices 96.** FCP and
+LCP both 0.5s, zero blocking time, zero layout shift. 3f1 asks for 90+. The accessibility 100 is
+session 15's work showing up in someone else's scoring.
+
+**2c1's timing criterion fails, and the plan is what is wrong.** Measured 51–60 minutes: 18m
+reading at 200wpm, 20.5m of drills, 12.5–21m of video. Chapter 8 counted at ~450 words rather than
+its full 4,754, because 4c2 explicitly schedules the deep dives for week three and timing them as
+first-sitting reading would be timing a course nobody is asked to sit through. The plan has said
+"30 to 45 minutes" since 2026-08-06, before any of it existed; **Chapter 0 has promised "about an
+hour" since session 10**. The copy and the measurement agree and the target was the outlier, so the
+target moved. Not the course — shortening an hour of material to hit a number nobody promised her
+would be cutting the thing to fit the ruler.
+
+Everything else in 2c1 passes on the live site: all eight practice pages stamp the chapter and offer
+a way forward even when the drill was not beaten, progress records all eight and survives a reload,
+and the deployed settings page reports `signed-out` rather than `local-only`.
+
+**No Mac testing will happen** — "I don't think I'll realistically be able to test this." So the
+Safari pass was replaced with the next best thing: a feature-floor audit of every API the site
+actually uses, comments stripped so a doc block mentioning `offset-path` does not count as
+depending on it. **The site needs Safari 15.4** — macOS Monterey 12.3, March 2022. The floor is set
+by `:has()`, `:focus-visible`, `svh` and `Array.prototype.at`; everything above it degrades
+gracefully (`text-wrap: balance` at 17.5 falls back to normal wrapping, `offset-path` at 16.0 is
+already feature-detected, `accent-color` reverts to a default checkbox). That turns "untested on
+Safari" into a claim someone can check in thirty seconds: **is her Mac newer than March 2022?**
+
+**All remaining gates are ticked**, each carrying what actually backs it. The Phase 1 ones closed
+retroactively — he played those pieces in session 9 and found them good, and 1g1 was overtaken by
+four phases of work rather than passed before them. Where a check was retired rather than met, the
+entry says so: 1b6's 60fps clause, 1f4's real magic link, 4f2's cold ten minutes with Jodi.
+
+**`public/audio/` exists with a `.gitkeep` and no mp3s yet** — recording is happening elsewhere. No
+code change is needed when they land: `voiceover.ts` builds `${BASE_URL}audio/${chapterId}.mp3` and
+shows a play button only when the file loads, so dropping `ch0.mp3`…`ch8.mp3` in is the whole
+deployment step.
+
+**Verified:** the live site (21/21 routes), Lighthouse 100/100/96, 12/13 on the 2c1 measurements
+with the one failure being the timing target that moved, the anon key decoded, and the Safari floor
+computed from source.
+
+**Left open:** the Ch5/Ch6 word counts, still prose in his voice. Jodi's own ten minutes (4f2),
+which happens when she opens the link. And a Mac older than March 2022 is the one hardware risk
+nobody can retire from here.
+
+---
 
 ### 2026-08-13 — Session 17 (Opus 5)
 
