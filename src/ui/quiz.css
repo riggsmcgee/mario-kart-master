@@ -53,8 +53,11 @@
   text-align: center;
 }
 
+/* The setup and the question are one thought, so they are drawn as one block: the gap below the
+   situation is pulled in until it is visibly tighter than the gap between the question and the
+   first answer. Without that every row sits 1rem apart and nothing groups with anything. */
 .quiz-situation {
-  margin: 0;
+  margin: 0 0 -0.45rem;
   color: var(--muted);
 }
 
@@ -211,6 +214,14 @@
  *
  * `align-items: start` matters: without it the diagram stretches to match a tall answer list and
  * the road turns into a smear.
+ *
+ * **The situation moved into the right-hand column** on 2026-08-12, from Katharine's playtest:
+ * "wants to combine the information here to make it more clear. Applies to multiple questions."
+ * The first version split them — picture and setup on the left, question and answers on the right
+ * — so the heading arrived with its context in a different column, and she was reading "Where do
+ * you leave it?" with no idea what "it" was. Setup, question, answers now run down one column in
+ * the order you would say them out loud, and the picture keeps the other. The narrow layout was
+ * always in that order; only the wide one disagreed.
  */
 @media (min-width: 62rem) {
   .quiz {
@@ -218,9 +229,10 @@
     grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
     grid-template-areas:
       'dots      dots'
+      'figure    situation'
       'figure    prompt'
-      'situation options'
-      'situation reply';
+      'figure    options'
+      'figure    reply';
     column-gap: 1.8rem;
     align-items: start;
   }

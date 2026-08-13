@@ -102,7 +102,7 @@
   {
     "id": "bob-omb",
     "situation": "A bob-omb, and it is ticking. {rival} is right behind you.",
-    "prompt": "What do you do with it?",
+    "prompt": "What do you do with the bob-omb?",
     "diagram": {
       "road": "straight",
       "caption": "Behind you, and counting down.",
@@ -135,7 +135,7 @@
   {
     "id": "red-shell-fire",
     "situation": "A red shell. {rival} is somewhere up ahead, out of sight round the bend.",
-    "prompt": "What do you do with it?",
+    "prompt": "What do you do with the red shell?",
     "diagram": {
       "road": "bend-right",
       "caption": "She is round the corner, where you cannot even see her.",
@@ -168,7 +168,7 @@
   {
     "id": "red-shell-incoming",
     "situation": "The warning is up: a red shell is locked on to you from behind. There is a banana in your hands.",
-    "prompt": "What do you do?",
+    "prompt": "What do you do about the red shell?",
     "diagram": {
       "road": "straight",
       "caption": "Locked on, and closing.",
@@ -201,7 +201,7 @@
   {
     "id": "slots-full",
     "situation": "Both your item slots are full: a banana, and a coin you have not bothered spending. A row of item boxes is coming up.",
-    "prompt": "What do you do before you reach them?",
+    "prompt": "What do you do before you reach the item boxes?",
     "diagram": {
       "road": "straight",
       "caption": "Two slots, both full, and free items straight ahead.",
@@ -235,7 +235,7 @@
   {
     "id": "where-to-dump",
     "situation": "You are about to spend a banana purely to free up a slot. There is a row of item boxes just ahead.",
-    "prompt": "Where do you leave it?",
+    "prompt": "Where do you drop the banana?",
     "diagram": {
       "road": "straight",
       "caption": "Everybody has to drive at the boxes. Nobody has a choice about it.",
@@ -270,7 +270,7 @@
   {
     "id": "coin-item",
     "situation": "First place, and the box hands you… a coin. Again.",
-    "prompt": "Worth using?",
+    "prompt": "Is the coin worth using?",
     "diagram": {
       "road": "straight",
       "caption": "Out in front, which is where the game hands you coins.",
@@ -303,7 +303,7 @@
   {
     "id": "mushroom-timing",
     "situation": "Second lap. You have been sitting on a mushroom since the last item box, and the hairpin is coming up fast.",
-    "prompt": "When do you use it?",
+    "prompt": "When do you use the mushroom?",
     "diagram": {
       "road": "bend-right",
       "caption": "The hairpin, and the long straight after it.",

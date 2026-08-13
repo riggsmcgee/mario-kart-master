@@ -69,7 +69,7 @@
   {
     "id": "trick-tell",
     "situation": "You went off a ramp and you are not sure whether the trick came out.",
-    "prompt": "How do you know it worked?",
+    "prompt": "How do you know the trick worked?",
     "answers": [
       {
         "id": "flourish",
@@ -93,7 +93,7 @@
   {
     "id": "drift-when",
     "situation": "A long, lazy left-hander coming up — and after it, a sharp little right.",
-    "prompt": "Which of the two is worth drifting?",
+    "prompt": "Which corner is worth drifting?",
     "diagram": {
       "road": "bend-left",
       "caption": "The long one first, the tight one after.",
@@ -122,7 +122,7 @@
   {
     "id": "hold-it",
     "situation": "You have a green shell, and there is nobody in front of you worth aiming at.",
-    "prompt": "What is it for?",
+    "prompt": "What should you do with the green shell?",
     "diagram": {
       "road": "straight",
       "caption": "Nothing ahead. Something is probably behind.",
