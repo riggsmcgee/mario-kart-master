@@ -23,8 +23,14 @@
  *
  * **The practice page is five questions about the video.** (Riggs, 2026-08-12.) This chapter used
  * to have nothing to do at all, on the argument that a chapter selling "the browser part is small"
- * should not open with a browser exercise. That argument survives — the lesson page is still pure
- * pitch, and nothing moves on it.
+ * should not open with a browser exercise. That argument survives, and the lesson page is still
+ * pure pitch.
+ *
+ * It is no longer motionless, though, and the distinction is worth keeping straight. The opener
+ * (`ch0-opener.ts`, 3b1) animates, but it is not an exercise: it asks for no input, scores
+ * nothing, and can be scrolled past without losing anything. What the old note was protecting was
+ * the rule that this page must not *demand* anything of her before it has earned the right to.
+ * A picture that argues on her behalf does not.
  *
  * What changed is the video's job. It used to be one of eight; it is now the anchor of the whole
  * course, covering in twelve minutes what Chapters 1 to 4 then take slowly. That makes "did she
@@ -42,6 +48,7 @@ import { Quiz, fillQuiz, parseQuiz } from '../../ui/quiz';
 import '../../ui/quiz.css';
 import { el, prose, rich } from '../dom';
 import type { ChapterContent, ChapterContext, Mounted } from '../types';
+import { createOpener } from './ch0-opener';
 
 /**
  * `quiz.css` was written for the Phase 1 testbed and reaches for its palette variables. Mapping
@@ -106,6 +113,18 @@ const content: ChapterContent = {
 
       proseFor(ctx, [
         'Reaction speed is one way to win a race. It is the only one {rival} has got.',
+      ]),
+
+      // The picture goes here rather than at the top or the bottom, and the position is the
+      // argument. (3b1.)
+      //
+      // The line above is the concession — she really is faster — and the drawing is the turn.
+      // Putting it before the concession would have it contradicting a claim nobody had made yet;
+      // putting it after the next four paragraphs would bury the one moment on this site that is
+      // worth watching, on the page most likely to be closed early.
+      createOpener({ t: (text) => ctx.t(text) }),
+
+      proseFor(ctx, [
         'Because most of Mario Kart is not reflexes at all. Free speed on the start line, before anybody has moved. Free speed on every ramp. Free speed painted on the road in boost pads, usually in a lane nobody drives in. Items that do more for you held than thrown.',
         'None of that needs fast hands. All of it needs someone to have mentioned it to you once — and nobody has mentioned it to {rival}. Why would they? She is winning.',
         'So here is the deal, {name}. She keeps her reactions. You quietly collect **everything else**.',

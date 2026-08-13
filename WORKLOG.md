@@ -18,10 +18,10 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 | | |
 |---|---|
 | Current phase | Phase 4, most of the way through — the whole course exists end to end |
-| Current step | **4f1** final QA, blocked on a Mac; **3c2** recording |
+| Current step | **3e1** readability pass; **4f1** final QA, blocked on a Mac; **3c2** recording |
 | Last gate passed | Riggs playtested the assembled site (2026-08-12) and sent a list; Session 10 is the response to it |
 | Next gate | **2c1** full run-through · **3f1** cold click-through · **4f2** Jodi, watched silently |
-| Repo state | All of Phase 1 built; Phase 2 assembled and split into lesson/practice pages; Phase 3 done except the intro animation and the recording; Phase 4 done except launch QA |
+| Repo state | All of Phase 1 built; Phase 2 assembled and split into lesson/practice pages; Phase 3 done except **3e1** and the recording; Phase 4 done except launch QA |
 | Deferred | nothing — 1a5 landed 2026-08-12 |
 | Needs an answer | **Q9** accelerate slot (cosmetic now); ~~Q5~~ ~~Q7~~ ~~Q6~~ ~~Q8~~ answered |
 | Blocked on Riggs | Pages source → "GitHub Actions"; the two Supabase secrets; nine mp3s |
@@ -29,6 +29,85 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 ---
 
 ## Log
+
+### 2026-08-13 — Session 14 (Opus 5)
+
+**Steps touched:** **3b1** (done)
+
+The site's one big animated moment, which was the last unbuilt feature in the whole plan.
+
+**Chapter 0's opener is the thesis, drawn as one corner.** A U-turn seen from above — deliberately
+the shape she already meets in every drill and on the lap map. {rival} takes the tight inside line.
+The other kart swings out to the wide lane, over a boost pad, and comes back in front. That is
+Mario Kart Stadium's outer-lane lesson (2b5) and it is the argument the entire website is making,
+said in seven seconds without a paragraph.
+
+It sits directly under the chapter's first line — *"Reaction speed is one way to win a race. It is
+the only one {rival} has got"* — and the position is the argument. That line is the concession, and
+the picture is the turn. Above it, the drawing would be contradicting a claim nobody had made yet;
+four paragraphs lower, the one moment on this site worth watching would be buried on the page most
+likely to be closed early.
+
+**The timings are measured, not chosen, and the measuring changed them.** My first pass had the
+green kart covering 125 units a second to red's 101 — so the kart the copy calls slower was
+quietly the faster one, which is the opposite of what the page says. The lines went to
+`getTotalLength()` in a real browser (outer 1124, inner 855, the wide way 31% further) and the
+keyframes were rederived from there: red flat at 116 a second, green at **110** up to the pad, then
+574 units in two seconds. Result, measured rather than hoped for — red leads until 5.6s of a 7.4s
+run, green goes past on the bottom straight, green crosses with red 160 units short. The overtake
+is late on purpose. An early one would make the wide lane look like the obvious choice, and this
+chapter exists because it is not.
+
+**Three bugs, all found by measuring and none of them visible in a screenshot check.**
+
+The boost pad has a CSS `transform` animation for its flash and an SVG `transform` attribute for
+its position. **A CSS transform replaces the attribute rather than composing with it**, so the
+moment the flash started the pad lost its position and flew to the corner of the diagram. It is two
+nested groups now: the outer one is placed, the inner one is scaled.
+
+The confetti burst from the wrong place. `finish()` calls `nextButton.focus()`, which scrolls the
+button into view — and the burst is drawn in a fixed layer, so spawning it before the page had
+finished moving left it hanging over whatever scrolled into that spot. Measured 575px from the star
+row it was supposed to come out of; one `requestAnimationFrame` later it is 0.
+
+And the outer racing line was painted *over* the pad, which sits at exactly that line's widest
+point — so the line bisected it and it read as two orange smudges rather than one object lying on
+the road. Chapter 4's drill had to learn the same lesson about depth in session 13, from the other
+direction.
+
+**Everything lands on the finished frame.** Every keyframe track ends on the value the element
+already has in the stylesheet, and none use a fill mode — so switching the animations off and
+letting them run to the end produce the same picture: both lines drawn, the pad lit, all three
+captions readable, green over the line with red still short of it. That is the version a
+reduced-motion reader gets, and the version a browser without motion paths gets, so it is the
+version that has to make the argument. Chapter 0's opener needs its own reduced-motion block rather
+than leaning on theme.css's global one, because that rule collapses durations and leaves delays
+alone — the third caption would have taken 5.9 seconds to appear for someone who asked for no
+motion at all.
+
+**Ch3's ramp diagram now moves**, and it is the only other diagram that gained anything. The stripe
+and the labels are statements about *where*, which a still drawing does perfectly well; the thing
+this chapter needs and cannot say is how quickly the lip arrives — the exact job the cut "about
+150ms either side" sentence was failing to do in words. So a kart runs the ramp on a loop and the
+lip pulses as it crosses. Verified the sync rather than asserting it: 7.7px apart on screen at the
+moment the CSS claims they meet.
+
+**Also:** the done-stamp thunk and the three-star fanfare were already there; confetti now joins the
+fanfare on exactly the same condition — three stars, and only when they are new. Never on a plain
+completion, because the stamp already covers *finished* and that is the common case.
+
+**Verified:** format, typecheck, lint, production build, 21/21 routes — and **30/30 checks in a
+real browser**, scrubbing the animation clock frame by frame: both karts level at the start line,
+red ahead at 1.5s/3s/4.5s, green on the pad (2 units off) at the moment the pad fires, green past
+the finish and red short of it at the end, captions dark at t=0 and lit in sequence, the
+reduced-motion figure showing its last frame with zero animations running, the ramp kart at the
+lip when the lip pulses, and the confetti firing from the star row and clearing itself up.
+
+**Left open:** unchanged. **3e1** is now the last build step before the gates. Nothing has run on a
+Mac, 60fps is unmeasured, no Safari pass, the print sheet has never met a printer, and nobody has
+timed a full run-through.
+
+---
 
 ### 2026-08-13 — Session 13 (Opus 5)
 

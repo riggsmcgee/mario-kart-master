@@ -1,0 +1,73 @@
+/* Chapter 3: the ramp diagram's one moving part. (3b1)
+
+   Same rule as `ch6.css`: the styles outside `@keyframes` are the resting picture, every track
+   returns to them, and none of them use a fill mode. Switch the animations off and the kart parks
+   past the landing on a diagram that is otherwise identical to the one that has been teaching this
+   chapter since 2b4 — which is also what `theme.css`'s global reduced-motion rule produces here, so
+   this file needs no block of its own. (Chapter 0's opener does need one; it has delays, and that
+   rule only collapses durations.)
+
+   **Why only these two things move.** The stripe, the labels and the flip are all statements about
+   *where*, and a still drawing says where perfectly well. The one thing this chapter has to convey
+   that a still drawing cannot is how quickly the lip arrives — which is the exact thing the cut
+   "about 150ms either side" sentence was failing to convey in words. So the kart moves, the lip
+   answers it, and nothing else does anything. */
+
+/* --- the kart ------------------------------------------------------------- *
+ *
+ * Resting at the far end, which is the end of its run. `offset-rotate` is left at its default so
+ * it noses up the ramp and tips through the arc — the flip that the chapter calls "the receipt" is
+ * a rotation, and letting the path supply it costs nothing.
+ *
+ * One lap every five seconds, of which the last 30% is a pause on the far side. Without the pause
+ * it reads as traffic; with it, it reads as one attempt, repeated.
+ */
+
+.ramp-runner {
+  offset-distance: 100%;
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: ramp-run 5s linear infinite;
+}
+
+@keyframes ramp-run {
+  0% {
+    offset-distance: 0%;
+  }
+  70% {
+    offset-distance: 100%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+/* --- the lip -------------------------------------------------------------- *
+ *
+ * It answers the kart rather than keeping its own time.
+ *
+ * The lip sits 35% of the way along the runner's path, and the runner covers that path over the
+ * first 70% of its five seconds — so the kart is at the lip at 0.35 × 70% = 24.5%. That is the
+ * only number in this file that matters, and it is why both animations must keep the same
+ * duration: change one and the pulse fires at a ramp the kart is not on.
+ */
+
+.ramp-lip {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ramp-lip-pulse 5s linear infinite;
+}
+
+@keyframes ramp-lip-pulse {
+  0%,
+  19% {
+    transform: scale(1);
+  }
+  24.5% {
+    transform: scale(1.45);
+  }
+  34%,
+  100% {
+    transform: scale(1);
+  }
+}

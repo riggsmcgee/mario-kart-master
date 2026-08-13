@@ -32,6 +32,7 @@ import type { ChapterMeta } from '../data/chapters';
 import { nextChapter, starsFor } from '../data/chapters';
 import type { ProgressStore } from '../backend/progress';
 import type { Sfx } from '../ui/sfx';
+import { celebrate } from '../ui/confetti';
 import { createVoiceover, type VoiceoverHandle } from '../ui/voiceover';
 import { VOICEOVER } from '../data/voiceover';
 import { el, rich } from './dom';
@@ -185,6 +186,19 @@ function chapterShell(meta: ChapterMeta, deps: ChapterPageDeps) {
 
       paintStamp(firstTime || improved);
       nextButton.focus();
+
+      // Confetti rides on exactly the same condition as the fanfare: three stars, and only when
+      // they are new. (3b1.)
+      //
+      // Two things have to have happened before it can fire, and both were found by measuring
+      // rather than by reading the code. `paintStamp` is what puts the star row on the page, so
+      // asking for its position any earlier gets a zero-sized box and a burst from the corner of
+      // the window. And `focus()` scrolls the button into view — the burst is drawn in a fixed
+      // layer, so spawning it before the page has finished moving leaves it hanging over
+      // whatever scrolled into that spot instead. One frame later, everything has settled.
+      if ((firstTime || improved) && stars >= 3) {
+        requestAnimationFrame(() => celebrate(stampSlot.querySelector('.stars') ?? stampSlot));
+      }
     },
   };
 

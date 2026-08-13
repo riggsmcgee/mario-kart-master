@@ -357,6 +357,33 @@ canvas {
   animation: stamp-in 0.42s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
+/* --- confetti ------------------------------------------------------------- */
+/*
+ * Three stars only (3b1). The motion itself is written in `confetti.ts`, because every piece
+ * needs its own angle and spin and a stylesheet cannot randomise; what lives here is the
+ * furniture, so that a burst can never affect the layout of the page it is celebrating.
+ *
+ * Fixed, unclickable, and clipped: a stray piece must not be able to catch a click meant for the
+ * next-chapter button underneath it, or push a scrollbar onto the page on its way off screen.
+ */
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.confetti-piece {
+  position: absolute;
+  display: block;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  will-change: transform, opacity;
+}
+
 /* --- reduced motion ------------------------------------------------------- */
 /*
  * Everything animated here is decoration on top of a state that is already correct, so

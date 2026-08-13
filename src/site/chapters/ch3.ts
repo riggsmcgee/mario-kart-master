@@ -45,6 +45,7 @@ import type { FurnitureSpec } from '../../engine/track';
 import { createKartDrill } from '../../ui/kart-drill';
 import { el, frag, prose, rich } from '../dom';
 import type { ChapterContent, ChapterContext, Mounted } from '../types';
+import './ch3.css';
 
 /**
  * The ramps, and the coins that fill the gaps between them.
@@ -111,6 +112,15 @@ function label(x: number, y: number, text: string, color: string, weight = '600'
   node.textContent = text;
   return node;
 }
+
+/**
+ * The line the animated kart rides: road, up the ramp face, through the flight, and away.
+ *
+ * Traced 6px above the surfaces the diagram already draws rather than along them, so a kart with
+ * height sits *on* the road instead of halfway through it. The lip is 35% of the way along, which
+ * is where `ch3.css` puts the pulse — measured off these segments, not eyeballed.
+ */
+const RUNNER_PATH = 'M 20 98 L 92 98 L 142 64 Q 196 -26 250 98 L 320 98';
 
 /**
  * One ramp, seen from the side, with the three moments marked.
@@ -190,11 +200,12 @@ function rampDiagram(): SVGSVGElement {
   );
   svg.append(label(110, 134, 'too early', 'var(--kerb)'));
 
-  // The lip.
+  // The lip. Pulses as the kart reaches it (3b1) — see `ch3.css` for why that is the one thing
+  // on this diagram worth animating.
   svg.append(
     svgEl(
       'circle',
-      { cx: '142', cy: '70', r: '8' },
+      { cx: '142', cy: '70', r: '8', class: 'ramp-lip' },
       { fill: 'var(--turf)', stroke: '#ffffff', 'stroke-width': '3' },
     ),
   );
@@ -210,6 +221,32 @@ function rampDiagram(): SVGSVGElement {
     ),
   );
   svg.append(label(250, 134, 'too late', 'var(--kerb)'));
+
+  // The kart, running the whole thing on a loop. (3b1.)
+  //
+  // This diagram is teaching a *moment inside a movement*, which is the one thing a still picture
+  // is genuinely bad at: the stripe says the window has width, and the labels say where its edges
+  // are, but neither can say how fast she is travelling through it. Watching a kart cross the lip
+  // does, in a way that the 150ms measurement this section used to quote never could.
+  //
+  // Everything it needs to teach is already drawn without it. If the animation does not run — she
+  // asked for no motion, or the browser has no motion path — the kart parks past the landing and
+  // the diagram is exactly the one that was here before.
+  const runner = svgEl('g', { class: 'ramp-runner' });
+  runner.append(
+    svgEl(
+      'rect',
+      { x: '-8', y: '-4', width: '15', height: '8', rx: '3' },
+      { fill: 'var(--track)' },
+    ),
+  );
+  runner.append(svgEl('circle', { cx: '7', cy: '0', r: '2.6' }, { fill: 'var(--trim)' }));
+  if (typeof CSS !== 'undefined' && CSS.supports('offset-path', "path('M 0 0 L 10 10')")) {
+    runner.style.setProperty('offset-path', `path('${RUNNER_PATH}')`);
+  } else {
+    runner.setAttribute('transform', 'translate(320 98)');
+  }
+  svg.append(runner);
 
   return svg;
 }
