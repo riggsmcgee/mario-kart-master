@@ -6,11 +6,12 @@
  * not in the room. If one chapter has to prove the whole thesis is real, it is this one, and it
  * gets three seconds per go to do it.
  *
- * **The auto-accelerate paragraph is the chapter.** Her kart accelerates by itself, so a lesson
- * about holding the accelerator reads as advice for other people and she would skip it politely
- * and never mention it. Riggs went and tested it on her exact settings and it still boosts (plan,
- * 2026-08-06), so the copy says so in the first person, before the ask, with the objection named
- * out loud. Answering the doubt she has not raised yet is most of teaching an adult anything.
+ * **The auto-accelerate card is gone.** (Riggs, 2026-08-12.) It was a whole card explaining that
+ * the boost still works with auto-accelerate switched on — written to answer an objection she was
+ * assumed to be about to raise. She is not going to raise it: as Riggs put it, she probably does
+ * not know the game *can* be played without auto-accelerate, so the card was teaching her that a
+ * setting exists in order to reassure her about it. That is a net loss, and it happened more than
+ * once across the course. The rule now is that auto-accelerate is simply never mentioned.
  *
  * **Five goes, then it stops on its own.** Fixed-length rather than "keep going until you get
  * three" — a drill that will not let you leave until you succeed is a test, and the plan is
@@ -97,31 +98,12 @@ const content: ChapterContent = {
         'The moment that matters is the **2**. As it disappears — not before it, not after it — you hold the accelerator down and you keep holding it. The lights go green and your kart leaves the line with a boost nobody else on the grid has got.',
       ]),
 
-      el(
-        'div',
-        { class: 'card' },
-        el('p', { class: 'eyebrow' }, 'The bit you were about to skip'),
-        el('h3', null, ctx.t('Yes, it works with auto-accelerate')),
-        proseFor(ctx, [
-          'Your kart accelerates by itself. You have never had to touch the accelerator in your life, so this whole chapter sounds like advice for somebody else, and you were about to be very polite about it.',
-          'I went and checked in the real game, on your settings, with auto-accelerate switched on: **holding the button during the countdown still gives you the boost.** It is not turned off for you. You have simply been leaving it on the start line every race.',
-        ]),
-      ),
-
       proseFor(ctx, [
-        'And getting it wrong costs you nothing. Miss the moment and you get a completely normal start — the one you were getting anyway. No penalty, no spin, no telling-off. So there is no reason on earth not to try it every single time.',
-        'Which is what makes it the right thing to learn first. It happens before the race exists. There is nothing to react to, so there is nothing for {rival} to be quicker at. It is purely a thing you know and she does not — the entire plan, in one button.',
+        'Get it wrong and nothing happens. You start normally — the start you were getting anyway. No penalty, no spin. So there is no reason not to try it every single race.',
+        'Which is why it is first. It happens before the race exists, so there is nothing to react to and nothing for {rival} to be quicker at. It is purely a thing you know and she does not.',
       ]),
 
-      el(
-        'p',
-        null,
-        ctx.t('In here you hold '),
-        el('kbd', null, key),
-        ctx.t(
-          ' instead of A. It is the only accelerator on the whole site — everywhere else the kart drives itself, exactly like yours does.',
-        ),
-      ),
+      el('p', null, ctx.t('In here, hold '), el('kbd', null, key), ctx.t(' on the 2.')),
     );
   },
 

@@ -66,20 +66,6 @@ function proseFor(ctx: ChapterContext, lines: string[]): HTMLDivElement {
   return prose(lines.map((line) => ctx.t(line)));
 }
 
-function kendahlCard(ctx: ChapterContext): HTMLElement {
-  return el(
-    'div',
-    { class: 'card' },
-    el('p', { class: 'eyebrow' }, 'Exhibit A'),
-    el('h3', null, ctx.t('It already works in your house')),
-    proseFor(ctx, [
-      "Kendahl doesn't drift. She doesn't defend with items. She takes no risks whatsoever. She drives a tidy line, picks up her coins, finishes the lap — and she beats {rival} regularly.",
-      'Same sofa, same sister, nothing flashy. She is not out-reacting anybody. She just knows where she is going and quietly refuses to throw races away.',
-      '*That* is the thing we are going to teach you, in pieces, one chapter at a time.',
-    ]),
-  );
-}
-
 function skillsCard(ctx: ChapterContext): HTMLElement {
   return el(
     'div',
@@ -119,16 +105,10 @@ const content: ChapterContent = {
       { class: 'stack' },
 
       proseFor(ctx, [
-        'Reaction speed is one way to win a race. It is not the only way, and it is the only one {rival} has got.',
-        'Because most of Mario Kart is not reflexes at all. There is free speed sitting on the start line before anybody has moved. There is free speed on every ramp. There is free speed painted on the road in orange arrows, usually in a lane nobody is driving in. There are items that do far more for you held than thrown.',
-        'None of that needs fast hands. All of it needs someone to have mentioned it to you once.',
-        'Nobody has mentioned it to {rival}. Why would they? She is winning.',
-      ]),
-
-      kendahlCard(ctx),
-
-      proseFor(ctx, [
-        'So here is the deal, {name}. She keeps her reactions — you were never getting those anyway. You go and quietly collect **everything else**, and the race stops being a fight you were always going to lose.',
+        'Reaction speed is one way to win a race. It is the only one {rival} has got.',
+        'Because most of Mario Kart is not reflexes at all. Free speed on the start line, before anybody has moved. Free speed on every ramp. Free speed painted on the road in orange arrows, usually in a lane nobody drives in. Items that do more for you held than thrown.',
+        'None of that needs fast hands. All of it needs someone to have mentioned it to you once — and nobody has mentioned it to {rival}. Why would they? She is winning.',
+        'So here is the deal, {name}. She keeps her reactions. You quietly collect **everything else**.',
       ]),
 
       skillsCard(ctx),

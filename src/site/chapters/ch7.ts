@@ -254,10 +254,9 @@ function weightCard(t: (text: string) => string): HTMLElement {
     el('h3', null, t('"The heavier the character, the better"')),
     prose(
       [
-        '{rival} is not making this up, and it is worth saying so plainly: heavy characters really do have a higher top speed, and they really do win the bumping. If two karts touch, the heavier one keeps its line and the lighter one goes into the grass. That is all true.',
-        'It is also the answer to a different question. It is the right advice for somebody driving clean laps at 150cc who is rarely getting hit — and you are playing 100cc with items on, against a houseful of people throwing shells. **You are going to get hit.** The number that decides your race is not how fast you go, it is how long you spend not going.',
-        'Which is where heavy quietly costs you: Pink Gold Peach is one of the heaviest drivers in the game, and she is correspondingly one of the slowest to wind back up after a knock. Every shell costs you noticeably more than it costs the person who hit you.',
-        'So: keep the weight if you enjoy shoving people, it is a real strategy. But swap those standard tyres for **Rollers**, because that one change buys back most of the pick-up you are missing and costs you almost nothing you were using.',
+        '{rival} is not making it up. Heavy characters really do have a higher top speed, and they really do win the bumping.',
+        'It is just the answer to a different question — one about driving clean laps and rarely getting hit. **You are going to get hit.** And Pink Gold Peach is one of the slowest in the game to wind back up afterwards, so every shell costs you more than it costs whoever threw it.',
+        'Keep the weight if you enjoy shoving people. But swap those tyres for **Rollers**, because that one change buys back most of what you are missing.',
       ].map(t),
     ),
   );
@@ -277,8 +276,8 @@ function driverCard(t: (text: string) => string): HTMLElement {
     el('h3', null, t('Peach, Daisy, Birdo and Yoshi are the same kart')),
     prose(
       [
-        'Genuinely. Not "roughly the same" — the game sorts every driver into a handful of weight groups, and inside a group they are identical in every number that exists. Different face, same kart.',
-        'So the answer to "which character should I be" is: **whichever one you like the look of.** Pick the character, then fix the weight class with the kart and the tyres, which is where all the real difference lives anyway.',
+        'Genuinely — not "roughly the same". The game sorts drivers into weight groups, and inside a group they are identical in every number that exists. Different face, same kart.',
+        'So the answer to "which character should I be" is **whichever one you like the look of.**',
       ].map(t),
     ),
     el(
@@ -299,9 +298,8 @@ const content: ChapterContent = {
     return frag(
       prose(
         [
-          'Everybody assumes the fast kart wins. At 100cc, with items switched on, against somebody who is definitely going to hit you with a shell — the fast kart does not win. **The kart that gets back up to speed wins.**',
-          'Because you are going to get hit. Not might: will. {rival} will hit you, the computer will hit you, a banana you never saw will hit you. Every hit costs the same amount of dignity but a different number of seconds, and that number is decided right now, on the character select screen, before the race even exists.',
-          'A big heavy fast build takes a long, sad moment to wind itself back up. A light nippy one is back at full pelt before you have finished complaining. So we are choosing **pick-up and turning**, and cheerfully giving away top speed you would rarely reach anyway — on your four tracks you are almost never flat out for long enough to notice.',
+          'Everybody assumes the fast kart wins. It does not. **The kart that gets back up to speed wins**, because you are going to get hit — not might, will.',
+          'A big heavy build takes a long, sad moment to wind itself back up. A nippy one is back at full pelt before you have finished complaining. So we are choosing **pick-up and turning**, and giving away top speed you would rarely reach anyway.',
         ].map(line),
       ),
       el(

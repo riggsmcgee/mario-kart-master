@@ -100,13 +100,13 @@ const content: ChapterContent = {
           'Here is the whole chapter, {name}, and you may stop reading after this sentence: **hold on to everything, and never fire it forwards.**',
         ),
         t(
-          'When you hold the item button, whatever you picked up sits out behind your back bumper instead of in your pocket. It does not go anywhere. It is just *there*, in the way — and anything that comes up the road at you hits it instead of you. Carrying it like that costs you nothing: no speed, no steering, no attention. So carry it. All race.',
+          'Hold the item button and whatever you picked up sits out behind your back bumper, in the way. Anything coming up the road hits it instead of you. It costs you nothing to carry — no speed, no steering. So carry it, all race.',
         ),
         t(
-          'This is the test every decision in this chapter has to pass: **low skill, high reward.** Throwing a shell up the road at a moving kart is high skill and low reward — people who play every day miss that shot. Holding the same shell behind you is no skill at all and it works every lap, every race, forever. {rival} fires everything the second she gets it. Let her.',
+          'Every decision here passes the same test: **low skill, high reward.** Throwing a shell at a moving kart is high skill and low reward — people who play every day miss that shot. Holding the same shell behind you takes no skill and works every lap, forever. {rival} fires everything the second she gets it. Let her.',
         ),
         t(
-          'And when something *is* coming for you, the game tells you: a little picture of the thing appears on your screen and a siren starts. That is not a puzzle and it is not a signal to start swerving about. It is a reminder to hold the button.',
+          'When something *is* coming for you, the game tells you — a little picture appears and a siren starts. That is not a signal to start swerving. It is a reminder to hold the button.',
         ),
       ]),
 
@@ -120,7 +120,7 @@ const content: ChapterContent = {
           null,
           rich(
             t(
-              'A red shell steers itself. Let it go and it sets off up the road, round corners and over hills, and finds whoever is in front of you — you never have to see them, and you never have to aim. It is the only item in the game that lands a hit for you, which makes it the only one worth pointing forwards. Everything else stays behind you.',
+              'A red shell steers itself — round corners, over hills, straight to whoever is in front of you. You never have to see them and you never have to aim. It is the only item that lands a hit *for* you, so it is the only one worth firing. Everything else stays behind you.',
             ),
           ),
         ),
@@ -173,10 +173,10 @@ const content: ChapterContent = {
 
       prose([
         t(
-          '**One more thing nobody tells you: you can carry two items at once, and if both slots are full, driving through an item box gives you nothing at all.** Not a swap, not an upgrade. Nothing. You sail through a free item and come out the other side holding exactly what you went in with.',
+          '**With both item slots full, driving through a box gives you nothing.** Not a swap — nothing. So on the run-in to a row of boxes, spend the junk and keep the armour.',
         ),
         t(
-          'So on the run-in to a row of boxes, spend the junk — the coin, the mushroom you were never going to use — and keep the armour. Never the other way round. And if you are dumping something anyway, drop it right on the boxes: everybody has to drive at those, so it is about as close to a free hit as this game gives you, and you did not aim at a soul.',
+          'And if you are dumping something anyway, drop it *on* the boxes. Everybody has to drive at those.',
         ),
       ]),
     );

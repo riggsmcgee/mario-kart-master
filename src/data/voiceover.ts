@@ -48,7 +48,6 @@ export const VOICEOVER: Record<string, string[]> = {
   ch1: [
     'There is free speed sitting on the start line, {name}, and almost nobody picks it up.',
     'The countdown goes three, two, one, GO. When the *two* starts to fade off the screen — that is your moment. Hold the accelerator then, and keep holding it.',
-    "Now, you've got auto-accelerate switched on, so you'd think holding the button does nothing. I didn't believe it either. So I went and tested it on my own Switch. **It still works.** You still get the boost.",
     'Get the timing wrong and you just start normally. That is the entire punishment. So there is genuinely no reason not to try it every single race.',
     "The drill on this page runs the countdown five times. Press and hold on the beat. It shows you how close you were in thousandths of a second — ignore that number if it annoys you, it's only there so you can watch yourself getting closer.",
     'What do you win? About a kart length. Which does not sound like much.',

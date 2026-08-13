@@ -115,7 +115,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 0,
     skill: 'The goal',
     title: 'So you want to beat {rival} at Mario Kart?',
-    hook: '{rival} wins because she reacts faster than you. That is a real advantage and you are not going to beat it. So we are not going to try — we are going to beat her with something she has not got, which is homework.',
+    hook: '{rival} is faster than you. So we are going to beat her with homework instead.',
     video: {
       id: 'CpeyjM8dyuk',
       title: 'How to Play Mario Kart 8 Deluxe — The video I WISH I had when I first started',
@@ -133,8 +133,8 @@ export const CHAPTERS: ChapterMeta[] = [
     id: 'ch1',
     number: 1,
     skill: 'Start boost',
-    title: 'The race is won before it starts',
-    hook: 'There is free speed on the start line and most people never take it. It costs you nothing, it works with your settings, and it happens before {rival} has touched anything.',
+    title: 'The strongest start on the grid',
+    hook: 'There is free speed sitting on the start line, and almost nobody picks it up.',
     drill: {
       title: 'Five starts',
       blurb: 'A countdown, five times over. Hold as the 2 vanishes, and keep holding through GO.',
@@ -146,7 +146,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 2,
     skill: 'Item smarts',
     title: 'The banana behind you',
-    hook: 'You do not need to aim anything. You do not need to be fast. You need to stop firing things the second you get them, and start carrying them behind you like a shield.',
+    hook: 'Stop throwing things. Carry them behind you instead.',
     drill: {
       title: 'Hold the banana',
       blurb: 'Six shells are coming. Hold your banana behind you and they hit that instead of you.',
@@ -158,7 +158,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 3,
     skill: 'Ramp tricks',
     title: 'Every ramp is free speed',
-    hook: 'Every time you go over a bump, a ramp or a jump, there is a boost sitting there waiting. One button, at the right moment, and you land going faster than you took off.',
+    hook: 'Every ramp has a free boost hidden in it. One button, at the top.',
     drill: {
       title: 'Six ramps',
       blurb:
@@ -171,7 +171,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 4,
     skill: 'Boost pads',
     title: 'The fast way round is not the tight way round',
-    hook: 'The orange arrows on the road are free speed, and here is the thing nobody tells you: they are often not on the line you would naturally drive. Knowing where they are is worth more than driving well.',
+    hook: 'The fast way round is not the tight way round.',
     drill: {
       title: 'Find the arrows',
       blurb: 'Eight boost pads, and several are nowhere near the line you would drive by instinct.',
@@ -183,7 +183,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 5,
     skill: 'Lines and coins',
     title: 'The fast way round a corner',
-    hook: 'Every corner has a good path through it and a bad one, and the bad one is the one everybody picks by instinct. This is the highest-scoring chapter in the course, and it is the only skill here that never has an off day.',
+    hook: 'Wide going in. Tight through the middle. Wide coming out.',
     video: {
       id: 'IlQRlP7FAlc',
       title: 'What is the point of COINS in Mario Kart 8 Deluxe?',
@@ -202,7 +202,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 6,
     skill: 'The drift',
     title: 'Drifting is a boost you steer with',
-    hook: 'This is the one everybody talks about, and it is worth the fuss. It is not a cornering trick — it is a way of *manufacturing* a boost out of a corner you had to take anyway, and it works with your settings exactly as they are.',
+    hook: 'A drift is a boost you make out of a corner you had to take anyway.',
     video: {
       id: '_21NuS0xjfc',
       title: 'Everything You Need to Know About Drifting in Mario Kart 8 Deluxe',
@@ -224,7 +224,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 7,
     skill: 'Your kart',
     title: 'Pick your weapon',
-    hook: 'One decision, made once, and then never again. At 100cc with items on, the kart that recovers quickly beats the kart that goes fastest — because you are going to get hit, and what matters is how quickly you are back up to speed.',
+    hook: 'Pick the kart that gets going again fastest, not the one that goes fastest.',
     drill: {
       title: 'Build your kart',
       blurb:
@@ -236,7 +236,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 8,
     skill: 'The plan',
     title: 'The {rival} Plan',
-    hook: 'Everything above was the classroom. This is the training programme: forty sessions, one a day, weekdays only. One job per session, and the grid fills in as you go.',
+    hook: 'Forty sessions. One a day, weekdays off at the weekend, one job each.',
     custom: true,
   },
 ];

@@ -79,9 +79,9 @@ grin, so grin while you say them.
 
 ---
 
-## Chapter 1 — The race is won before it starts
+## Chapter 1 — The strongest start on the grid
 
-**Target:** 60–90 seconds (~190 words)
+**Target:** 60–90 seconds (~160 words)
 **Tone:** Brisk, and slightly incredulous that nobody picks this up. "It still works" is the news
 of the chapter — say it like you are telling her something you personally went and checked, because
 you did.
@@ -90,10 +90,6 @@ you did.
 >
 > The countdown goes three, two, one, GO. When the *two* starts to fade off the screen — that is
 > your moment. Hold the accelerator then, and keep holding it.
->
-> Now, you've got auto-accelerate switched on, so you'd think holding the button does nothing. I
-> didn't believe it either. So I went and tested it on my own Switch. **It still works.** You
-> still get the boost.
 >
 > Get the timing wrong and you just start normally. That is the entire punishment. So there is
 > genuinely no reason not to try it every single race.

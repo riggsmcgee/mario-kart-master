@@ -217,10 +217,13 @@ const content: ChapterContent = {
           'Here is something the game never bothers to mention. Every ramp, every bump, every little jump on every track has a **free boost** sitting on top of it. It has been there the whole time. Most people drive over thousands of them and pick up nothing at all.',
         ),
         ctx.t(
-          'Collecting it takes one button — the hop button, the shoulder button under your finger — pressed at the moment the kart reaches the **top** of the ramp. Not on the way up. Not when you land. At the lip: the last scrap of ramp before there is nothing underneath you.',
+          'It takes one button, pressed at the **top** of the ramp. Not on the way up, not when you land — at the lip, the last scrap of ramp before there is nothing underneath you.',
         ),
         ctx.t(
-          'You will know instantly whether you got it, because **the kart does a flip.** A spin, a barrel roll, a bit of showing off in mid-air. That flourish is not decoration, it is the receipt. Flip means boost. No flip, no boost. You never have to wonder, and you never have to check a menu. And that is the whole of what the game means by a *trick* — this one press, landed. The kart does the acrobatics; you press a button.',
+          '**It is the shoulder button under your finger, and it is the same button you drift with** in Chapter 6. Tap it and you get a trick. Hold it into a corner and you get a drift. One button, two jobs, and the game works out which one you meant.',
+        ),
+        ctx.t(
+          'You will know instantly whether you got it, because **the kart does a flip.** That flourish is the receipt: flip means boost, no flip means no boost. You never have to check anything.',
         ),
       ]),
 
