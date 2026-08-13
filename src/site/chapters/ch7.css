@@ -271,29 +271,41 @@
 }
 
 /*
- * Cards and setup side by side, once there is room. (One-screen budget, 2026-08-12.)
+ * Cards and setup side by side, once there is room. (One-screen budget, 2026-08-12; rebuilt
+ * 2026-08-13.)
  *
- * Stacked, this page is 1172px at 1440x900 — the only practice page that still does not fit, and
- * the reason is simply that a setup panel underneath a grid of builds is two tall things in a
- * column. Beside each other they are one tall thing.
+ * The first version of this put the setup panel in a second column and forced the builds into a
+ * single column beside it, and it made the page **worse**: 1867px, from 1172px, and the tallest
+ * practice page in the course by a factor of two. The reasoning had been sound — a panel under a
+ * grid is two tall things in a column — but stacking the three builds to buy room for the panel
+ * traded a short problem for a long one, and nobody measured afterwards. Before she picks
+ * anything, the panel holds a single italic line, so two thirds of that page was an empty column
+ * sitting next to a 1472px stack.
  *
- * It also reads better: the instructions for the build she has picked end up level with the card
- * she picked, rather than a scroll away from it.
+ * Three across, panel underneath. The builds are meant to be *compared*, which is a thing you do
+ * with your eyes and not with a scrollbar, and the panel earns its height only once she has
+ * chosen — by which point she has read the cards and is looking downward anyway.
  */
 @media (min-width: 64rem) {
-  .combo-picker {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 1fr);
-    gap: var(--gap);
-    align-items: start;
+  .combo-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .combo-grid {
-    grid-template-columns: minmax(0, 1fr);
+  /* Tighter than the reading pages: three columns of body copy at 60rem is a narrow measure, and
+     the padding is the cheapest height to give back. Chrome first, copy never — the four part
+     rows are a table of names and lose nothing by sitting closer together, which is not true of
+     the paragraph under them. */
+  .combo-card {
+    padding: 1.4rem 1.1rem 1.1rem;
+    gap: 0.45rem;
+  }
+
+  .combo-parts {
+    gap: 0.15rem 0.9rem;
+    padding: 0.6rem 0;
   }
 
   .combo-setup {
-    position: sticky;
-    top: 1rem;
+    margin-top: var(--gap);
   }
 }

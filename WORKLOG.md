@@ -30,6 +30,41 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 ## Log
 
+### 2026-08-13 — Session 17 (Opus 5)
+
+**Steps touched:** the one-screen work carried since session 11
+
+**Chapter 7's practice page was 1867px, and the thing that made it that tall was the fix for it
+being too tall.** Session 12 put the setup panel in a second column to save height — sound
+reasoning, a panel under a grid is two tall things in a column — but it also forced the three
+builds into a single column to make room, and nobody measured afterwards. Before she picks
+anything the panel holds one italic line, so what shipped was a 1472px stack of cards next to a
+column that was two thirds empty. It went from 1172px to 1867px in the name of making it shorter.
+
+Three across, panel underneath: **1099px**. The builds are meant to be compared, which is something
+you do with your eyes rather than a scrollbar, and the panel only earns its height once she has
+chosen — by which point she is looking downward anyway. The rest came from chrome, never copy: card
+padding, and the four part rows, which are a table of names and lose nothing by sitting closer
+together.
+
+**And the 3e1 type bump had cost three pixels.** Lifting `--t-label` to 14px grew the eyebrow above
+every practice heading by about a pixel — nothing anywhere except against a budget measured to the
+pixel, where Chapter 1's page came to 903px of a 900px window. Three pixels of overflow is a
+scrollbar, which is the exact complaint the budget exists to answer. Taken back off the hook margin
+and the end row. **All eight practice pages are on 900px again.**
+
+**Not done, and deliberately handed back:** the Chapter 5 and 6 word counts. That is the other half
+of the consolidation Riggs asked for, and it is prose in his voice in a present he is writing for
+his aunt. Sessions 11 and 12 both deferred it as a content decision and both were right to. Ch7's
+practice page is still 199px over its budget for the same reason — the remaining height is three
+paragraphs of body copy, and shortening them is an editorial call, not a layout one.
+
+**Verified:** format, typecheck, lint, production build, 21/21 routes, 3b1 still 30/30, 4f1 still
+26/26, the 3e1 sweeps unchanged (contrast 1 known false positive, focus 0/0), all eight practice
+pages at 900px, no clipped labels.
+
+---
+
 ### 2026-08-13 — Session 16 (Opus 5)
 
 **Steps touched:** **2b9** (done) · **4f1** (everything that does not need a Mac)

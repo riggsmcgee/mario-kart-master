@@ -614,11 +614,15 @@ kbd {
   margin: 0.1rem 0 0;
 }
 
+/* 0.5rem rather than 0.6rem since 3e1 lifted `--t-label`: the eyebrow above every practice
+   heading grew by a pixel, which is nothing anywhere except against a budget measured to the
+   pixel — Chapter 1's page came to 903px of a 900px window, and three pixels of overflow is a
+   scrollbar, which is the exact complaint this budget exists to answer. */
 .page-practice .chapter-hook {
   font-size: 1rem;
   line-height: 1.45;
   max-width: 52rem;
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.5rem;
   padding-left: 0.9rem;
 }
 
@@ -660,9 +664,11 @@ main:has(.page-practice) ~ .site-footer {
   padding: 1rem 0 1.4rem;
 }
 
+/* The later of the two `.chapter-end` rules, and the one that wins. Trimmed with the hook above
+   for the same three pixels. */
 .page-practice .chapter-end {
-  margin-top: 0.8rem;
-  padding-top: 0.8rem;
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
 }
 
 .site-footer {
