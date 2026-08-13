@@ -30,6 +30,47 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 ## Log
 
+### 2026-08-12 — Session 12 (Opus 5)
+
+**Steps touched:** **2b1**–**2b8** copy pass · **2b6** · **2b7** · **4b1**
+
+Riggs sent marked-up screenshots — arrows, crossings-out, margin notes — plus a short list. As a
+way of giving feedback on a website it worked better than prose would have: "cut this" drawn
+across a card is unambiguous in a way that describing the card is not.
+
+**Two of the cuts were things written to answer objections she will never raise.** Chapter 1 had a
+card explaining that the start boost still works with auto-accelerate on. As he put it, she
+probably does not know the game *can* be played without auto-accelerate — so the card was teaching
+her that a setting exists purely in order to reassure her about it. Chapter 0's Kendahl card was
+the same shape: evidence marshalled for a case she had not yet doubted. Both gone, and
+auto-accelerate is now not mentioned anywhere in the course.
+
+**Every hook is one line now.** They were paragraphs, in the position the eye lands on first.
+
+**Chapter 6 teaches the stick.** He asked for the different stick states, and it turned out to be
+the fact every drifting tutorial assumes you already have: once a drift starts, the stick stops
+steering and starts shaping. Into the corner tightens, centred holds, away widens — all three keep
+you drifting, and only the button ends it. **The engine had to change to match**: counter-steering
+used to cancel a drift, which is not what the real game does, and shipping it would have put the
+physics in contradiction with the card above it. Verified by driving all three states.
+
+**Chapter 5 got a place to happen.** "Way too technical and unapplied" was right — four paragraphs
+about corners in general. Halved, and pointed at the big left after the start on Mario Kart
+Stadium, which is what she drives in week two of the programme.
+
+**On his video question:** no, and I checked. The good racing-line tutorials are real-motorsport
+ones — braking points, turn-in phases, weight transfer — none of which she has. Embedding one
+would have made the chapter more technical, which is the opposite of the note.
+
+**Verified:** typecheck, lint, production build, 21/21 routes against `dist/` served as Pages
+serves it, and the three drift stick states driven in a browser.
+
+**Left open:** the consolidation pass is a beginning, not a finish — he said as much. Chapter 5
+(923 words) and Chapter 6 (893) are still the longest lesson pages, and Chapter 7's practice page
+and the plan page still do not fit one screen. Both are content decisions now rather than layout.
+
+---
+
 ### 2026-08-12 — Session 11 (Opus 5)
 
 **Steps touched:** **2a2** · **2b1** · **2b7** · **2b8** · **4b1** · **4b2** · layout pass across
