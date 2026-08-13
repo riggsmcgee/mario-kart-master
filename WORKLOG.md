@@ -30,6 +30,54 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 ## Log
 
+### 2026-08-12 — Session 11 (Opus 5)
+
+**Steps touched:** **2a2** · **2b1** · **2b7** · **2b8** · **4b1** · **4b2** · layout pass across
+the practice pages
+
+A second playtest list from Riggs, sent on his way to the gym with "make this a big work push".
+Nine items, all real. Two of them were bugs rather than preferences.
+
+**The drift was backwards.** "You still turn just as sharp, so you can't drift for long — to get
+an orange I have to go in a full circle." That is not a tuning complaint. The model *added* drift
+yaw on top of whatever she was already steering, so a drifting kart turned harder than a normal
+one: up to 3.15 rad/s, which over the 1.9s an orange took is 343°. A full circle, precisely as
+reported. It replaces her steering now — zero input to `stepKart`, all yaw from the drift, base
+rate tracing an eighteen-unit radius on a ten-unit road. Orange is 57° of corner. Neutral steering
+keeps the drift alive, which is what lets her settle into one at all.
+
+His "the boost is happening but I don't see the flip" was the same bug from the other side: there
+was no visible tell. Grip now drops to 30% so the kart genuinely slides, there is a hop on entry,
+and the sparks are twice the size on both rear wheels.
+
+**Mario is not Peach.** Found while verifying the new driver swap. `sameClassAs('peach')` returned
+Mario and Luigi, so the picker was offering a driver that really does change the handling, directly
+under a sentence promising it would not. Five simplified weight classes were harmless while they
+only fed a bar chart; they stopped being harmless the moment a page asserted them.
+
+**Sessions are volume on a known track now.** "Do five starts — if she just resets, that's less
+than two minutes." Every session is [a number of runs] of [one named track] with [one thing to
+think about], which fixes the length *and* teaches the maps — a week lives on one track and rotates
+the focus. Not one session id changed; they are the primary key in `plan_checks`.
+
+**One screen, measured rather than eyeballed.** The Chapter 0 quiz was 2.03 screens at 1440x900 and
+no practice page fitted. Quiz goes two-column above 62rem; practice pages get an explicit budget
+with the drill absorbing the slack. Seven of eight now land at exactly 900px. The footer resisted
+for a while because its padding was an *inline style* in `app.ts`, which outranks every stylesheet
+rule — only measuring the parts showed why the first fix did nothing.
+
+**Verified:** typecheck, lint, production build; 21/21 routes against `dist/` served as Pages
+serves it and against dev; drift charge behaviour, line scoring and the driver swap all exercised
+by driving them in a real browser. The render check earned its keep again — it caught the Chapter 0
+rename immediately.
+
+**Left open, honestly:** Chapter 7's practice page is still 1172px, and the plan page 1304px. Both
+are content rather than chrome, which is the pass Riggs said would come later.
+
+**Not mine to commit:** `README.md` has his pasted notes in the working tree.
+
+---
+
 ### 2026-08-12 — Session 10 (Opus 5)
 
 **Steps touched:** **2a2** (rebuilt) · **2b1** · **2b6** · **2b7** · **2b8** · **2b9** (answered) ·
