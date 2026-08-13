@@ -30,6 +30,82 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 ## Log
 
+### 2026-08-13 — Session 13 (Opus 5)
+
+**Steps touched:** **2b1** · **2b3**–**2b5** · **1c1** · **1d1** · **3b2** · **4f1**
+
+The first playtest with a real reader who is not Riggs. Katharine went through it, and the headline
+is that **the quizzes and the games are the parts that land** — his words, "seem to be a hit". The
+rest of the notes are what a first contact with a stranger's eyes always produces: not big things
+wrong, just every place where the site assumed something she did not have.
+
+**Two rendering-level bugs, both of which made a drill teach the wrong thing.**
+
+The boost pads "aren't appearing until you get really close to them", and Riggs guessed the cause
+exactly: "it looks like it might be something with the road covering them up from a far". It was.
+The pad slab had no `polygonOffset` at all, while the road under it is pulled toward the camera by
+`polygonOffsetFactor: -2` — and `factor` scales with the polygon's depth slope, so a road seen
+almost edge-on down a straight accumulates enough bias to swallow a 14cm-tall slab. Measured before
+and after on the same frame: **33 pad pixels on screen, of which 24 were in the far half; now 456
+and 446.** The road was eating about 95% of every distant pad. This mattered more than a graphics
+glitch normally would, because Chapter 4's entire lesson is *plan a line to something ahead of
+you*, and the drill was hiding the thing until it was too late to steer for it.
+
+The start-boost drill relaunched itself 1.7 seconds after each go, so the verdict — the one
+sentence saying whether she was early or late — was gone before she had read it. On a drill whose
+whole teaching device is that sentence. A fixed delay was never going to be right; it is too short
+to read or too long to sit through, depending on whether she already knew what went wrong. Now the
+result stays until she asks for the next one. Writing that turned up a second bug behind it: tap
+the key to start and keep holding it, and the old grader said **"No start"** to someone with their
+finger on the key. It now reads as "Too early", which is what it is.
+
+**The quiz could be passed by pressing 1.** Every card in all three decks is authored
+correct-answer-first, which is the sane way to write one, and all twenty were rendering in that
+order. Fixed at parse time. Rotating by `index + hash(id)` rather than either alone is measured,
+not guessed: the hash by itself put *nothing* in slot 1 across the whole ten-card Chapter 2 deck —
+the same bug wearing a different hat — and the index by itself cycles 1, 3, 2 so every deck opens
+on slot 1. Together: 7/5/8 across the twenty, every slot used in every deck, and deterministic, so
+a card she comes back to has not moved its furniture.
+
+**"Them is too vague."** The question was in the right-hand column and its setup was in the left,
+so she was reading *Where do you leave it?* with no idea what "it" was. Both halves fixed — the
+setup now sits directly above the question in the same column, and every prompt names its subject
+("What do you do before you reach **the item boxes**?").
+
+**Chapter 4 is named for the object, not its colour.** "They're called boost pads and they are not
+always orange." A reader taught "orange arrows" who then meets a blue one has been taught wrong.
+Renamed everywhere it faces her — chapter, drill, deck, voiceover, training programme. The lesson
+is now one portable rule (*worth going out of your way for*) instead of a four-sentence tour of one
+corner of Mario Kart Stadium proving it.
+
+**Chapter 3's timing section is one paragraph, down from three.** The cut material was a
+measurement — the window is about 150ms either side of the lip — dressed as reassurance. It cannot
+reassure, because a number that small only sounds impossible, and it is not actionable either:
+nobody times a third of a second by knowing it is a third of a second. The window is still *drawn*,
+as a green stripe on the diagram, which is the honest way to show a duration to someone who has to
+feel it.
+
+**Also cut:** Chapter 2's "low skill, high reward" paragraph (the principle still governs what goes
+in the deck; it no longer lectures her about itself), and the "What to do with the thing in your
+hands" card is now "Item cheatsheet". Two dangling "the card below" references to the Switch cards
+deleted in session 12 are gone.
+
+**One tooling fix, earned the hard way.** `scripts/shoot.mjs` waits for vite's banner by matching
+`/Local:.*http/` — but vite colours the banner even when stdout is a pipe, so the bytes are
+`ESC[1mLocal ESC[22m:` and "Local:" is never contiguous. The regex could not match, the wait timed
+out at 60s, and the orphaned child then held port 5173 so the *next* run failed with a different
+error. It strips ANSI first now.
+
+**Verified:** format, typecheck, lint, production build, 21/21 routes, and in a browser: the
+before/after pad pixel counts above, the answer-slot spread per card, the setup/question/answers
+landing in one column in that order, and all four paths through the new ready gate (held-through
+grades early · still holding does not advance · release alone does not advance · press advances).
+
+**Left open:** the one-screen work and the Chapter 5/6 word counts, unchanged from session 12 and
+still content decisions. Nothing has run on a Mac, which is Jodi's only platform.
+
+---
+
 ### 2026-08-12 — Session 12 (Opus 5)
 
 **Steps touched:** **2b1**–**2b8** copy pass · **2b6** · **2b7** · **4b1**
