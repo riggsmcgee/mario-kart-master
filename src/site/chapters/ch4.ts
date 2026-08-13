@@ -5,10 +5,20 @@
  * bent toward making that one idea land rather than toward teaching a technique. Boost pads are
  * not a skill: you do not press anything, you cannot mistime them, and there is no such thing as
  * a decoy (Riggs, 2026-08-07 — Mario Kart has no fake pads, so "spot the fake" was never the
- * lesson). What there is, is a track where the arrows sit **off the line you would naturally
- * drive** — straight out of Mario Kart Stadium, where the dash panels live in the wide outer lane
- * — which makes the fast way round different from the tight way round, and makes the only way to
- * know it *knowing the track*. Preparation beating reaction, painted on the road.
+ * lesson). What there is, is a track where the pads sit **off the line you would naturally
+ * drive**, which makes the fast way round different from the tight way round, and makes the only
+ * way to know it *knowing the track*. Preparation beating reaction, painted on the road.
+ *
+ * **Cut back on 2026-08-12**, from Riggs's playtest: "Ch4 is a bit convoluted. They're called
+ * boost pads and they are not always orange. I think the big thing is emphasizing that using a pad
+ * is usually faster than not using one, even if its out of the way. Lose the rest of the
+ * complexity." Three things followed. The chapter is named for the object rather than its colour,
+ * everywhere, because a reader who has learned "orange arrows" and then meets a blue one on
+ * another track has been taught wrong. The lesson is stated as a single portable rule — *worth
+ * going out of your way for* — instead of being inferred from a worked example of one corner of
+ * one track. And the worked example itself is gone: the three-painted-lanes tour of Mario Kart
+ * Stadium was four sentences proving a thing the rule now says in one, and the drill and the map
+ * cards below demonstrate it better than any paragraph could.
  *
  * **Why the drill layout looks like that.** Eight pads, and four of them are deliberately
  * unreachable from the tidy line: three strung down the outside of the wide right-hander, one on
@@ -129,38 +139,31 @@ function fillNames(questions: QuizQuestion[], t: (text: string) => string): Quiz
 const content: ChapterContent = {
   concept(ctx) {
     return frag(
-      el('h2', null, 'The orange arrows'),
+      el('h2', null, 'Boost pads'),
       prose([
-        'Somewhere on every track there are orange arrows painted on the road. Drive over one and the kart takes off like something bit it. You do not press anything, you cannot get the timing wrong, and it works every single lap. Officially they are called dash panels. Everyone calls them boost pads, and you can call them the orange arrows if you like — nobody is marking you.',
-        'So far so easy. Here is the part nobody mentions: **they are often not where you would naturally drive.**',
-        'On Mario Kart Stadium — the first track of the cup you are going to own — the road opens into three painted lanes after the first right turn, and the arrows are out in the **wide outer lane**. The long way round. Everybody who has not looked it up hugs the inside, because inside is shorter and shorter feels faster, and they hand back three boosts a lap to save a few kart lengths.',
-        'Which means the fast way round is not the tight way round, and there is no way to work that out while you are driving. By the time an arrow is on your screen you are level with it.',
+        'Painted on the road, on every track, there are strips that shove you forward when you drive over one. They are called **boost pads**. Usually orange arrows, though not on every track — so what you are looking for is a painted strip with arrows on it, in whatever colour that track happens to use.',
+        'Free speed. You do not press anything and there is no timing to get wrong.',
+        'Here is the whole chapter: **a boost pad is worth going out of your way for.** Even when it is on the far side of the road. Even when reaching it means taking the long way round a corner. The few extra kart lengths cost you less than the boost gives back — and hardly anyone believes that, which is why hardly anyone does it.',
       ]),
       el(
         'div',
         // The card is an aside between two runs of prose, and neither the card nor a paragraph
         // brings spacing of its own to that join.
         { class: 'card', style: { margin: 'var(--gap) 0' } },
-        el('p', { class: 'eyebrow' }, 'This is the whole plan, in one corner'),
-        el(
-          'p',
-          null,
-          rich(
-            ctx.t(
-              'You cannot react to a boost pad. You can only *remember* it. {rival} is faster than you at everything that happens in the moment — and this is not one of those things. It is homework, and it is sitting on the road waiting for whichever of you bothered to look.',
-            ),
-          ),
-        ),
+        el('p', { class: 'eyebrow' }, 'The one exception'),
         el(
           'p',
           { style: { marginBottom: '0' } },
           rich(
-            '**The one exception:** never slow down for an arrow. Shuffling across a straight to reach one is free. Braking to line one up gives back more than it hands you — and an arrow is a great fat stripe of road, not a target you have to aim at.',
+            'Never slow down for one. Shuffling across a straight to reach a pad is free; braking to line one up costs more than it pays. A pad is a great fat stripe of road, not a target you have to aim at.',
           ),
         ),
       ),
       prose([
-        'Next is a lap of the practice track. There are eight arrows on it, and four of them are nowhere near the line you would take the first time round. That is on purpose. Go and find them.',
+        ctx.t(
+          'You cannot react to a boost pad — by the time it is on your screen you are level with it. You can only already know it is there. That is homework, and homework is the one race {rival} is not running.',
+        ),
+        'Eight pads on the practice lap. Four of them are nowhere near the line you would take first time round. Go and find them.',
       ]),
     );
   },
@@ -207,7 +210,7 @@ const content: ChapterContent = {
       mount: drillSlot,
       sfx: ctx.sfx,
       layout: PAD_LAYOUT,
-      goal: 'Drive over all eight arrows — including the ones out wide.',
+      goal: 'Drive over all eight boost pads — including the ones out wide.',
       unit: 'pads',
       target: TOTAL_PADS,
       laps: LAPS,
@@ -252,13 +255,13 @@ const content: ChapterContent = {
           return {
             title: `${score} of eight.`,
             detail:
-              'The ones you missed are the ones off your natural line: the outside of the big right-hander, and the far side of the chicane — the quick left-right-left wiggle on the way back round. Worth another lap, or carry on — the map test is where it sticks.',
+              'The ones you missed are off your natural line: the outside of the big right-hander, and the far side of the chicane. Worth another lap, or carry on — the map test is where it sticks.',
           };
         }
         return {
-          title: score === 1 ? 'One arrow.' : score === 0 ? 'None this time.' : `${score} arrows.`,
+          title: score === 1 ? 'One pad.' : score === 0 ? 'None this time.' : `${score} pads.`,
           detail:
-            'Nothing here is timed and nothing is lost. Have another go if you fancy it — the arrows have not moved, and out on the Switch they never will.',
+            'Nothing here is timed and nothing is lost. Have another go if you fancy it — the pads have not moved, and out on the Switch they never will.',
         };
       },
     });
@@ -274,7 +277,7 @@ const content: ChapterContent = {
           'p',
           null,
           rich(
-            `**${padsHit} of ${TOTAL_PADS} arrows** on the track, and **${summary.correct} of ${summary.total}** on the map.`,
+            `**${padsHit} of ${TOTAL_PADS} pads** on the track, and **${summary.correct} of ${summary.total}** on the map.`,
           ),
         ),
         el(
@@ -282,7 +285,7 @@ const content: ChapterContent = {
           { style: { marginBottom: '0' } },
           rich(
             ctx.t(
-              'You now know something about a piece of road that {rival} has driven a hundred times and never once looked at. Take it to the Switch — the card below tells you exactly where to start.',
+              'You now know something about a piece of road that {rival} has driven a hundred times and never once looked at.',
             ),
           ),
         ),

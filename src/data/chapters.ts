@@ -173,8 +173,8 @@ export const CHAPTERS: ChapterMeta[] = [
     title: 'The fast way round is not the tight way round',
     hook: 'The fast way round is not the tight way round.',
     drill: {
-      title: 'Find the arrows',
-      blurb: 'Eight boost pads, and several are nowhere near the line you would drive by instinct.',
+      title: 'Find the boost pads',
+      blurb: 'Eight of them, and several are nowhere near the line you would drive by instinct.',
     },
     stars: { unit: 'pads hit out of 8', two: 5, three: 7 },
   },

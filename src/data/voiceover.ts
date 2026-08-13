@@ -76,14 +76,14 @@ export const VOICEOVER: Record<string, string[]> = {
   ],
 
   ch4: [
-    'Orange arrows painted on the road. Drive over one, go fast. You knew that bit already.',
-    "Here's the bit nobody tells you. **The arrows are usually not on the line you would naturally drive.**",
+    'Boost pads. Painted strips on the road — usually orange arrows, not always. Drive over one, go fast. You knew that bit already.',
+    "Here's the bit nobody tells you. **They are usually not on the line you would naturally drive.**",
     'Take Mario Kart Stadium — the first track, the easy one. After the first right-hander the road opens out into lanes. The outside one. The wide one. The one that obviously looks longer.',
     'That is where the boost pads are. And the coins.',
     'So the long way round is the fast way round, and you would never work that out by driving it. Somebody has to tell you, or you have to go looking.',
     'That is this entire website, in one corner of one track. {rival} is hugging the inside because the inside looks shorter. Let her.',
     "The drill has eight pads on a lap and some of them are deliberately out where you'd never go. You'll have to plan the lap instead of reacting to it — which, conveniently, is the only kind of racing where you have the advantage.",
-    "On the Switch, drive one lap of each of your four tracks where the only goal is hitting arrows. Finish last. Doesn't matter. You're not racing, you're drawing a map.",
+    "On the Switch, drive one lap of each of your four tracks where the only goal is hitting boost pads. Finish last. Doesn't matter. You're not racing, you're drawing a map.",
   ],
 
   ch5: [

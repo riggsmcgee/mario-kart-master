@@ -88,7 +88,7 @@ you did.
 
 > There is free speed sitting on the start line, Jodi, and almost nobody picks it up.
 >
-> The countdown goes three, two, one, GO. When the *two* starts to fade off the screen — that is
+> The countdown goes three, two, one, GO. When the _two_ starts to fade off the screen — that is
 > your moment. Hold the accelerator then, and keep holding it.
 >
 > Get the timing wrong and you just start normally. That is the entire punishment. So there is
@@ -175,10 +175,10 @@ compliment disguised as a fact about Kayla.
 **Tone:** The reveal chapter. Quiet and matter-of-fact on the setup, then put the weight on "not on
 the line you would naturally drive" and pause after it. "Let her" is allowed to be a little smug.
 
-> Orange arrows painted on the road. Drive over one, go fast. You knew that bit already.
+> Boost pads. Painted strips on the road — usually orange arrows, not always. Drive over one, go
+> fast. You knew that bit already.
 >
-> Here's the bit nobody tells you. **The arrows are usually not on the line you would naturally
-> drive.**
+> Here's the bit nobody tells you. **They are usually not on the line you would naturally drive.**
 >
 > Take Mario Kart Stadium — the first track, the easy one. After the first right-hander the road
 > opens out into lanes. The outside one. The wide one. The one that obviously looks longer.
@@ -195,8 +195,8 @@ the line you would naturally drive" and pause after it. "Let her" is allowed to 
 > You'll have to plan the lap instead of reacting to it — which, conveniently, is the only kind of
 > racing where you have the advantage.
 >
-> On the Switch, drive one lap of each of your four tracks where the only goal is hitting arrows.
-> Finish last. Doesn't matter. You're not racing, you're drawing a map.
+> On the Switch, drive one lap of each of your four tracks where the only goal is hitting boost
+> pads. Finish last. Doesn't matter. You're not racing, you're drawing a map.
 
 ---
 

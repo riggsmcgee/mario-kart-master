@@ -1,7 +1,7 @@
 [
   {
     "id": "wide-lane",
-    "situation": "The first big right-hander of the lap. The road opens out, and there are three orange arrows painted down the outside of it.",
+    "situation": "The first big right-hander of the lap. The road opens out, and there are three boost pads painted down the outside of it.",
     "prompt": "Which line do you take?",
     "diagram": {
       "road": "bend-right",
@@ -18,7 +18,7 @@
         "id": "outside",
         "label": "Swing out wide and drive over all three",
         "correct": true,
-        "response": "Three arrows, three shoves forward, and you did not have to press a thing. Yes, you drove a few extra kart lengths to get out there — and they cost you a fraction of what the arrows gave back. This is the single most useful habit in the chapter: go the long way if the long way is boosted."
+        "response": "Three pads, three shoves forward, and you did not have to press a thing. Yes, you drove a few extra kart lengths to get out there — and they cost you a fraction of what the pads gave back. This is the whole habit: go the long way if the long way is boosted."
       },
       {
         "id": "inside",
@@ -28,18 +28,18 @@
       {
         "id": "middle",
         "label": "Stay in the middle and take whichever one you can reach",
-        "response": "The middle is the one line on this corner that gets you none of them. Arrows are not that wide, and half-committing to the outside means arriving beside all three rather than on top of them. Pick the lane and go."
+        "response": "The middle is the one line on this corner that gets you none of them. Pads are not that wide, and half-committing to the outside means arriving beside all three rather than on top of them. Pick the lane and go."
       }
     ],
-    "takeaway": "Shorter is not the same as faster. If the long way round is painted with arrows, the long way round is the fast way."
+    "takeaway": "Shorter is not the same as faster. If the long way round is painted, the long way round is the fast way."
   },
   {
     "id": "inside-pad",
-    "situation": "A long, lazy left-hander with one arrow painted on it — tucked in tight against the inside kerb.",
+    "situation": "A long, lazy left-hander with one boost pad painted on it — tucked in tight against the inside kerb.",
     "prompt": "Where do you drive?",
     "diagram": {
       "road": "bend-left",
-      "caption": "One arrow, and this time it is on the tight line.",
+      "caption": "One pad, and this time it is on the tight line.",
       "markers": [
         { "kind": "you", "at": 0.1, "lane": 0.1, "label": "You" },
         { "kind": "pad", "at": 0.55, "lane": -0.5 }
@@ -50,25 +50,25 @@
         "id": "inside",
         "label": "Tuck in tight and drive over it",
         "correct": true,
-        "response": "Right. Notice what just happened: last corner the answer was 'go wide', this one it is 'stay tight', and both answers came from the same place — looking at where the arrows actually are. There is no rule to learn here. There is a track to learn."
+        "response": "Right. Notice what just happened: last corner the answer was 'go wide', this one it is 'stay tight', and both answers came from the same place — looking at where the pads actually are. There is no rule to learn here. There is a track to learn."
       },
       {
         "id": "wide",
-        "label": "Out wide — that is where the arrows live",
-        "response": "That was the last corner. Arrows are painted wherever the people who built the track felt like painting them, and on this one they went on the inside. A rule you apply everywhere will be wrong somewhere; knowing the corner is never wrong."
+        "label": "Out wide — that is where the pads live",
+        "response": "That was the last corner. Pads are painted wherever the people who built the track felt like painting them, and on this one they went on the inside. A rule you apply everywhere will be wrong somewhere; knowing the corner is never wrong."
       },
       {
         "id": "skip",
-        "label": "Ignore it — one arrow is not worth changing your line for",
+        "label": "Ignore it — one pad is not worth changing your line for",
         "response": "It is free speed sitting directly on your way, and you would have to steer around it to miss it. When the boost is on the tidy line, you get both, and that is the easiest point on the whole lap."
       }
     ],
-    "takeaway": "There is no rule about which side the arrows are on. There is only knowing this particular track."
+    "takeaway": "There is no rule about which side the pads are on. There is only knowing this particular track."
   },
   {
     "id": "kerb-hugger",
-    "situation": "A long straight. There is an arrow painted right up against the right-hand kerb, and you are cruising along the middle of the road quite happily.",
-    "prompt": "What do you do about it?",
+    "situation": "A long straight. There is a boost pad painted right up against the right-hand kerb, and you are cruising along the middle of the road quite happily.",
+    "prompt": "What do you do about the pad?",
     "diagram": {
       "road": "straight",
       "caption": "Half a road over. No corner for ages.",
@@ -92,14 +92,14 @@
       {
         "id": "slow",
         "label": "Slow down a little so you can line it up properly",
-        "response": "Never this one. An arrow is not a target you have to aim at — it is a great fat stripe of road you drive over. Lifting off to hit it means paying more speed than it gives back, which is the only way to lose money on a free boost."
+        "response": "Never this one. A pad is not a target you have to aim at — it is a great fat stripe of road you drive over. Lifting off to hit it means paying more speed than it gives back, which is the only way to lose money on a free boost."
       }
     ],
-    "takeaway": "On a straight, an arrow is always worth the shuffle across. It is never, ever worth slowing down for."
+    "takeaway": "On a straight, a pad is always worth the shuffle across. It is never, ever worth slowing down for."
   },
   {
     "id": "her-line",
-    "situation": "Second lap. {rival} is a few kart lengths ahead of you, glued to the inside kerb like she always is. The arrows are out on the wide side.",
+    "situation": "Second lap. {rival} is a few kart lengths ahead of you, glued to the inside kerb like she always is. The pads are out on the wide side.",
     "prompt": "Do you follow her?",
     "diagram": {
       "road": "bend-right",
@@ -114,7 +114,7 @@
     "answers": [
       {
         "id": "wide",
-        "label": "Let her have the inside. Take the arrows.",
+        "label": "Let her have the inside. Take the pads.",
         "correct": true,
         "response": "Let her have it. She is driving the line that looks shortest, which is what everybody does when they have not looked the track up — and you get two boosts and a clear road for the trouble. This is the whole plan in one corner: she is quicker than you, and you know something she does not."
       },
@@ -126,15 +126,15 @@
       {
         "id": "split",
         "label": "Sit in between so you can react to whatever she does",
-        "response": "Watching her is exactly the game you cannot win — she moves, you respond, and you are always half a second behind. You do not need to watch her at all. You need to be on the arrows, which have not moved since 2014."
+        "response": "Watching her is exactly the game you cannot win — she moves, you respond, and you are always half a second behind. You do not need to watch her at all. You need to be on the pads, which have not moved since 2014."
       }
     ],
-    "takeaway": "You are not racing her line. You are racing the road, and you are the one who knows where the arrows are."
+    "takeaway": "You are not racing her line. You are racing the road, and you are the one who knows where the pads are."
   },
   {
     "id": "round-the-corner",
-    "situation": "The arrows on this corner sit past the bend, out of sight from where you are now. You only know they are there because you have driven this track before.",
-    "prompt": "So how do you end up on them?",
+    "situation": "The pads on this corner sit past the bend, out of sight from where you are now. You only know they are there because you have driven this track before.",
+    "prompt": "So how do you end up on the pads?",
     "diagram": {
       "road": "bend-right",
       "caption": "This is the map, not the view. From where you are, all you can see is the corner.",
@@ -154,7 +154,7 @@
       {
         "id": "react",
         "label": "Wait until you can see them, then steer across",
-        "response": "By the time an arrow appears on your screen you are practically level with it, and a kart does not move sideways that fast. Anything on a race track you have to react to, you have already missed. That is why the map matters more than the reflexes."
+        "response": "By the time a pad appears on your screen you are practically level with it, and a kart does not move sideways that fast. Anything on a race track you have to react to, you have already missed. That is why the map matters more than the reflexes."
       },
       {
         "id": "middle",

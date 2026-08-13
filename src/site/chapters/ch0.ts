@@ -106,7 +106,7 @@ const content: ChapterContent = {
 
       proseFor(ctx, [
         'Reaction speed is one way to win a race. It is the only one {rival} has got.',
-        'Because most of Mario Kart is not reflexes at all. Free speed on the start line, before anybody has moved. Free speed on every ramp. Free speed painted on the road in orange arrows, usually in a lane nobody drives in. Items that do more for you held than thrown.',
+        'Because most of Mario Kart is not reflexes at all. Free speed on the start line, before anybody has moved. Free speed on every ramp. Free speed painted on the road in boost pads, usually in a lane nobody drives in. Items that do more for you held than thrown.',
         'None of that needs fast hands. All of it needs someone to have mentioned it to you once — and nobody has mentioned it to {rival}. Why would they? She is winning.',
         'So here is the deal, {name}. She keeps her reactions. You quietly collect **everything else**.',
       ]),
