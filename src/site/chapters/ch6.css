@@ -115,8 +115,17 @@
   background: var(--ink-faint);
 }
 
+/*
+ * The badges carry a white number, so their backgrounds have to be dark enough to read it — which
+ * is a stricter requirement than the dots below have, and the two used to share values. (3e1.)
+ * Blue measured 2.90:1 behind white and the boost red 3.93:1; both are now over 5. The *dots* keep
+ * the bright originals, because a dot is a shape and has nothing written on it.
+ *
+ * Orange is the exception and always was: it takes near-black text rather than white, which is why
+ * it was the only one already passing.
+ */
 .drift-steps li[data-stage='blue'] .drift-step-badge {
-  background: #2f9bff;
+  background: #1668c4;
 }
 
 .drift-steps li[data-stage='orange'] .drift-step-badge {
@@ -125,7 +134,7 @@
 }
 
 .drift-steps li[data-stage='boost'] .drift-step-badge {
-  background: var(--kerb);
+  background: var(--kerb-ink);
 }
 
 /* --- what the sparks are worth -------------------------------------------- */
@@ -172,8 +181,9 @@
   font-size: 1.15rem;
 }
 
+/* The numbers are the payload of this whole section, so they take the readable red. */
 .spark-seconds {
-  color: var(--kerb);
+  color: var(--kerb-ink);
   font-size: 1.05rem;
 }
 

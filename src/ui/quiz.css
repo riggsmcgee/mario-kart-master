@@ -48,7 +48,7 @@
 
 .quiz-figure figcaption {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   margin-top: 0.45rem;
   text-align: center;
 }
@@ -106,7 +106,7 @@
   border-radius: 6px;
   border: 1px solid var(--line);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 
@@ -115,10 +115,32 @@
   opacity: 1;
 }
 
-/* Marked after answering. The right one is always shown, whether or not it was picked. */
+/*
+ * Marked after answering. The right one is always shown, whether or not it was picked.
+ *
+ * **Each state has a shape as well as a colour.** (3e1.) Green border plus green tint said "this
+ * is the right one" in hue alone — on the one control in the course whose entire job is to tell
+ * her which answer was correct. Anyone who cannot separate that green from the neutral border was
+ * being shown a quiz that marked itself invisibly. So: the right answer carries a tick, the one
+ * she picked is dashed, and the rest are dimmed. Turn the whole page greyscale and all three are
+ * still legible, which is the test.
+ */
 .quiz-answer[data-state='right'] {
   border-color: #1a7f37;
   background: rgba(26, 127, 55, 0.12);
+  border-width: 3px;
+  /* Shrink the padding by the pixel the border gained, so marking a card does not shift its text. */
+  padding: calc(0.9rem - 1px) calc(1rem - 1px);
+  /* A third track, added only on this state, so the tick has somewhere to sit. Declaring it on
+     every button instead would leave a 0.75rem gap trailing all the ones that never grow one. */
+  grid-template-columns: 1.9rem 1fr auto;
+}
+
+.quiz-answer[data-state='right']::after {
+  content: '✓';
+  font-size: 1.15rem;
+  line-height: 1;
+  color: #1a7f37;
 }
 
 .quiz-answer[data-state='picked'] {
@@ -126,8 +148,14 @@
   border-style: dashed;
 }
 
+/*
+ * Dimmed, not erased. 0.45 put these at about 2.6:1 — and they are meant to be *read*: seeing the
+ * wrong options next to the right one is the comparison that does the teaching, which is the whole
+ * reason every button gets marked rather than just the one she pressed. 0.7 still reads as
+ * "these are out of the running" and clears AA.
+ */
 .quiz-answer[data-state='other'] {
-  opacity: 0.45;
+  opacity: 0.7;
 }
 
 /* --- the reply --- */

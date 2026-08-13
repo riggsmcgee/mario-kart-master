@@ -152,7 +152,7 @@ const content: ChapterContent = {
     function fillRow(index: number, result: CountdownResult, isGood: boolean): void {
       const row = rows[index];
       if (!row) return;
-      row.style.color = isGood ? 'var(--turf)' : 'var(--ink-soft)';
+      row.style.color = isGood ? 'var(--turf-ink)' : 'var(--ink-soft)';
 
       const parts: Array<Node | string> = [el('strong', null, GRADE_LABELS[result.grade])];
       if (result.errorMs !== null) {

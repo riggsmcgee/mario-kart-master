@@ -18,10 +18,10 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 | | |
 |---|---|
 | Current phase | Phase 4, most of the way through — the whole course exists end to end |
-| Current step | **3e1** readability pass; **4f1** final QA, blocked on a Mac; **3c2** recording |
+| Current step | **4f1** final QA, blocked on a Mac; **3c2** recording |
 | Last gate passed | Riggs playtested the assembled site (2026-08-12) and sent a list; Session 10 is the response to it |
 | Next gate | **2c1** full run-through · **3f1** cold click-through · **4f2** Jodi, watched silently |
-| Repo state | All of Phase 1 built; Phase 2 assembled and split into lesson/practice pages; Phase 3 done except **3e1** and the recording; Phase 4 done except launch QA |
+| Repo state | All of Phase 1 built; Phase 2 assembled and split into lesson/practice pages; Phase 3 done except the recording; Phase 4 done except launch QA |
 | Deferred | nothing — 1a5 landed 2026-08-12 |
 | Needs an answer | **Q9** accelerate slot (cosmetic now); ~~Q5~~ ~~Q7~~ ~~Q6~~ ~~Q8~~ answered |
 | Blocked on Riggs | Pages source → "GitHub Actions"; the two Supabase secrets; nine mp3s |
@@ -29,6 +29,68 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 ---
 
 ## Log
+
+### 2026-08-13 — Session 15 (Opus 5)
+
+**Steps touched:** **3e1** (done)
+
+The readability pass, done by measuring the rendered page rather than reading the stylesheet — a
+token that passes in isolation still fails where it lands, and `--ink-faint` on white and
+`--ink-faint` on `--trim-wash` are different numbers of which only one is written down anywhere.
+Three sweeps over all 21 routes: contrast on every text node against its resolved backdrop, rendered
+type size, and a real Tab through all 182 focusable elements.
+
+**One token was most of the problem.** `--ink-faint` measured **3.01:1 on white and 2.77:1 on
+`--paper`** — under AA on the eyebrow above the heading of nearly every page on the site, the plan
+grid's labels, the back links, and the kart chapter's slot names. Seventeen of twenty distinct
+failures were that one value. It is `#626b7e` now, which clears 4.5:1 on every surface it touches.
+The cost is that it sits close to `--ink-soft`, so the gap between quiet and quieter is carried by
+size, weight and tracking instead of by greyness — which is the right trade, because an eyebrow set
+in uppercase mono at 0.14em was never relying on faintness to read as a label.
+
+**`--kerb` and `--turf` were being used for two jobs.** Both are fine as a fill, a border or a 6px
+rule and neither is legible as text: 3.93:1 and 3.21:1 on white. So they got `--kerb-ink` and
+`--turf-ink` alongside them rather than one value bent to cover both. That caught the **done stamp**,
+which the sweep initially missed — a stamp only exists on a finished chapter and the crawl walked
+fresh pages, which is a small lesson about auditing a site in its empty state.
+
+**The focus audit was wrong the first time, and the wrong answer looked convincing.** It called
+`element.focus()` and read the outline back, and every element on the site "failed". `:focus-visible`
+deliberately does not match programmatic focus, so what it was reading was the *initial* value —
+`outline-style: none` with Chrome's `medium` width, which computes to 3px and looks exactly like a
+real rule that has been overridden. Tabbed properly, **all 182 elements already had a ring**. Three
+had a ring that could not be seen: the plan grid's cell and tick at 2.36:1 and 2.17:1, and the video
+poster at **1:1** — `--track` on `--track`, a dark ring on a dark poster, an element a keyboard user
+could land on with no way to know. That one is the single worst thing this pass found and it is
+invisible to anybody using a mouse.
+
+**The smallest type on the site was 9.3px**, the track name inside each of the forty plan cells. It
+turned out the comment above it — "sized so Water Park fits without an ellipsis" — had been false for
+some time: the label wanted 47px of a 43px slot and was being clipped anyway. The real cause was the
+week column, sized `max-content`, taking 183px of a 578px board for something read once per row while
+the five cells read forty times shared 76px each. Capped at 8rem the name wraps, the cells gain
+width, and both labels now fit at a readable size with nothing clipped. Smallest type on the site is
+11.2px, and everything sentence-shaped is 14px or more.
+
+**Two things were still saying it in colour alone.** The quiz marked the right answer with a green
+border and a green tint — on the one control in the course whose entire job is to say which answer
+was correct. It carries a tick now, and the dimmed also-rans went from 0.45 opacity (about 2.6:1) to
+0.7, because the comment above them is right that reading the wrong ones next to the right one is
+what does the teaching. And the lap list — the accessible route that exists *because* the map is
+`aria-hidden` — marked finished chapters with a green wash and nothing else.
+
+**Verified:** format, typecheck, lint, production build, 21/21 routes, the 3b1 browser suite still
+30/30 after the palette moved, and the three sweeps re-run: **contrast failures 20 → 0** (the one
+remaining line is a known false positive — white pin numbers measured against the page instead of
+the coloured circle they sit on, which the walk-up cannot see), **focus 3 → 0**, **type floor 9.3px →
+11.2px**, and zero clipped labels on the plan grid. The practice pages still land on their 900px
+one-screen budget.
+
+**Left open:** unchanged. Nothing has run on a Mac, 60fps is unmeasured, no Safari pass, the print
+sheet has never met a printer, nobody has timed a full run-through. Chapter 7's practice page (1862px)
+and the Ch5/Ch6 word counts are still the deferred content pass.
+
+---
 
 ### 2026-08-13 — Session 14 (Opus 5)
 

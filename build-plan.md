@@ -205,7 +205,7 @@ Theme, motion, voice, sound. This is the "make her smile" phase.
 - [ ] **3c2** Record voiceovers *(human: Riggs, QuickTime or Voice Memos, quiet room, phone mic is fine)*. Fallback if recording stalls: a warm TTS voice, but Riggs's actual voice is the gift here.
 - [x] **3c3** Audio integration: per-chapter player with a big play button, auto-pause when a drill starts, full transcript visible beneath (accessibility + skimmers). *(Sonnet)*
 - [x] **3d1** SFX: engine hum, coin ping, star fanfare, shield thunk. Original, subtle, mutable. *(Sonnet)*
-- [ ] **3e1** Readability pass: large type everywhere, contrast check, focus states, no information carried by color alone. *(Sonnet)*
+- [x] **3e1** Readability pass: large type everywhere, contrast check, focus states, no information carried by color alone. *(Sonnet)* — done 2026-08-13, by measuring every rendered text node on all 21 routes rather than reading the stylesheet. Contrast failures 20 → 0 (root cause: `--ink-faint` at 3.01:1, plus `--kerb` and `--turf` used as text); focus rings 3 broken → 0, including one at 1:1 that was invisible; smallest type 9.3px → 11.2px. Colour-only signals fixed on the quiz's right answer and the lap list's done state.
 - [ ] **3f1 GATE (Riggs):** click through the whole site cold. Question: would you be proud to send her this link as a present? Lighthouse performance stays 90+.
 
 ---

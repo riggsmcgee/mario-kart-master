@@ -51,7 +51,36 @@
   --card: #ffffff;
   --ink: var(--track);
   --ink-soft: #5b6478;
-  --ink-faint: #8d95a6;
+  /**
+   * The quiet tier. Darkened from #8d95a6 in the 3e1 pass, and the reason is worth keeping.
+   *
+   * At #8d95a6 it measured **3.01:1 on white and 2.77:1 on `--paper`** — under AA either way, on
+   * the eyebrow that sits above the heading of nearly every page on the site, plus the plan grid's
+   * labels, the back links, and the kart chapter's slot names. It was the single most widespread
+   * legibility problem here by a wide margin, and it was invisible to anyone with good eyes
+   * reading on a good screen, which is precisely who built it and not at all who it is for.
+   *
+   * At #626b7e it clears 4.5:1 on every surface it lands on — white 5.35, paper 4.98, and all four
+   * washes between 4.6 and 5.0. The cost is that it now sits close to `--ink-soft`, so the gap
+   * between "quiet" and "quieter" is carried by size, weight and letter-spacing rather than by
+   * greyness. That is the right trade: an eyebrow is already unmistakable at 13px, uppercase, in
+   * mono with 0.14em of tracking. It did not need to be faint as well, and being faint was the
+   * only part of it a sixty-something reader could not get past.
+   */
+  --ink-faint: #626b7e;
+  /**
+   * Kerb red, dark enough to be *read*. `--kerb` itself is 3.93:1 on white — fine for a fill, a
+   * border or a 6px rule, and under AA for any text below 24px. So the two uses got two tokens
+   * rather than one token used two ways.
+   */
+  --kerb-ink: #c62d24;
+  /**
+   * The same split for green, and it caught the done stamp — the single most-seen piece of good
+   * news on the site, set in `--turf` at 3.21:1 on white. The audit missed it on the first pass
+   * because a stamp only exists on a chapter that has been finished and the sweep walked fresh
+   * pages, which is its own small lesson about auditing a site in its empty state.
+   */
+  --turf-ink: #2a7a30;
   --rule: #d7e0ec;
   --rule-soft: #e8eef6;
 
@@ -72,7 +101,17 @@
   --t-section: clamp(1.4rem, 2.4vw, 1.85rem);
   --t-body: clamp(1.125rem, 1.5vw, 1.3rem);
   --t-small: 1rem;
-  --t-label: 0.82rem;
+  /**
+   * The label tier, lifted from 0.82rem to 0.875rem in the 3e1 pass — 13.1px to 14px.
+   *
+   * It reads as a small change and it is the most-seen one on the site: this is the eyebrow above
+   * the heading of every page, plus the plan grid's week and day headers and the callout kinds.
+   * 14px is the floor this pass settled on for anything made of words, and the eyebrow was under
+   * it everywhere. Uppercase mono with 0.14em of tracking is legible *shape* but demanding *size*,
+   * which is exactly the combination that looks fine to the person who set it and does not to the
+   * person reading it.
+   */
+  --t-label: 0.875rem;
 
   /* --- space and shape ----------------------------------------------------- */
 
@@ -331,8 +370,8 @@ canvas {
   font-size: 1.4rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--turf);
-  border: 4px solid var(--turf);
+  color: var(--turf-ink);
+  border: 4px solid var(--turf-ink);
   border-radius: 10px;
   padding: 0.35em 0.7em;
   transform: rotate(-7deg);

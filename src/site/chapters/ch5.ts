@@ -229,7 +229,7 @@ const content: ChapterContent = {
             border: '3px solid var(--kerb)',
           },
         },
-        el('p', { class: 'eyebrow', style: { color: 'var(--kerb)' } }, 'The sting in the tail'),
+        el('p', { class: 'eyebrow', style: { color: 'var(--kerb-ink)' } }, 'The sting in the tail'),
         el('p', null, rich('**Get hit and you drop three coins.** Not one. Three.')),
         el(
           'p',

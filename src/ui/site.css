@@ -72,7 +72,7 @@
 }
 
 .course-bar-count {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--ink-soft);
   white-space: nowrap;
 }
@@ -217,9 +217,33 @@
   box-shadow: 0 2px 0 var(--rule);
 }
 
+/*
+ * Done gets a tick, not just a green wash. (3e1.)
+ *
+ * This list is the site's accessible route to every chapter — the map above it is `aria-hidden`
+ * precisely because this says the same thing in words. It was not quite saying all of it: "you
+ * have finished this one" was carried entirely by the background going green, which is the one
+ * signal a colour-blind reader does not get, on the only copy of it they were meant to be able to
+ * use. Generated content rather than markup because `update()` already drives the whole state off
+ * `data-status`, and most screen readers announce it.
+ */
 .lap-list-item[data-status='done'] {
   background: var(--turf-wash);
   box-shadow: 0 2px 0 #bfe4bf;
+}
+
+.lap-list-item[data-status='done'] .lap-list-link::after {
+  content: ' ✓';
+  color: var(--turf-ink);
+  font-weight: 700;
+}
+
+.lap-list-item[data-status='in_progress'] .lap-list-link::after {
+  content: ' · started';
+  color: var(--ink-soft);
+  font-family: var(--body);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .lap-list-item[data-here='true'] {
@@ -322,6 +346,24 @@
   font-size: 1.05rem;
   text-align: center;
   padding: 1.5rem;
+}
+
+/*
+ * The one focus ring on the site that had to be overridden, and the only one that was genuinely
+ * invisible. (3e1.)
+ *
+ * The house ring is `--track` on the reasoning that everything it lands on is a pale surface. This
+ * button is not: it is a dark poster filling a dark well, so the ring was `--track` on `--track` —
+ * **1:1**, an element a keyboard user could land on with no way to know they had. Measured, not
+ * spotted; it looks perfectly fine to anyone using a mouse.
+ *
+ * Inset rather than offset because the poster is flush to the rounded well that clips it, so a
+ * ring drawn outside the border box would be cropped away by `overflow: hidden` on `.video`.
+ */
+.video-poster:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: -6px;
+  border-radius: var(--round-lg);
 }
 
 .video-play {
@@ -522,12 +564,12 @@ kbd {
 
 .sync {
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   color: var(--ink-faint);
 }
 
 .sync[data-status='error'] {
-  color: var(--kerb);
+  color: var(--kerb-ink);
 }
 
 /* --- small screens -------------------------------------------------------- */

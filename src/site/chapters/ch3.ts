@@ -198,7 +198,7 @@ function rampDiagram(): SVGSVGElement {
       { stroke: 'var(--rule)', 'stroke-width': '2' },
     ),
   );
-  svg.append(label(110, 134, 'too early', 'var(--kerb)'));
+  svg.append(label(110, 134, 'too early', 'var(--kerb-ink)'));
 
   // The lip. Pulses as the kart reaches it (3b1) — see `ch3.css` for why that is the one thing
   // on this diagram worth animating.
@@ -209,7 +209,7 @@ function rampDiagram(): SVGSVGElement {
       { fill: 'var(--turf)', stroke: '#ffffff', 'stroke-width': '3' },
     ),
   );
-  svg.append(label(142, 46, 'press here', 'var(--turf)', '700'));
+  svg.append(label(142, 46, 'press here', 'var(--turf-ink)', '700'));
 
   // Too late: the landing.
   svg.append(svgEl('circle', { cx: '250', cy: '104', r: '6' }, { fill: 'var(--kerb)' }));
@@ -220,7 +220,7 @@ function rampDiagram(): SVGSVGElement {
       { stroke: 'var(--rule)', 'stroke-width': '2' },
     ),
   );
-  svg.append(label(250, 134, 'too late', 'var(--kerb)'));
+  svg.append(label(250, 134, 'too late', 'var(--kerb-ink)'));
 
   // The kart, running the whole thing on a loop. (3b1.)
   //

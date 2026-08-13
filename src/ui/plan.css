@@ -45,7 +45,7 @@
 .plan-headline {
   font-family: var(--display);
   font-size: var(--t-section);
-  color: var(--kerb);
+  color: var(--kerb-ink);
   margin-bottom: 0.8rem;
 }
 
@@ -233,7 +233,7 @@
 /* "week 3" is a schedule, not a warning — it reads as a timetable stamp rather than a lock. */
 .plan-tab-when {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #14776c;
@@ -413,15 +413,21 @@
   --pin-ink: #06322c;
 }
 
+/*
+ * These two carry white numbers, so they take the ink-weight red and green rather than the display
+ * ones: `--kerb` behind white measured 3.93:1 and `--turf` 3.21:1, on a pin that renders at about
+ * 14px once the schematic is scaled to fit. (3e1.) The other four kinds already used dark ink on a
+ * bright fill and were never in question.
+ */
 .track-map .tm-pin[data-kind='hazard'],
 .plan-callout[data-kind='hazard'] {
-  --pin: var(--kerb);
+  --pin: var(--kerb-ink);
   --pin-ink: #ffffff;
 }
 
 .track-map .tm-pin[data-kind='split'],
 .plan-callout[data-kind='split'] {
-  --pin: var(--turf);
+  --pin: var(--turf-ink);
   --pin-ink: #ffffff;
 }
 
@@ -459,7 +465,7 @@
 .plan-choice-take {
   font-family: var(--display);
   font-size: 1.1rem;
-  color: var(--kerb);
+  color: var(--kerb-ink);
   margin-bottom: 0.4rem;
 }
 
@@ -684,9 +690,21 @@
   color: var(--ink-soft);
 }
 
+/*
+ * The week column is capped rather than `max-content`. (3e1.)
+ *
+ * It used to size to its longest label — "Sweet Sweet Canyon · the drift" — and took 183px of a
+ * 578px board for a column that is read once per row, leaving 76px each for the five cells that
+ * are read forty times. That is what forced the track name inside a cell down to 9.3px, and it
+ * *still* clipped: "Water Park" wanted 47px of a 43px slot, so the label the type size was chosen
+ * to protect was being cut off anyway.
+ *
+ * Capped at 8rem the name wraps to two lines — which a row 60px tall has room for — and the cells
+ * gain enough width to carry both their labels at a size a sixty-year-old can read.
+ */
 .grid-board {
   display: grid;
-  grid-template-columns: max-content repeat(5, minmax(0, 1fr));
+  grid-template-columns: minmax(5.5rem, 8rem) repeat(5, minmax(0, 1fr));
   gap: 3px;
 }
 
@@ -718,7 +736,7 @@
 }
 
 .grid-week-name {
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   color: var(--ink-faint);
   line-height: 1.15;
 }
@@ -739,8 +757,10 @@
   width: 100%;
   min-height: 2.9rem;
   border-radius: 10px;
-  /* Right padding clears the tick, which is absolutely positioned over this corner. */
-  padding: 0.3rem 1.35rem 0.3rem 0.45rem;
+  /* Right padding clears the tick, which is absolutely positioned over this corner. Trimmed by
+     0.2rem in the 3e1 pass — the tick is 1rem wide and sits 0.4rem in, so 1.15rem is the real
+     clearance and the extra was buying nothing at the exact place the labels needed room. */
+  padding: 0.3rem 1.15rem 0.3rem 0.4rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -756,18 +776,21 @@
 
 .grid-cell-label {
   font-family: var(--display);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.15;
 }
 
 /*
- * Sized so "Water Park" — the longest of the four short names — fits without an ellipsis at the
- * narrowest the grid ever gets. The ellipsis rule stays as a backstop for a track added later
- * with a longer name, but nothing in the cup hits it.
+ * Both labels are sized so the longest real string fits without an ellipsis: "Defensive cup" for
+ * the job and "Water Park" for the track. Re-measured in a browser after the 3e1 pass widened the
+ * cells, rather than trusted — the previous version of this comment made the same claim and had
+ * been false for some time, because the width it was tuned against had changed underneath it.
+ *
+ * The ellipsis rule stays as a backstop for a longer name added later.
  */
 .grid-cell-track {
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   letter-spacing: -0.01em;
   color: var(--ink-faint);
   line-height: 1.1;
@@ -786,15 +809,27 @@
   border-color: var(--turf);
 }
 
+/* The padding shrinks by exactly the pixel the border grows, so selecting a cell does not move
+   the text inside it. The four values must track `.grid-cell`'s — they went out of step once
+   already, which is why the selected cell was the only one still clipping its label. */
 .grid-cell[data-selected='true'] {
   border-color: var(--track);
   border-width: 3px;
-  padding: calc(0.3rem - 1px) calc(1.35rem - 1px) calc(0.3rem - 1px) calc(0.45rem - 1px);
+  padding: calc(0.3rem - 1px) calc(1.15rem - 1px) calc(0.3rem - 1px) calc(0.4rem - 1px);
 }
 
+/*
+ * The ring is `--track`, not `--boost`. (3e1.)
+ *
+ * Orange was chosen to match the grid's accent and measured **2.36:1 against the white cell and
+ * 2.17:1 against the page** — under the 3:1 that WCAG asks of a non-text indicator, on the one
+ * control in this grid a keyboard user has to find forty times in a row. `--track` is 12.6:1 on
+ * both. Orange still means "this is the one to do next" everywhere else in the grid; it just no
+ * longer has to double as "this is where your keyboard is".
+ */
 .grid-cell:focus-visible,
 .grid-tick:focus-visible {
-  outline: 3px solid var(--boost);
+  outline: 3px solid var(--track);
   outline-offset: 2px;
 }
 
@@ -836,7 +871,7 @@
 
 .session-chip {
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   background: var(--rule-soft);
   border-radius: var(--round-pill);
   padding: 0.22em 0.7em;
@@ -917,7 +952,7 @@
 }
 
 .plan-strip-links .btn {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   padding: 0.45em 0.9em;
 }
 
