@@ -15,8 +15,10 @@
  *  - **The way out is always visible.** "Change user" is the only live control, and it is
  *    obviously live. A lockout with no exit stops being a joke about thirty seconds in.
  *
- * Nothing is stored for her, which is also the honest engineering answer: her role never reaches
- * the server, so there is no row anywhere recording that Kayla was locked out.
+ * Nothing is stored for her on the server. Her role never reaches it, so there is no row anywhere
+ * recording that Kayla was here — and after 4e4 there is exactly one local flag, written only if she
+ * plays the whole thing through and says yes three times. The ending makes that the ceremony rather
+ * than hiding it. See `kayla/admission.ts`.
  */
 
 import type { PlayerRole } from '../backend/schema';
@@ -24,6 +26,7 @@ import type { ProgressStore } from '../backend/progress';
 import type { Sfx } from '../ui/sfx';
 import { turboJodi } from '../ui/mascot';
 import { el, rich } from './dom';
+import { isAdmitted } from './kayla/admission';
 import { RIVAL } from './player';
 import type { Mounted } from './types';
 
@@ -80,6 +83,9 @@ export function renderDoorman(mount: HTMLElement, deps: DoormanDeps): Mounted {
 
   const options = el('div', { class: 'doorman-options' });
 
+  /** Kayla's ten minutes, once it has loaded. Held so that leaving the page tears it down. */
+  let kayla: Mounted | null = null;
+
   function choose(role: PlayerRole, name?: string): void {
     markDoormanAnswered();
     progress.setRole(role);
@@ -88,39 +94,78 @@ export function renderDoorman(mount: HTMLElement, deps: DoormanDeps): Mounted {
     onChosen(name === undefined ? { role } : { role, name });
   }
 
-  /** The gag. Deadpan, and with the exit in plain sight from the first frame. */
+  /**
+   * The gag. (4e4 — it used to end here.)
+   *
+   * The original version of this function was the whole joke: a deadpan notice, every chapter
+   * visible and locked, and "Change user" as the only live control. It was right, and it was over in
+   * eight seconds, which meant the funniest page on the site was one Kayla would look at once.
+   *
+   * It is now the first fifteen seconds of something. The notice below is still the notice —
+   * `beats/notice.ts` renders the same words on the same paper — and everything the original design
+   * note insisted on still holds: deadpan rather than taunting, the exit live and visible at every
+   * moment, and nothing at all written down about her.
+   *
+   * **Loaded on demand.** Ten minutes of anything is a lot of JavaScript to hand to Jodi, who will
+   * never see a byte of it. Same reasoning as `chapter-registry.ts`, and the same mechanism.
+   */
   function lockOut(): void {
     markDoormanAnswered();
     progress.setRole('kayla');
 
-    const back = el('button', { class: 'btn btn-go', type: 'button' }, 'Change user');
-    back.addEventListener('click', () => {
-      forgetDoorman();
-      render();
-    });
+    // Something has to be on screen while the chunk is in the air, and "Access review" is both the
+    // honest loading state and the first line of the thing that is loading.
+    root.replaceChildren(el('p', { class: 'eyebrow' }, 'Nothing to see here'));
 
-    root.replaceChildren(
-      el('p', { class: 'eyebrow' }, 'Access review'),
-      el('h1', null, `Why are you here, ${RIVAL}?`),
-      el(
-        'p',
-        { class: 'hero-lede', style: { marginInline: 'auto' } },
-        rich(
-          'This site was built for someone else, and you already know all of it. That is rather the problem.',
-        ),
-      ),
-      el(
-        'p',
-        { style: { marginInline: 'auto', color: 'var(--ink-soft)' } },
-        'Every chapter is right there. All of them are locked. Nothing you do here is saved.',
-      ),
-      back,
-      el(
-        'p',
-        { class: 'eyebrow', style: { marginTop: '2rem' } },
-        'This message is affectionate. Mostly.',
-      ),
-    );
+    void import('./kayla')
+      .then(({ renderKayla }) => {
+        kayla = renderKayla(mount, {
+          sfx,
+          onLeave() {
+            kayla?.dispose();
+            kayla = null;
+            mount.replaceChildren(root);
+            forgetDoorman();
+            render();
+          },
+          /**
+           * She got through it and said yes three times, so the site is hers.
+           *
+           * Her *role* stays `kayla` — see `kayla/admission.ts` for why that matters, and why
+           * promoting her to `other` would be the same launch-blocking bug 4f1 already found once.
+           * The flag beside it is what `app.ts` reads, and `onChosen` re-renders the shell with the
+           * lock lifted.
+           */
+          onAdmitted() {
+            kayla?.dispose();
+            kayla = null;
+            sfx.play('fanfare');
+            onChosen({ role: 'kayla' });
+          },
+        });
+      })
+      .catch((error: unknown) => {
+        // If the chunk never arrives she gets the notice she was always going to get, and the way
+        // out. A present that fails to load a joke should not also fail to be a website.
+        console.error('[doorman] the Kayla build did not load', error);
+        const back = el('button', { class: 'btn btn-go', type: 'button' }, 'Change user');
+        back.addEventListener('click', () => {
+          forgetDoorman();
+          render();
+        });
+        root.replaceChildren(
+          el('p', { class: 'eyebrow' }, 'Nothing to see here'),
+          el('h1', null, `Why are you here, ${RIVAL}?`),
+          el(
+            'p',
+            { class: 'hero-lede', style: { marginInline: 'auto' } },
+            rich(
+              'This site was built for someone else, and you already know all of it. That is rather the problem.',
+            ),
+          ),
+          back,
+        );
+      });
   }
 
   function askName(): void {
@@ -193,7 +238,10 @@ export function renderDoorman(mount: HTMLElement, deps: DoormanDeps): Mounted {
         ),
       );
       button.addEventListener('click', () => {
-        if (option.role === 'kayla') lockOut();
+        // Once she has been admitted her own name is just a name. No notice, no ten minutes,
+        // no ceremony — the reward for getting through it is that it never happens again.
+        if (option.role === 'kayla' && !isAdmitted()) lockOut();
+        else if (option.role === 'kayla') choose('kayla');
         else if (option.role === 'other') askName();
         else choose(option.role);
       });
@@ -213,6 +261,8 @@ export function renderDoorman(mount: HTMLElement, deps: DoormanDeps): Mounted {
 
   return {
     dispose() {
+      kayla?.dispose();
+      kayla = null;
       root.remove();
     },
   };

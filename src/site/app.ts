@@ -23,6 +23,7 @@ import { renderPlanPage } from './plan-page';
 import { renderDoorman, doormanAnswered, forgetDoorman } from './doorman';
 import { el } from './dom';
 import { renderHome } from './home';
+import { isAdmitted } from './kayla/admission';
 import { playerFor, fill } from './player';
 import { Router, go, hrefFor, type Route } from './router';
 import { renderSettings } from './settings';
@@ -112,9 +113,16 @@ export function startApp(root: HTMLElement): void {
     current = next;
   }
 
-  /** Kayla sees the course and cannot open any of it. Enforced here, not per page. */
+  /**
+   * Kayla sees the course and cannot open any of it. Enforced here, not per page.
+   *
+   * **Unless she got through it.** (4e4.) The ten minutes behind her own name ends with three
+   * confirmations and a promise, and this is where the promise is kept: one local flag, set by
+   * `kayla/admission.ts`, and the lock is off for good on that machine. Her role never changes and
+   * never reaches the server — the flag is the whole mechanism, deliberately.
+   */
   function locked(): boolean {
-    return player.role === 'kayla';
+    return player.role === 'kayla' && !isAdmitted();
   }
 
   function message(eyebrow: string, heading: string, detail: string): Mounted {

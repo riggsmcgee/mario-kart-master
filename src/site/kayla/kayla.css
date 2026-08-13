@@ -1,0 +1,1312 @@
+/**
+ * How Kayla's half of the site looks. (4e4)
+ *
+ * The whole visual argument is one move: **this page starts as the website and ends as the machinery
+ * behind it.** The first screen she sees is deliberately indistinguishable from the doorman she just
+ * clicked through — same paper, same rounded card, same Fredoka heading — because the gag only works
+ * if she believes the notice for the first fifteen seconds. Then, as she takes it apart, the warm
+ * layer peels back to a colder one underneath: grid paper, hairline rules, mono type, the look of a
+ * building's service corridor. `data-layer` on the stage is the dial, and every colour below is
+ * derived from the site's existing tokens rather than invented, so the corridor is recognisably the
+ * *same building*.
+ *
+ * And then it comes back. The last beat sets `data-layer="warm"` and the paper returns, because the
+ * point of the whole exercise is that she was let in rather than that she broke in.
+ *
+ * Nothing here uses a colour the theme does not already have. That is not thrift — a second palette
+ * would make this read as a different website, and "this is your mum's present, seen from behind" is
+ * the one thing the styling has to say.
+ */
+
+/* --- opening it over something else ---------------------------------------- */
+
+/**
+ * The stage as a full-window overlay, used in the two places it is opened from inside another page:
+ * the prototype harness (`src/proto/kayla/`) and the "have a look at Kayla's" button in settings.
+ *
+ * **It has to be an overlay in both, and for the same reason.** The stage is a full-viewport flex
+ * column with a `position: fixed` narrator strip and a `position: fixed` exit. Rendered into a slot
+ * partway down a page that has its own header, every one of those lands in the wrong place: the
+ * scene is pushed down by the header and then still asks for 100vh, so the page scrolls, and the
+ * strip and the exit float over furniture belonging to the site she is supposed to have left.
+ *
+ * The rules live here rather than in either caller because the geometry they are fixing is this
+ * file's, and a change to the strip or the stage would otherwise break both of them silently.
+ */
+#host:not([hidden]),
+.k-over {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  overflow: auto;
+  background: var(--paper);
+}
+
+body.k-harness-open,
+body.k-over-open {
+  overflow: hidden;
+}
+
+/**
+ * Undo the testbed's own heading treatment inside the stage.
+ *
+ * The harness page loads `testbed.css`, which uppercases every `h2`, shrinks it to 17.6px and puts
+ * a hairline under it — correct for a lab page, and it does not apply anywhere Kayla will ever be.
+ * But it means the bench renders Chapter K's heading as a small grey rule-through-caps that the
+ * real thing never shows, and a bench whose whole job is judging tone and typography must not
+ * quietly restyle the thing it is judging.
+ */
+#host h1,
+#host h2,
+#host h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.5em;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-transform: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+
+#host h1 {
+  font-size: var(--t-hero);
+}
+
+/* --- the stage ------------------------------------------------------------ */
+
+.k-stage {
+  --k-ink: var(--ink);
+  --k-paper: var(--paper);
+  --k-rule: var(--rule);
+  --k-surface: var(--card);
+  --k-quiet: var(--ink-soft);
+
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /**
+   * `flex-start` plus an auto margin on the scene, rather than `justify-content: center`.
+   *
+   * They look identical until the content is taller than the viewport, and then they are not: a
+   * centred flex column overflows *both* ends, and the top overflow is not reachable by scrolling.
+   * Chapter K stacks four cards and is comfortably the tallest thing here, so the beat that matters
+   * most is the one that would have lost its first paragraph off the top of the screen. Auto margins
+   * centre the same way and collapse instead of overflowing.
+   */
+  justify-content: flex-start;
+  gap: var(--gap);
+  padding: 4.5rem 1.25rem 8rem;
+  background: var(--k-paper);
+  color: var(--k-ink);
+  transition:
+    background 0.8s ease,
+    color 0.8s ease;
+  overflow: clip;
+}
+
+/**
+ * The layer underneath. Graph paper drawn with two gradients rather than an image — it costs
+ * nothing, scales to any screen, and can fade in as she uncovers it.
+ */
+.k-stage[data-layer='system'] {
+  --k-paper: #eef1f6;
+  --k-ink: #333a4a;
+  --k-rule: #c3cbd9;
+  --k-surface: #f7f9fc;
+  --k-quiet: #5d6678;
+  background-image:
+    linear-gradient(var(--k-rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--k-rule) 1px, transparent 1px);
+  background-size: 34px 34px;
+  background-position: center;
+}
+
+.k-stage[data-layer='deep'] {
+  --k-paper: #262b36;
+  --k-ink: #e7ecf5;
+  --k-rule: #3b4354;
+  --k-surface: #2f3542;
+  --k-quiet: #a7b1c4;
+  background-image:
+    linear-gradient(var(--k-rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--k-rule) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.k-stage[data-layer='warm'] {
+  --k-paper: var(--trim-wash);
+  background-image: none;
+}
+
+/**
+ * The play area.
+ *
+ * **The bottom clearance is not padding for looks.** The narrator strip is `position: fixed` across
+ * the bottom of the window and is about six rem tall, so anything the scene puts at its own bottom
+ * edge is drawn *underneath* it. That is survivable for a paragraph and fatal for a control: beat 7's
+ * pointer slot landed under the strip, `elementFromPoint` at the middle of it returned the subtitle
+ * line, and the last interaction in the piece could not be dropped on at all.
+ *
+ * `scroll-margin-bottom` is the other half, and it is the half that is easy to miss.
+ * `scrollIntoView` has no idea a fixed element exists — `block: 'nearest'` happily parks a node flush
+ * against the bottom of the viewport, behind the strip. The margin is what tells it to stop short.
+ */
+.k-scene {
+  position: relative;
+  width: min(52rem, 100%);
+  margin-block: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+  text-align: center;
+  padding-bottom: 8rem;
+}
+
+.k-scene > * {
+  scroll-margin-bottom: 8rem;
+}
+
+/* The notice itself: the doorman's own furniture, so that beat one is believable. */
+
+.k-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.k-notice h1 {
+  margin: 0;
+}
+
+.k-notice p {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+/* --- the narrator strip --------------------------------------------------- */
+
+/**
+ * Subtitles, not a speech bubble.
+ *
+ * Fixed to the bottom, full width, mono. `--mono` is the site's instrument-reading face (see
+ * `theme.css`) and that is exactly the right association: this is the website's own readout, not a
+ * character speaking. The height is reserved whether or not there is a line in it, because a strip
+ * that grows and shrinks pushes the whole scene around every time it says something.
+ */
+.narrator {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--track) 92%, black);
+  color: #f4f7fc;
+  border-top: 3px solid var(--boost);
+  padding: 0.9rem 1.25rem;
+  min-height: 5.9rem;
+  display: flex;
+  align-items: center;
+  /* Subtitles are not a document. Ten minutes of dragging objects around a page will eventually
+     sweep a selection across this strip, and a half-highlighted sentence at the bottom of the screen
+     reads as the page coming apart rather than as a thing she did. */
+  -webkit-user-select: none;
+  user-select: none;
+  transition:
+    background 0.5s ease,
+    border-color 0.5s ease,
+    opacity 0.3s ease;
+}
+
+.nar-inner {
+  width: min(58rem, 100%);
+  margin-inline: auto;
+  font-family: var(--mono);
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+  line-height: 1.45;
+}
+
+/**
+ * Two lines, not one — the highest-leverage change in the pacing pass.
+ *
+ * With a single replaced line, a sentence is readable for its own reveal plus its hold and then it
+ * is gone forever. With the previous line still on screen while the next one types, the readable
+ * window is roughly doubled **at no cost in wall-clock time**. The alternative was inflating every
+ * hold, which would have turned ten minutes into eighteen.
+ *
+ * Three would be worse: the strip is a thin band at the bottom of a page she is also playing in, and
+ * three lines starts eating the stage.
+ */
+.nar-stack {
+  min-width: 0;
+}
+
+.nar-prev {
+  margin: 0;
+  opacity: 0.42;
+  min-height: 1.45em;
+}
+
+.nar-current {
+  display: flex;
+  align-items: baseline;
+  gap: 0.15rem;
+}
+
+.nar-line {
+  margin: 0;
+}
+
+.nar-line strong,
+.nar-prev strong {
+  color: var(--trim);
+  font-weight: 500;
+}
+
+/** The live region carries the finished sentence for screen readers and shows nothing. */
+.nar-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nar-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  translate: 0 0.15em;
+  background: var(--boost);
+  opacity: 0;
+}
+
+.nar-caret.typing {
+  opacity: 1;
+  animation: k-blink 1s steps(1, end) infinite;
+}
+
+@keyframes k-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+
+/** Rattled. Used when she has just done something it did not plan for. */
+.narrator-rattled {
+  border-top-color: var(--kerb);
+}
+
+.narrator-rattled .nar-inner {
+  animation: k-shudder 0.35s ease;
+}
+
+@keyframes k-shudder {
+  25% {
+    translate: -3px 0;
+  }
+  75% {
+    translate: 3px 0;
+  }
+}
+
+/** Official. The bureaucratic register gets a bureaucratic colour. */
+.narrator-official {
+  background: #1d2129;
+  border-top-color: var(--box);
+}
+
+/** Muted: it is still talking, it just cannot be heard. */
+.narrator-silenced {
+  border-top-color: var(--ink-faint);
+}
+
+.narrator-silenced .nar-caret {
+  background: var(--ink-faint);
+}
+
+/* --- the exit ------------------------------------------------------------- */
+
+/**
+ * Always there, always obviously live.
+ *
+ * Fixed rather than in the flow, at the corner where a real application would put it, and never
+ * dimmed, never disabled, never covered by a beat. `z-index` above everything the scene can make.
+ */
+.k-exit {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 40;
+  font-size: 0.95rem;
+  padding: 0.55em 1.1em;
+}
+
+/* --- the pocket ----------------------------------------------------------- */
+
+/**
+ * The bin.
+ *
+ * It is a drop target before it is a display, so it is deliberately large, deliberately in the
+ * corner, and deliberately obvious — she is going to be aiming at it one-handed while dragging
+ * something that was moving a moment ago. A 2rem tray would be a dexterity test; this is a bin.
+ */
+/**
+ * `display: flex` beats the user-agent's `[hidden] { display: none }`, so the bin sat on screen from
+ * the first frame of beat 1 — six minutes before anything had been thrown away and long before the
+ * narrator begs her not to use it. An explicit rule is the only thing that wins that argument.
+ */
+.k-pocket[hidden] {
+  display: none;
+}
+
+.k-pocket {
+  position: fixed;
+  left: 1rem;
+  bottom: 5.6rem;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 11rem;
+  min-height: 5rem;
+  background: var(--card);
+  border: 3px dashed var(--k-rule);
+  border-radius: var(--round);
+  padding: 0.7rem 0.9rem;
+  box-shadow: var(--lift);
+  color: var(--k-quiet);
+  transition: border-color 0.2s ease;
+  /* It is a drop target, so everything she carries passes over it. Same reasoning as the strip. */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Anything being carried over it lights it up. */
+.k-pocket:hover,
+body:has(.carrying) .k-pocket {
+  border-color: var(--kerb);
+  color: var(--kerb-ink);
+}
+
+.k-pocket-arriving {
+  animation: k-bin-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards;
+}
+
+@keyframes k-bin-in {
+  from {
+    translate: -120% 0;
+    opacity: 0;
+  }
+}
+
+.k-bin-lid {
+  transform-origin: 8px 13px;
+  transition: rotate 0.25s ease;
+}
+
+.k-pocket-took .k-bin-lid {
+  rotate: -34deg;
+}
+
+.k-pocket-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.k-pocket-title {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.k-pocket-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-height: 2.1rem;
+}
+
+.k-pocket-slot {
+  display: grid;
+  place-items: center;
+  min-width: 2.1rem;
+  min-height: 2.1rem;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--k-rule);
+  border-radius: 8px;
+  background: var(--paper);
+  font-size: 1.3rem;
+  line-height: 1;
+  animation: k-bin-drop 0.4s ease backwards;
+}
+
+@keyframes k-bin-drop {
+  from {
+    translate: 0 -14px;
+    opacity: 0;
+  }
+}
+
+/* --- grabbing ------------------------------------------------------------- */
+
+.grabbable {
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+  border-radius: 6px;
+}
+
+.grabbable:focus-visible {
+  outline: 3px solid var(--boost);
+  outline-offset: 3px;
+}
+
+.grabbable.carrying {
+  cursor: grabbing;
+  z-index: 25;
+  filter: drop-shadow(0 8px 10px rgba(43, 48, 64, 0.28));
+  scale: 1.12;
+}
+
+/**
+ * The halo. The one piece of hand-holding in the whole experience, and it is deliberate: a website
+ * has spent thirty years teaching everybody that text is not furniture, so the *first* draggable
+ * object has to be pointed at or the experience ends at beat one with a shrug.
+ */
+.halo {
+  position: absolute;
+  inset: -60%;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+  color: var(--boost);
+  opacity: 0.9;
+  animation: k-halo 2.4s ease-in-out infinite;
+}
+
+@keyframes k-halo {
+  50% {
+    scale: 1.12;
+    opacity: 0.45;
+  }
+}
+
+.letter {
+  display: inline-block;
+  white-space: pre;
+}
+
+.letter-space {
+  width: 0.32em;
+}
+
+/* --- beat 1: the notice --------------------------------------------------- */
+
+.k-fine {
+  font-size: var(--t-small);
+  color: var(--k-quiet);
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+/**
+ * The full stop that comes off.
+ *
+ * `inline-block` so it can be transformed at all, and a hair of padding so that a single dot is a
+ * target a finger can actually hit — a 4px tap target is not a puzzle, it is an eye test.
+ */
+.k-stop {
+  display: inline-block;
+  position: relative;
+  padding: 0 0.18em;
+  /* `translate` is deliberately not transitioned here — `grab.ts` owns it, inline, from the moment
+     the thing comes loose, and two owners of one property is how a flight ends up stuttering. */
+  transition: rotate 0.45s ease;
+}
+
+.k-stop-loose {
+  rotate: -14deg;
+}
+
+/**
+ * Off the baseline, over everything, and on its way to the corner.
+ *
+ * **Three separate things make it findable, because one was not enough.** (Riggs, 2026-08-13: "I like
+ * it. It's hard to see next to the change user button.") At its typeset size a full stop parked
+ * beside a button reads as dust, and nobody clicks dust. So it is scaled up to nearly three times,
+ * given a shadow so it sits *on* the page rather than in it, and — the part that actually does the
+ * work — it never quite settles. A slow rock, forever, until she touches it.
+ *
+ * Motion is what the eye catches when the reader has stopped reading, and this is the one moment in
+ * ten minutes where everything depends on being noticed.
+ */
+/**
+ * **It stops being a character and becomes an object.**
+ *
+ * Scaling the glyph was the obvious approach and it does not work: `.k-fine` sets 16px type, a full
+ * stop at 16px is about three pixels across, and 2.8× of three pixels is still a speck — measured at
+ * eight pixels beside a button, which is indistinguishable from a dead sub-pixel on a laptop screen.
+ *
+ * So the moment it comes off the sentence it is drawn rather than typeset: a fixed 16px disc, its own
+ * size regardless of the type around it, with the character itself made transparent. That also
+ * quietly foreshadows what it is about to become in beat 2, which is the same shape twelve times
+ * bigger.
+ */
+.k-stop-fallen {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--k-ink);
+  color: transparent;
+  z-index: 36;
+  filter: drop-shadow(0 2px 3px rgba(43, 48, 64, 0.45));
+  animation: k-rock 3s ease-in-out 1.2s infinite;
+}
+
+/**
+ * Never quite settles. Motion is what the eye catches once the reader has stopped reading.
+ *
+ * Animated on `top` rather than `translate`, and that is not a stylistic choice. `grab.ts` owns
+ * `translate` as an inline style for the flight and for every drag, and a CSS animation outranks an
+ * inline declaration while it is running — so a `translate` keyframe here would repeatedly yank the
+ * full stop back into the sentence it fell out of, four times a cycle, for no visible reason.
+ * `.k-stop` is already `position: relative`, so `top` is free.
+ */
+@keyframes k-rock {
+  0%,
+  58%,
+  100% {
+    top: 0;
+  }
+  66% {
+    top: -5px;
+  }
+  74% {
+    top: 0;
+  }
+  80% {
+    top: -2px;
+  }
+  88% {
+    top: 0;
+  }
+}
+
+/* Once she has hold of it the fidgeting stops — it has been noticed, which was the whole job. */
+.k-stop-fallen.carrying,
+.k-stop-fallen.k-hole {
+  animation: none;
+}
+
+/* --- beat 2: the hole ----------------------------------------------------- */
+
+/**
+ * A dot becomes a hole.
+ *
+ * Drawn as a radial gradient rather than a flat circle so it reads as depth — a flat black disc
+ * looks like a sticker sitting on the page, and the whole beat depends on believing there is
+ * somewhere for the words to go.
+ */
+.k-hole {
+  --k-hole-size: 0.95rem;
+  width: var(--k-hole-size);
+  height: var(--k-hole-size);
+  padding: 0;
+  color: transparent;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, #05070c 42%, #12161f 72%, #2b3040 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9);
+  vertical-align: middle;
+  transition:
+    width 0.25s ease,
+    height 0.25s ease;
+}
+
+.k-hole-falling {
+  animation: k-drop 0.9s ease-in forwards;
+}
+
+@keyframes k-drop {
+  to {
+    translate: 0 60vh;
+    scale: 0.5;
+    opacity: 0;
+  }
+}
+
+.k-word {
+  display: inline-block;
+  transition: none;
+}
+
+.k-eaten {
+  animation: k-swallowed 0.42s cubic-bezier(0.5, 0, 1, 0.6) forwards;
+  pointer-events: none;
+}
+
+@keyframes k-swallowed {
+  to {
+    translate: 0 1.4rem;
+    scale: 0.12;
+    rotate: 18deg;
+    opacity: 0;
+  }
+}
+
+/** The page follows the hole down. */
+.k-falling {
+  animation: k-page-drop 1.2s cubic-bezier(0.6, 0, 0.9, 0.4) forwards;
+}
+
+@keyframes k-page-drop {
+  to {
+    translate: 0 -75vh;
+    opacity: 0;
+  }
+}
+
+/* --- panels (beats 3 onward) ---------------------------------------------- */
+
+.k-panel {
+  background: var(--k-surface);
+  border: 2px solid var(--k-rule);
+  border-radius: var(--round);
+  padding: 1.5rem 1.6rem;
+  width: min(40rem, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  box-shadow: var(--lift);
+}
+
+.k-panel h2 {
+  margin: 0;
+}
+
+.k-panel p {
+  margin: 0;
+  max-width: var(--measure);
+}
+
+/** Stencilled service labels. The typographic voice of the layer under the website. */
+.k-stencil {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--k-quiet);
+}
+
+/* --- beat 3: the mute war ------------------------------------------------- */
+
+.k-speaker-btn {
+  background: none;
+  border: 3px solid var(--k-rule);
+  border-radius: var(--round);
+  padding: 0.7rem 1rem;
+  color: var(--k-ink);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.2s ease;
+}
+
+.k-speaker-btn:hover {
+  border-color: var(--boost);
+}
+
+.k-speaker-btn:focus-visible {
+  outline: 3px solid var(--boost);
+  outline-offset: 3px;
+}
+
+.k-mute-bar {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.k-muted {
+  color: var(--k-quiet);
+}
+
+.k-muted .k-wave {
+  opacity: 0;
+}
+
+.k-muted .k-mute-bar {
+  opacity: 1;
+}
+
+/**
+ * The narrator's own cursor.
+ *
+ * Positioned against the scene, not the viewport, so a short window cannot launch it off-screen.
+ * `pointer-events: auto` while it flies is the whole puzzle — it has to be catchable in motion.
+ */
+.k-ghost-cursor {
+  position: absolute;
+  z-index: 20;
+  color: var(--kerb);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+
+.k-ghost-caught {
+  position: static;
+  color: var(--kerb);
+}
+
+.k-ghost-loose {
+  position: relative;
+  color: var(--kerb);
+}
+
+/* --- beat 4: the voice box ------------------------------------------------ */
+
+.k-voicebox {
+  gap: 1.2rem;
+}
+
+.k-vents {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.k-vent-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: var(--round);
+  padding: 0.4rem 0.5rem;
+  color: var(--k-ink);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  transition: border-color 0.12s ease;
+}
+
+.k-vent-btn:hover {
+  border-color: var(--k-rule);
+}
+
+.k-vent-btn:focus-visible {
+  outline: 3px solid var(--boost);
+  outline-offset: 2px;
+}
+
+.k-vent-pad {
+  transition: opacity 0.12s ease;
+}
+
+/** Lit: the pad is down, the hole is stopped, the note is sounding. */
+.k-vent-lit {
+  color: var(--boost);
+}
+
+.k-vent-lit .k-vent-pad {
+  opacity: 1;
+}
+
+.k-vent-name {
+  color: var(--k-quiet);
+}
+
+.k-hatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.2rem;
+  border: 2px dashed var(--k-rule);
+  border-radius: var(--round);
+  width: 100%;
+  transition:
+    border-color 0.4s ease,
+    background 0.4s ease;
+}
+
+.k-hatch-open {
+  border-style: solid;
+  border-color: var(--turf);
+  background: color-mix(in srgb, var(--turf) 12%, transparent);
+}
+
+.k-slots {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.k-slot {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 8px;
+  border: 2px solid var(--k-rule);
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  color: var(--k-quiet);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.k-slot-done {
+  border-color: var(--boost);
+  background: var(--boost);
+  color: #ffffff;
+}
+
+/* --- beat 5: the assessment ----------------------------------------------- */
+
+.k-form {
+  gap: 1.1rem;
+}
+
+.k-ask {
+  font-family: var(--display);
+  font-size: var(--t-section);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.k-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.k-option {
+  font: inherit;
+  font-size: 1.05rem;
+  text-align: left;
+  padding: 0.8em 1em;
+  border-radius: 12px;
+  border: 2px solid var(--k-rule);
+  background: transparent;
+  color: var(--k-ink);
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    translate 0.12s ease;
+}
+
+.k-option:hover {
+  border-color: var(--boost);
+  translate: 3px 0;
+}
+
+.k-option:focus-visible {
+  outline: 3px solid var(--boost);
+  outline-offset: 2px;
+}
+
+.k-verdict {
+  font-family: var(--mono);
+  font-size: 1rem;
+  letter-spacing: 0.14em;
+  min-height: 1.4em;
+  color: var(--turf-ink);
+}
+
+.k-rejected {
+  color: var(--kerb);
+}
+
+/* --- beat 6: the ledger --------------------------------------------------- */
+
+.k-ledger {
+  gap: 1.4rem;
+}
+
+.k-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.k-bar-track {
+  position: relative;
+  flex: 1;
+  height: 14px;
+  border-radius: var(--round-pill);
+  background: color-mix(in srgb, var(--k-rule) 60%, transparent);
+  overflow: visible;
+}
+
+.k-bar-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: var(--round-pill);
+  background: var(--boost);
+  transition: width 0.12s ease;
+}
+
+/**
+ * The handle. It is the only part of a progress bar that has ever been grabbable, and it is drawn
+ * to look like it — bigger than the bar, raised, with the site's grab cursor.
+ */
+.k-bar-handle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 3px solid var(--boost);
+  box-shadow: var(--lift);
+  cursor: grab;
+  touch-action: none;
+  transition: left 0.12s ease;
+}
+
+.k-bar-handle:active {
+  cursor: grabbing;
+}
+
+.k-bar-handle:focus-visible {
+  outline: 3px solid var(--boost);
+  outline-offset: 3px;
+}
+
+.k-bar-count {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--k-quiet);
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+.k-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.k-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  min-height: 5.5rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 2px solid var(--k-rule);
+  background: transparent;
+  color: var(--k-ink);
+  font: inherit;
+  text-align: left;
+  cursor: default;
+  opacity: 0.55;
+  transition:
+    opacity 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.k-tile-open {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.k-tile-open:hover {
+  border-color: var(--boost);
+}
+
+.k-tile:focus-visible {
+  outline: 3px solid var(--boost);
+  outline-offset: 2px;
+}
+
+.k-tile-no {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.k-tile-lock {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  color: var(--k-quiet);
+  transition: opacity 0.3s ease;
+}
+
+.k-tile-open .k-tile-lock {
+  opacity: 0;
+}
+
+.k-shackle {
+  transition: translate 0.3s ease;
+}
+
+.k-tile-hook {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--k-quiet);
+  margin: 0;
+}
+
+.k-tile-read {
+  border-color: var(--box);
+}
+
+/* --- beat 7: Chapter K ---------------------------------------------------- */
+
+.k-outro,
+.k-signoff {
+  text-align: center;
+}
+
+.k-tenth {
+  width: min(16rem, 100%);
+  align-items: center;
+  text-align: center;
+  border-color: var(--boost);
+  border-style: dashed;
+  animation: k-arrive 0.6s ease backwards;
+}
+
+@keyframes k-arrive {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+
+.k-chapterk,
+.k-ask-card {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.k-lede {
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+
+.k-dossier {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.45rem 1rem;
+  margin: 0;
+  width: 100%;
+}
+
+.k-dossier dt {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--k-quiet);
+  white-space: nowrap;
+  padding-top: 0.2rem;
+}
+
+.k-dossier dd {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.k-return {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.k-return-slot {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 12px;
+  border: 3px dashed var(--k-rule);
+}
+
+/* --- beat 8: the video, the one form, the way in --------------------------- */
+
+.k-post {
+  align-items: stretch;
+  text-align: left;
+}
+
+.k-video {
+  width: 100%;
+  border-radius: var(--round);
+  background: #11141b;
+  display: block;
+}
+
+.k-confirm {
+  align-items: stretch;
+  text-align: left;
+}
+
+.k-confirm h2 {
+  text-wrap: balance;
+}
+
+/**
+ * The small print.
+ *
+ * Genuinely small, genuinely dense, and worth reading — which is the joke. A parody of a thing
+ * nobody reads only works if this one rewards being read.
+ */
+.k-print {
+  margin: 0;
+  padding-left: 1.4rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--k-quiet);
+}
+
+.k-print li {
+  margin-bottom: 0.25rem;
+}
+
+.k-confirm-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+/**
+ * **The Yes is absurd. The No is ordinary, and it works.**
+ *
+ * All the theatre is in the length of the label; none of it is in the behaviour. The button does not
+ * move, does not grow, does not pretend the No is not there — the third pass removed a version that
+ * dodged the cursor across three panels, because a button that runs away is funny for about a second
+ * and a half and this is the one moment in the piece that should not be making her work.
+ */
+.k-yes {
+  max-width: 100%;
+  text-align: left;
+}
+
+.k-no {
+  flex-shrink: 0;
+}
+
+/* Answered. The buttons stay on the page, visibly spent, rather than vanishing out from under her. */
+.k-confirm-done .k-confirm-buttons {
+  opacity: 0.4;
+}
+
+.k-filed {
+  color: var(--boost);
+  margin-top: 0.2rem;
+}
+
+.k-admitted {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.k-admitted h2 {
+  font-size: var(--t-title);
+}
+
+/* --- reduced motion ------------------------------------------------------- */
+
+/**
+ * Reduced motion, taken seriously.
+ *
+ * This is not a checkbox here. The genre this borrows from has a well-documented accessibility
+ * failure — unavoidable screen shake and scrolling, no toggle, and reviewers reporting actual
+ * nausea. This experience has a page that falls down a hole in it, so the setting has to mean
+ * something.
+ *
+ * The rule is the same one the rest of the site follows: **the resting state is the finished
+ * state.** Every animation below ends on the value the element already has, so switching them off
+ * cuts straight to the outcome. The word still leaves the sentence, the page still becomes the
+ * layer underneath, the hole still goes. Nothing travels to get there.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .nar-caret.typing,
+  .halo,
+  .narrator-rattled .nar-inner,
+  .k-tenth,
+  .k-pocket-arriving,
+  .k-pocket-slot {
+    animation: none;
+  }
+
+  /**
+   * The one exception, and it is deliberate.
+   *
+   * The fallen full stop keeps rocking. Reduced motion is about vestibular safety and about large
+   * moving surfaces — a 12px character tipping a few degrees is neither, and it is the only thing
+   * standing between a reduced-motion player and never finding the first interaction at all. The
+   * halo behind it goes solid instead of pulsing, so there are still two signals rather than one.
+   */
+  .k-stop-fallen {
+    animation-duration: 4s;
+  }
+
+  .k-stage,
+  .narrator,
+  .k-stop,
+  .k-hole,
+  .k-bar-fill,
+  .k-bar-handle {
+    transition: none;
+  }
+
+  /* The halo still has to be findable without pulsing, so it goes solid instead. */
+  .halo {
+    opacity: 0.75;
+  }
+
+  /* Straight to gone, with no journey. */
+  .k-eaten,
+  .k-hole-falling,
+  .k-falling {
+    animation: none;
+    opacity: 0;
+  }
+
+  .k-eaten {
+    display: none;
+  }
+}
+
+/* --- small screens -------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .k-pocket {
+    bottom: 5.2rem;
+    max-width: 8.5rem;
+  }
+
+  .k-stage {
+    padding-bottom: 9rem;
+  }
+}

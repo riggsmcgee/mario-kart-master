@@ -100,4 +100,14 @@ export const PROTOS: Proto[] = [
       'it proves the signup trigger and row-level security both work.',
     status: 'signed-off',
   },
+  {
+    id: 'kayla',
+    title: 'There Is No Course',
+    step: '4e4',
+    gate: '4e3',
+    blurb:
+      "Kayla's lockout as ten minutes of play: the website insists there is nothing here while " +
+      'she takes it apart. Beat-by-beat jumps, because the last one is nine minutes from a cold start.',
+    status: 'built',
+  },
 ];
