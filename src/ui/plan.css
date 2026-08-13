@@ -846,6 +846,24 @@
   background: var(--trim-wash);
 }
 
+/* How much of it. The first thing she needs, so it leads and it is the loudest of the three. */
+.session-chip-reps {
+  background: var(--track);
+  color: #fff;
+}
+
+/*
+ * The one thing to think about. Every session has exactly one, and it is the session — the
+ * paragraph under it is only how to go about it. Sized and weighted to be read on its own.
+ */
+.session-focus {
+  margin: 0 0 0.7rem;
+  font-family: var(--display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .session-job {
   margin: 0 0 0.7rem;
   font-size: 1rem;

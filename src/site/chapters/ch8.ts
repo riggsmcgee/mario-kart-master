@@ -591,7 +591,9 @@ const content: ChapterContent = {
                     el('span', { class: 'sheet-tick' }, '☐'),
                     ' ',
                     el('span', { class: 'sheet-grid-label' }, t(item.label)),
-                    el('span', { class: 'sheet-grid-track' }, item.track),
+                    // Volume and track, because on paper there is no panel to open — the cell has
+                    // to carry enough that she could work tonight off the fridge alone.
+                    el('span', { class: 'sheet-grid-track' }, `${item.reps} · ${item.track}`),
                   ),
                 ),
               ),

@@ -38,7 +38,7 @@ export const VOICEOVER: Record<string, string[]> = {
     "So we're not going to try. **We're going to beat her with homework.**",
     "Because here's the thing about {rival}. She has played this game for years and she has never once studied it. She doesn't know where the boost pads are. She's quick enough not to have had to.",
     "You're about to know. All of it.",
-    'Nine short chapters, about half an hour. Each one is two pages: a page that explains the idea, and then a page where you get to try it, so it lands in your hands instead of just your head.',
+    'Nine short chapters, about an hour all in. Each one is two pages: a page that explains the idea, and then a page where you get to try it, so it lands in your hands instead of just your head.',
     "Then the real work happens on your Switch, and the last chapter is where that lives — forty short sessions with one job each. That's the course. This is just the classroom.",
     "Fair warning. You'll be terrible at the drills for two minutes. Everybody is. Nothing here can be broken and nothing counts against you.",
     "I can't promise you'll beat her. I can promise that one evening she is going to look over and say, when did you learn that. And you get to shrug.",
@@ -96,7 +96,7 @@ export const VOICEOVER: Record<string, string[]> = {
     'Coins, while we are here. Ten of them and your kart is genuinely faster. Not a trick, not a myth. It stops at ten, so ten is the number, and almost nobody bothers.',
     "They're armour as well. Every time something hits you, you drop three. Which is one more reason to be carrying that banana from chapter two.",
     "On the next page there's a line painted straight onto the road. Your score is how much of the lap you spend sitting on it — not how much of it you touch. Smooth wins.",
-    "Oh — and this is exactly what Kendahl does, incidentally. No drifting, no items, no risks. A tidy line and her coins, and she beats {rival} regularly. Make of that what you like.",
+    'Oh — and this is exactly what Kendahl does, incidentally. No drifting, no items, no risks. A tidy line and her coins, and she beats {rival} regularly. Make of that what you like.',
   ],
 
   ch6: [
@@ -121,8 +121,9 @@ export const VOICEOVER: Record<string, string[]> = {
 
   ch8: [
     'Right, {name}. This is the one you print out and stick on the fridge.',
-    "Three or four sessions a week, fifteen or twenty minutes each. That's less than an episode of anything.",
-    "One cup: the Mushroom Cup. Four tracks. You're going to know those four the way you know your own street — and when it is your turn to pick, you pick them. Every time. Don't be polite about it.",
+    "Forty boxes. One a day, five days a week, weekends off — so about two months, and each one is fifteen or twenty minutes. That's less than an episode of anything.",
+    'Every box is the same shape: a few runs of one particular track, with one thing to think about while you drive them. That is deliberate. You get better at the skill and you learn the map, at the same time, off the same laps.',
+    "And it is one cup: the Mushroom Cup. Four tracks. By the end of this you're going to know those four the way you know your own street — and when it is your turn to pick, you pick them. Every time. Don't be polite about it.",
     'There is a guide in here for each one. Where the pads are, where the coins are, the single hazard that actually matters. Read the overviews now. The deep dives are for about week three, when the words will mean something.',
     'And there is a ladder to climb. Beat your own ghost. Then finish top three against the computer. Then win the cup against the computer. Then take one race off {rival}. Then take the whole cup off her.',
     'That last rung might take a while. That is fine. That is what a plan is for.',

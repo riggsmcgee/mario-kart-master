@@ -63,7 +63,7 @@ grin, so grin while you say them.
 >
 > You're about to know. All of it.
 >
-> Nine short chapters, about half an hour. Each one is two pages: a page that explains the idea,
+> Nine short chapters, about an hour all in. Each one is two pages: a page that explains the idea,
 > and then a page where you get to try it, so it lands in your hands instead of just your head.
 >
 > Then the real work happens on your Switch, and the last chapter is where that lives — forty
@@ -315,19 +315,23 @@ handed an answer rather than a menu. Say the combo slowly enough that she could 
 
 ## Chapter 8 — The Kayla Plan
 
-**Target:** 60–90 seconds (~200 words)
+**Target:** 60–90 seconds (~270 words)
 **Tone:** The send-off. Warm the whole way through, brisk in the middle where it is logistics, and
 then mean the last paragraph — this is the one she will play again. Do not rush "I want the phone
 call". Stop talking after it.
 
 > Right, Jodi. This is the one you print out and stick on the fridge.
 >
-> Three or four sessions a week, fifteen or twenty minutes each. That's less than an episode of
-> anything.
+> Forty boxes. One a day, five days a week, weekends off — so about two months, and each one is
+> fifteen or twenty minutes. That's less than an episode of anything.
 >
-> One cup: the Mushroom Cup. Four tracks. You're going to know those four the way you know your
-> own street — and when it is your turn to pick, you pick them. Every time. Don't be polite about
-> it.
+> Every box is the same shape: a few runs of one particular track, with one thing to think about
+> while you drive them. That is deliberate. You get better at the skill and you learn the map, at
+> the same time, off the same laps.
+>
+> And it is one cup: the Mushroom Cup. Four tracks. By the end of this you're going to know those
+> four the way you know your own street — and when it is your turn to pick, you pick them. Every
+> time. Don't be polite about it.
 >
 > There is a guide in here for each one. Where the pads are, where the coins are, the single
 > hazard that actually matters. Read the overviews now. The deep dives are for about week three,

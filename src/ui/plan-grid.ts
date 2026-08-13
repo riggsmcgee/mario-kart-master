@@ -60,6 +60,9 @@ export function createPlanGrid(options: PlanGridOptions): PlanGrid {
   const panelWhy = el('p', { class: 'session-why' }, '');
   const panelTrack = el('span', { class: 'session-chip' }, '');
   const panelMode = el('span', { class: 'session-chip session-chip-mode' }, '');
+  const panelReps = el('span', { class: 'session-chip session-chip-reps' }, '');
+  /** The one thing to think about. Set apart from the how, because it is the whole session. */
+  const panelFocus = el('p', { class: 'session-focus' }, '');
 
   const panelChapter = el('button', { class: 'btn btn-quiet session-link', type: 'button' }, '');
   panelChapter.addEventListener('click', () => {
@@ -82,7 +85,8 @@ export function createPlanGrid(options: PlanGridOptions): PlanGrid {
     { class: 'session-panel', attrs: { 'aria-live': 'polite' } },
     panelEyebrow,
     panelTitle,
-    el('div', { class: 'session-chips' }, panelTrack, panelMode),
+    el('div', { class: 'session-chips' }, panelReps, panelTrack, panelMode),
+    panelFocus,
     panelJob,
     panelWhy,
     el('div', { class: 'session-actions' }, panelDone, panelChapter),
@@ -176,10 +180,12 @@ export function createPlanGrid(options: PlanGridOptions): PlanGrid {
     if (!selected) {
       panelEyebrow.textContent = 'The programme';
       panelTitle.textContent = 'Pick a session';
+      panelFocus.textContent = '';
       panelJob.textContent = 'Every box is one evening, fifteen to twenty minutes. Start at 1.1.';
       panelWhy.textContent = '';
       panelTrack.hidden = true;
       panelMode.hidden = true;
+      panelReps.hidden = true;
       panelDone.hidden = true;
       panelChapter.hidden = true;
       return;
@@ -195,8 +201,11 @@ export function createPlanGrid(options: PlanGridOptions): PlanGrid {
     panelTitle.textContent = t(item.label);
     panelTrack.hidden = false;
     panelMode.hidden = false;
+    panelReps.hidden = false;
+    panelReps.textContent = item.reps;
     panelTrack.textContent = item.track;
     panelMode.textContent = item.mode;
+    panelFocus.replaceChildren(rich(t(item.focus)));
     panelJob.replaceChildren(rich(t(item.job)));
     panelWhy.replaceChildren(rich(t(item.why)));
     panelDone.hidden = false;
