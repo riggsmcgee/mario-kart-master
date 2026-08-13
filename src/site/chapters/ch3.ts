@@ -19,7 +19,17 @@
  * *direction* of a miss precisely so a miss could teach something. This chapter therefore does no
  * judging of its own: it echoes the engine's verdict and adds one to the score for `got-it`. A
  * penalty for a bad press would contradict, inside thirty seconds, the one thing the concept
- * section just spent four paragraphs establishing.
+ * section exists to establish.
+ *
+ * **The timing prose is one paragraph** as of 2026-08-12, where it used to be three. Riggs struck
+ * the lot out on a screenshot: "Consolidate to one paragraph and lose the technical stuff and
+ * jargins. Only practical." The cut material was a measurement — the window is ~150ms either side
+ * of the lip — dressed up as reassurance. It cannot function as reassurance, because a number that
+ * small only sounds impossible, and it is not actionable either: nobody times a third of a second
+ * by knowing it is a third of a second. What survives is the part she can act on. The ramp does
+ * not move, so she can learn where it is; a mistimed press costs nothing, so there is no reason to
+ * ration her attempts. The window is still drawn, as a green stripe on the diagram, which is the
+ * honest way to show a duration to someone who has to feel it rather than count it.
  *
  * **Why six ramps and why there.** Six is the target, so a single flawless lap could finish it —
  * but three laps are allowed, which turns eighteen chances into a target of six and makes the
@@ -204,11 +214,6 @@ function rampDiagram(): SVGSVGElement {
   return svg;
 }
 
-/** A number in the mono voice. Milliseconds turn up constantly in this course; they get a font. */
-function ms(text: string): HTMLElement {
-  return el('span', { class: 'ms' }, text);
-}
-
 const content: ChapterContent = {
   concept(ctx: ChapterContext): Node {
     return frag(
@@ -243,39 +248,11 @@ const content: ChapterContent = {
         ),
       ),
 
-      el(
-        'div',
-        { class: 'prose' },
-        el(
-          'p',
-          null,
-          ctx.t('The green stripe is the window, and it is about '),
-          ms('150 milliseconds'),
-          ctx.t(' either side of the lip — so a little under '),
-          ms('a third of a second'),
-          ctx.t(
-            ' wide in total. Written down like that it sounds impossible, and if you had to spot the ramp and then react to it, it would be.',
-          ),
+      prose([
+        ctx.t(
+          'The ramp is in the same place every lap, so you are never reacting to it — you are arriving at it. And getting the timing wrong costs you **nothing**: too early, too late, four times in a panic on the way over, and the worst that happens is the ordinary jump you would have had anyway. So press the button on every ramp, every time.',
         ),
-        el(
-          'p',
-          null,
-          rich(
-            ctx.t(
-              'But you are not reacting to anything. The ramp does not leap out at you. It is in the same place on lap one, lap two and lap three, it was there last week and it will be there next Tuesday. **You are not reacting, you are arriving** — and being somewhere on time is a thing you have been doing since long before {rival} was born.',
-            ),
-          ),
-        ),
-        el(
-          'p',
-          null,
-          rich(
-            ctx.t(
-              'And here is the part that should settle it. Getting the timing wrong costs you **nothing**. Not a wobble, not a slowdown, not a penalty. Press too early, press too late, press four times in a panic on the way over — the worst thing that can happen is an ordinary jump, exactly the jump you would have had by sitting on your hands. So there is no such thing as a ramp not worth trying on. Press the button every single time.',
-            ),
-          ),
-        ),
-      ),
+      ]),
     );
   },
 

@@ -103,9 +103,6 @@ const content: ChapterContent = {
           'Hold the item button and whatever you picked up sits out behind your back bumper, in the way. Anything coming up the road hits it instead of you. It costs you nothing to carry — no speed, no steering. So carry it, all race.',
         ),
         t(
-          'Every decision here passes the same test: **low skill, high reward.** Throwing a shell at a moving kart is high skill and low reward — people who play every day miss that shot. Holding the same shell behind you takes no skill and works every lap, forever. {rival} fires everything the second she gets it. Let her.',
-        ),
-        t(
           'When something *is* coming for you, the game tells you — a little picture appears and a siren starts. That is not a signal to start swerving. It is a reminder to hold the button.',
         ),
       ]),
@@ -129,7 +126,7 @@ const content: ChapterContent = {
       el(
         'div',
         { class: 'card' },
-        el('p', { class: 'eyebrow' }, 'What to do with the thing in your hands'),
+        el('p', { class: 'eyebrow' }, 'Item cheatsheet'),
         el(
           'ul',
           { style: { marginTop: '0.8rem', paddingLeft: '1.2em' } },
@@ -239,7 +236,7 @@ const content: ChapterContent = {
           nextUp.replaceChildren(
             rich(
               t(
-                'Hold what you have got, fire only the red shells, and throw the bob-omb backwards. The card below is what to take to the Switch.',
+                'Hold what you have got, fire only the red shells, and throw the bob-omb backwards. That is the whole of it.',
               ),
             ),
           );
