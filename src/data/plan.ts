@@ -179,24 +179,6 @@ export const CUP_TRAINING = {
   ] as CupStage[],
 };
 
-// --- steering the pick ------------------------------------------------------
-
-export const CUP_STEERING = {
-  lines: [
-    'When it is your turn to choose, you choose the Mushroom Cup. Not usually. Every time.',
-    '**No mercy picks.** She is not choosing a cup to be kind to you, and you would not want her to. Picking your own tracks is not cheating, it is the only part of the race you control before the lights go out.',
-    'If she asks why you always pick the same cup, tell her the truth: you like those tracks. It is completely true and she will find it unbearable.',
-    'If she picks first and picks something else, that is fine. You still know four tracks better than she knows any track — and your cup is coming round again.',
-  ],
-  items: [
-    {
-      id: 'plan.steer.pledge',
-      text: 'Agree with yourself now: when it is your pick, it is your cup.',
-      detail: 'Decide it here, in a calm room, rather than on the sofa with somebody watching.',
-    },
-  ] as PlanItem[],
-};
-
 // --- the milestone ladder ---------------------------------------------------
 
 /**
@@ -389,7 +371,6 @@ export function allCheckIds(): string[] {
   return [
     ...allSessionIds(),
     ...CUP_TRAINING.stages.flatMap((stage) => stage.items.map((item) => item.id)),
-    ...CUP_STEERING.items.map((item) => item.id),
     ...MILESTONES.map((milestone) => milestone.id),
   ];
 }

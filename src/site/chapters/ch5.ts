@@ -148,16 +148,11 @@ const content: ChapterContent = {
   concept(ctx: ChapterContext): Node {
     return frag(
       prose([
-        '**Everything else in this course is a knack you have to catch** — a button at the right instant, an item held at the right moment. Knacks have bad days.',
-        'This one does not. This one is deciding where on the road you want to be, and then being there. It is the skill with the highest floor in the whole course: it pays on your sharpest evening and it still pays on the one where you are tired and your tea has gone cold. **If you only remember one chapter, remember this one.**',
+        'Everything else in this course is a knack you have to catch. Knacks have bad days. **This one does not** — it is deciding where on the road you want to be, and then being there.',
+        'Most people hug the inside of a corner, because the inside is obviously shorter. It is also the *tightest* way round, so you slow down the most and come out pointing at the grass instead of down the next straight.',
       ]),
 
-      heading('So what is a racing line?'),
-      prose([
-        'It is just the path you take through a corner. There is a good one and a bad one, and the bad one is the one everybody picks by instinct: hug the inside, all the way round.',
-        'Hugging the inside genuinely is the shortest way round. It is also the *tightest* way round, so it is the one where you have to slow down the most, and you come out of it pointing at the edge of the road instead of down the next straight. Shortest and fastest are not the same thing. They almost never are.',
-        'The good line has three parts, and you can say them out loud while you drive.',
-      ]),
+      heading('The three parts of a corner'),
 
       el(
         'div',
@@ -193,18 +188,37 @@ const content: ChapterContent = {
       ),
 
       prose([
-        '**Wide, tight, wide.** It is a longer path on paper and a faster one in the kart, because you never have to slow down as much and you finish the corner facing the right way.',
-        'And here is the unglamorous bit holding all of it up: **be smooth.** Most of the speed people lose is not lost in corners at all. It is lost sawing left-right-left-right down a straight, trying to sit in the exact middle of the road. Every one of those little corrections shaves a sliver off your speed, and there are hundreds of them in a race.',
-        'Pick a line. Sit on it. Stop fiddling. Boring is fast.',
+        '**Wide, tight, wide.** Longer on paper, faster in the kart, and you finish the corner already facing the right way.',
+      ]),
+
+      // Where it happens on a track she is about to drive.
+      //
+      // Riggs, 2026-08-12: "Ch5 is way too technical and unapplied." The chapter had four
+      // paragraphs of theory and no place. This is the fix — the same idea pointed at the two
+      // corners she will actually meet in week two of the programme, named, so that "wide, tight,
+      // wide" has somewhere to happen rather than being a phrase about corners in general.
+      el(
+        'div',
+        { class: 'card', style: { borderLeft: '8px solid var(--box)' } },
+        el('p', { class: 'eyebrow' }, 'On your first track'),
+        el('h3', null, 'Mario Kart Stadium, the big left after the start'),
+        prose([
+          'Come out of the start straight on the **right-hand** edge of the road. Do not turn in early, however wrong it feels. Let the corner come to you, brush the **inside** kerb at the tightest point, and then let the kart drift back out to the **left** as you straighten.',
+          'That is it. Same three moves on the long right-hander later in the lap, mirrored. Two corners, one shape, and the rest of the track is nearly straight.',
+        ]),
+      ),
+
+      prose([
+        'And the unglamorous bit holding it up: **be smooth.** Most of the speed people lose is not lost in corners at all — it is lost sawing left-right-left-right down a straight, trying to sit exactly in the middle of the road. Pick a line, sit on it, stop fiddling.',
         ctx.t(
-          'Which is, incidentally, exactly what Kendahl does. No drifting, no items, no risks — a tidy line and her coins, and she beats {rival} regularly. Make of that what you like.',
+          'Which is exactly what Kendahl does, incidentally. Make of that what you like.',
         ),
       ]),
 
       heading('Coins are speed. Ten of them.'),
       prose([
-        'Coins are not points and they are not decoration. Every coin you are carrying makes your kart slightly quicker. It stacks up to ten, and then it stops — past ten they do nothing for your speed at all.',
-        'So ten is the number. Ten by the end of lap one, and then simply keep them. Hardly anybody bothers to do this, which is precisely why it works.',
+        'Every coin you are carrying makes your kart quicker. It stops at ten — past ten they do nothing for your speed at all.',
+        'So ten is the number. Ten by the end of lap one, then keep them. Hardly anybody bothers, which is precisely why it works.',
       ]),
 
       el(
@@ -224,25 +238,15 @@ const content: ChapterContent = {
           { style: { margin: '0' } },
           rich(
             ctx.t(
-              'Get clobbered twice and your ten is a four, and now you are slower for the rest of the lap on top of the seconds you already lost spinning around. Which is Chapter 2 arriving back round the other side: the banana trailing behind you is not only protecting your bumper, it is protecting your top speed. {rival} has almost certainly never thought about this. You have now.',
+              'Get hit twice and your ten is a four — slower for the rest of the lap, on top of the seconds you lost spinning round. Which is Chapter 2 coming back the other way: that banana behind you is protecting your top speed as well as your bumper.',
             ),
           ),
         ),
       ),
 
-      heading('The bit between the boosts'),
       prose([
-        'Last chapter you learned where the boost pads live. Now stop thinking of them as things you happen to drive over, and start thinking of them as dots to be joined up.',
-        ctx.t(
-          '**The lap is won in the paths between the boosts.** Anyone can drive over a pad that is already underneath them. Getting from this one to the next one without wasting a single metre is the actual driving — and it is a thing you can work out in advance, in the calm, while {rival} is finding out at full speed.',
-        ),
-        'Coins work the same way. A line of coins on a track is not treasure scattered about. It is the game quietly telling you where the fast way round is. Follow the coins and you are usually already on the racing line.',
-      ]),
-
-      prose([
-        'So: the practice track, with the good line painted straight onto the road in teal, coins sitting along it, and two boost pads where it already wanted to go. Three laps, and steering is the only control that does anything.',
-        '**Your score is the share of the lap you spend on the line** — not how much of it you touch. Sitting on it is the whole exercise, so smooth beats quick here in a way it does not anywhere else in this course.',
-        'If the line seems to be taking you the long way round a corner, good. That is the lesson. And do not lunge at it, because lunging is what makes you saw at the wheel — look at where it goes *next*, aim there, and let the kart run to it.',
+        'One last thing, and it is free: **a line of coins is the game telling you where the fast way round is.** Follow them and you are usually already on the racing line.',
+        'Next page, the line is painted on the road in teal. **Your score is how much of the lap you spend on it** — not how much of it you touch. Do not lunge at it; look at where it goes next and let the kart run there.',
       ]),
     );
   },

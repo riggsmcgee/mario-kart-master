@@ -31,7 +31,6 @@ import '../../ui/plan.css';
 import { getChapter } from '../../data/chapters';
 import type { VideoRef } from '../../data/chapters';
 import {
-  CUP_STEERING,
   CUP_TRAINING,
   FUNDAMENTALS,
   MILESTONES,
@@ -198,14 +197,6 @@ const content: ChapterContent = {
             checkList(stage.items),
           ),
         ),
-      ),
-      el(
-        'section',
-        { class: 'card plan-card plan-steering' },
-        el('p', { class: 'eyebrow' }, 'When it is your turn to pick'),
-        el('h3', null, t('No mercy picks')),
-        prose(CUP_STEERING.lines.map((line) => t(line))),
-        checkList(CUP_STEERING.items),
       ),
     );
 
@@ -625,7 +616,6 @@ const content: ChapterContent = {
             el('ul', { class: 'sheet-list' }, ...stage.items.map((item) => sheetLine(item))),
           ),
         ),
-        el('ul', { class: 'sheet-list' }, ...CUP_STEERING.items.map((item) => sheetLine(item))),
       ),
       el(
         'section',
