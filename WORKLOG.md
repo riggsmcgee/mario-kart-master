@@ -30,6 +30,60 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 ## Log
 
+### 2026-08-13 — Session 16 (Opus 5)
+
+**Steps touched:** **2b9** (done) · **4f1** (everything that does not need a Mac)
+
+**The launch QA found a bug that would have ruined the present.**
+
+`lockOut()` calls `progress.setRole('kayla')` like any other doorman choice. That marks the profile
+dirty, and `push()` writes it to the signed-in user's `profiles` row. The plan's own 4e3 asks for
+Kayla to "find the lockout organically after launch" — which means on Jodi's machine, while Jodi is
+signed in. Her poking at the doorman would have written `role: 'kayla'` onto **Jodi's** profile, and
+Jodi would have opened her present, on any device, and been locked out of it. By a joke. Recoverable
+only if she happened to know to press "Change user", on a site whose whole promise is that nothing
+in it can be broken.
+
+The doorman's own doc comment has claimed the opposite since it was written — "her role never
+reaches the server, so there is no row anywhere recording that Kayla was locked out". That was the
+intent and it was never what the code did. It is true now, enforced in `push()` rather than at the
+call site, so it holds however the role gets set — including the sign-in path, which re-dirties the
+profile from whatever happens to be in local storage at that moment.
+
+Her role is still kept *locally*, deliberately: the lockout has to survive a reload rather than
+re-interrogating her every time she opens the tab.
+
+**Everything else in 4f1 that can be checked without a Mac now is.** 26/26 in Chromium: four doorman
+roles, name templating with no unfilled `{name}`/`{rival}` anywhere, Bill's heavier recommender,
+Kayla leaving no course progress behind and finding her way back out, "Someone else" getting the
+full parts browser, progress surviving a reload and the network being cut, and the fridge sheet
+rendering to a real 166kB PDF under print media with the screen version and the header dropped.
+
+**Four of those "failures" were the test being wrong**, which is worth recording because the wrong
+answers were confident ones. A `page.goto` to a different *hash* resolves instantly — `networkidle`
+means nothing when no request is made — so the first run read the DOM before the router had
+re-rendered and reported that name templating was broken on three roles. Bill's recommender lives on
+the practice page, not the lesson. And the skip link is live on the lockout screen, which is correct:
+it moves focus inside the page she is already on, unlocks nothing, and deleting it to tidy up a gag
+would trade a real accessibility affordance for a punchline.
+
+**2b9 is verified rather than assumed.** `scripts/check-videos.mjs` (new, `npm run check:videos`)
+asks YouTube's oEmbed endpoint about all seven embedded videos — three in chapters, four in the
+track guides. 200 means it exists and may be embedded, 401 means embedding is switched off, 404
+means gone. oEmbed rather than the Data API so it needs no key, no quota and no account, and will
+still run in a year for whoever is around. **7/7 usable.** It reads the ids out of `chapters.ts` and
+`tracks.ts` rather than keeping its own list, because a second list is a second thing to forget. A
+network failure is reported separately and does not fail the run — a checker that cries wolf on a
+flaky connection is one that gets ignored on the day it is right.
+
+**Verified:** format, typecheck, lint, production build, 21/21 routes, 7/7 videos, 26/26 QA checks.
+
+**Left open:** the four things that need hardware nobody here has — macOS, 60fps, Safari, and an
+actual printer. Chapter 7's practice page and the Ch5/Ch6 word counts are still the deferred content
+pass.
+
+---
+
 ### 2026-08-13 — Session 15 (Opus 5)
 
 **Steps touched:** **3e1** (done)

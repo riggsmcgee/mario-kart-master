@@ -15,7 +15,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "shoot": "node scripts/shoot.mjs --serve"
+    "shoot": "node scripts/shoot.mjs --serve",
+    "check:videos": "node scripts/check-videos.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

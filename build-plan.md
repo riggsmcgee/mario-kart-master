@@ -186,7 +186,7 @@ Each chapter step includes drafting its copy (plain, warm, funny; Jodi and Kayla
   - **The Zippy One: Toad (or any baby character) + Biddybuggy + Roller.** Maximum acceleration; tradeoff is being light enough for Kayla to bump around.
   - **The Steady One: Waluigi + Wild Wiggler + Roller.** Heavier and harder to shove, slightly slower to recover.
   Chapter ends as the bridge: "That's the classroom done. Go set these on your Switch right now." *(Opus)*
-- [ ] **2b9** Video curation: links are already verified (see shortlist below); watch each for tone (encouraging, not sweaty), trim to one short embed per chapter via start-time parameters where useful. *(Sonnet)*
+- [x] **2b9** Video curation: links are already verified (see shortlist below); watch each for tone (encouraging, not sweaty), trim to one short embed per chapter via start-time parameters where useful. *(Sonnet)* — answered 2026-08-12 (the "one mechanic per video, or no video at all" rule, three Bayesic videos kept with a start time on the drifting one, four chapters left with none) and verified live 2026-08-13: `npm run check:videos` asks YouTube's oEmbed endpoint whether each of the seven embeds still exists and is still embeddable. 7/7 usable.
 
 ### 2c. Phase gate
 
@@ -271,6 +271,9 @@ Steps:
 ### 4f. Launch
 
 - [ ] **4f1** Final QA: full pass on Mac Chrome (plus one quick Safari sanity check), video link checker script run, sync survives sign-out/reload/offline, all four doorman roles behave, printable prints. **Carried from 1b6: the kart drills have never run on macOS at all, and the 60fps check is still outstanding.** Measure frame rate on a real Mac here at the latest — earlier if one becomes available, because a performance problem found at 4f1 is expensive. *(Sonnet)*
+  - **Done 2026-08-13, everything that does not need a Mac** — 26/26 in Chromium: all four doorman roles (including the Kayla lockout leaving no progress behind and letting her back out), name templating for Jodi/Bill/Other with no unfilled tokens, Bill's heavier recommender, progress surviving a reload and the network going away, and the fridge sheet rendering to a real PDF under print media. `npm run check:videos` added and passing 7/7.
+  - **It found one launch-blocker.** `lockOut()` pushed `role: 'kayla'` to the signed-in profile, so Kayla finding the gag on Jodi's machine — which is exactly what 4e3 asks for — would have locked Jodi out of her own present on every device. Now refused in `push()`. See the Session 16 entry.
+  - **Still outstanding, all of it needing hardware nobody here has:** nothing has ever run on macOS, 60fps is unmeasured, no Safari pass, and the print sheet has never met an actual printer.
 - [ ] **4f2 GATE (Jodi):** she uses the site cold for 10 minutes, no coaching, Riggs watches silently. Fix the first three points of confusion before anything else. *(human + Opus for fixes)*
 - [ ] **4f3** Launch: send her the link. Ideally with the Ch0 voiceover as the teaser.
 

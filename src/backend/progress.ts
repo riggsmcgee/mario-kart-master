@@ -557,7 +557,28 @@ export class ProgressStore {
       if (profileDirty) {
         const patch: { display_name?: string | null; role?: PlayerRole } = {};
         if (this.snapshot.displayName !== null) patch.display_name = this.snapshot.displayName;
-        if (this.snapshot.role !== null) patch.role = this.snapshot.role;
+        /**
+         * **The `kayla` role is never written to the server.** (4f1.)
+         *
+         * The doorman's own doc says "her role never reaches the server, so there is no row
+         * anywhere recording that Kayla was locked out". That was the intent and it was not what
+         * the code did: `lockOut()` calls `setRole('kayla')` like any other choice, which marked
+         * the profile dirty and pushed it.
+         *
+         * The consequence is not a stray row. The plan wants Kayla to find the lockout organically
+         * after launch (4e3) — which means on Jodi's machine, where Jodi is signed in. Her poking
+         * at the doorman would have written `role: 'kayla'` to *Jodi's* profile, and Jodi would
+         * open her present on any device and be locked out of it. Recoverable only by someone
+         * knowing to press "Change user", on a site whose entire promise is that nothing here can
+         * be broken.
+         *
+         * Enforced at the one place that talks to the server rather than at the call site, so it
+         * holds however the role is set — including the sign-in path above, which re-dirties the
+         * profile from whatever happens to be in local storage at the time.
+         */
+        if (this.snapshot.role !== null && this.snapshot.role !== 'kayla') {
+          patch.role = this.snapshot.role;
+        }
         if (Object.keys(patch).length > 0) {
           const { error } = await supabase.from('profiles').update(patch).eq('id', userId);
           if (error) throw new Error(error.message);
