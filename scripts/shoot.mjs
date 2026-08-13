@@ -67,7 +67,7 @@ const ROUTES = [
   ['ch1-try', '/#/chapter/ch1/try', 'Five starts'],
   ['ch2-try', '/#/chapter/ch2/try', 'Hold the banana'],
   ['ch3-try', '/#/chapter/ch3/try', 'Six ramps'],
-  ['ch4-try', '/#/chapter/ch4/try', 'Find the arrows'],
+  ['ch4-try', '/#/chapter/ch4/try', 'Find the boost pads'],
   ['ch5-try', '/#/chapter/ch5/try', 'Follow the line'],
   ['ch6-try', '/#/chapter/ch6/try', 'Six corners'],
   ['ch7-try', '/#/chapter/ch7/try', 'Build your kart'],
@@ -103,6 +103,13 @@ const IGNORE = [
   /^Failed to load resource: the server responded with a status of 404/i,
 ];
 
+/**
+ * SGR colour codes. Built from a char code rather than written as a literal escape so the source
+ * carries no control character — which both `no-control-regex` and the next person reading this
+ * line will thank us for.
+ */
+const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
+
 async function startServer() {
   const child = spawn('npm', ['run', 'dev', '--', '--port', '5173', '--strictPort'], {
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -112,7 +119,11 @@ async function startServer() {
   await new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('dev server did not start in 60s')), 60_000);
     const watch = (chunk) => {
-      if (/Local:.*http/i.test(String(chunk))) {
+      // Strip ANSI before matching. Vite colours its banner even when stdout is a pipe, which
+      // puts an escape sequence between "Local" and ":" — so the obvious /Local:.*http/ never
+      // matches, the wait times out at 60s, and the orphaned child then holds the port so the
+      // next run fails differently. Cost an evening once; not again.
+      if (/Local:.*http/i.test(String(chunk).replace(ANSI, ''))) {
         clearTimeout(timer);
         resolve();
       }
