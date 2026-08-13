@@ -113,7 +113,7 @@ export const CHAPTERS: ChapterMeta[] = [
   {
     id: 'ch0',
     number: 0,
-    skill: 'The promise',
+    skill: 'The goal',
     title: 'So you want to beat {rival} at Mario Kart?',
     hook: '{rival} wins because she reacts faster than you. That is a real advantage and you are not going to beat it. So we are not going to try — we are going to beat her with something she has not got, which is homework.',
     video: {
@@ -137,8 +137,7 @@ export const CHAPTERS: ChapterMeta[] = [
     hook: 'There is free speed on the start line and most people never take it. It costs you nothing, it works with your settings, and it happens before {rival} has touched anything.',
     drill: {
       title: 'Five starts',
-      blurb:
-        'A countdown, five times over. Hold as the 2 vanishes and keep holding through GO. Nothing else on screen matters.',
+      blurb: 'A countdown, five times over. Hold as the 2 vanishes, and keep holding through GO.',
     },
     stars: { unit: 'good starts out of 5', two: 3, three: 4 },
   },
@@ -150,8 +149,7 @@ export const CHAPTERS: ChapterMeta[] = [
     hook: 'You do not need to aim anything. You do not need to be fast. You need to stop firing things the second you get them, and start carrying them behind you like a shield.',
     drill: {
       title: 'Hold the banana',
-      blurb:
-        'Six shells are coming. Hold your banana behind you and they hit that instead of you. Let go at the wrong moment and you find out why holding matters.',
+      blurb: 'Six shells are coming. Hold your banana behind you and they hit that instead of you.',
     },
     stars: { unit: 'shells blocked out of 6', two: 3, three: 5 },
   },
@@ -176,8 +174,7 @@ export const CHAPTERS: ChapterMeta[] = [
     hook: 'The orange arrows on the road are free speed, and here is the thing nobody tells you: they are often not on the line you would naturally drive. Knowing where they are is worth more than driving well.',
     drill: {
       title: 'Find the arrows',
-      blurb:
-        'Eight boost pads, and several of them are nowhere near the line you would drive by instinct. Go and get them anyway.',
+      blurb: 'Eight boost pads, and several are nowhere near the line you would drive by instinct.',
     },
     stars: { unit: 'pads hit out of 8', two: 5, three: 7 },
   },

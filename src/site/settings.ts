@@ -47,11 +47,25 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
 
   const page = el('div', { class: 'page wrap stack-lg' });
 
+  /**
+   * The way out. (Riggs, 2026-08-12: "it's a little confusing to get out of settings".)
+   *
+   * The site mark in the header does go home, but it reads as a logo rather than as a control, and
+   * on a page reached by a deliberate click the way back should be as obvious as the way in. So
+   * there are two: a back link above the title where the eye lands first, and a plain button at the
+   * bottom for anyone who has read to the end and expects one there.
+   *
+   * "Back to the course" rather than "Back": she may have arrived here from a chapter, and this
+   * says where she is going rather than merely that she is leaving.
+   */
+  const backLink = el('a', { class: 'back-link', href: '#/' }, '← Back to the course');
+  backLink.addEventListener('click', () => sfx.play('page'));
+
   page.append(
     el(
       'header',
       { class: 'page-head' },
-      el('p', { class: 'eyebrow' }, 'Settings'),
+      el('p', { class: 'eyebrow' }, backLink),
       el('h1', null, 'Bits and pieces'),
     ),
   );
@@ -242,7 +256,14 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
     ),
   );
 
+  const backButton = el('button', { class: 'btn btn-go', type: 'button' }, 'Back to the course');
+  backButton.addEventListener('click', () => {
+    sfx.play('page');
+    go({ name: 'home' });
+  });
+
   page.append(
+    el('div', { class: 'chapter-end' }, backButton),
     el(
       'p',
       { class: 'eyebrow' },

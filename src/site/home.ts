@@ -58,7 +58,7 @@ export function renderHome(mount: HTMLElement, deps: HomeDeps): Mounted {
     'p',
     { class: 'eyebrow', style: { marginTop: '1rem' } },
     doneCount === 0
-      ? `${CHAPTERS.length} chapters · about 40 minutes · most of the work happens on the Switch`
+      ? `${CHAPTERS.length} chapters · about an hour · most of the work happens on the Switch`
       : doneCount === CHAPTERS.length
         ? 'Every chapter done. Go and win something.'
         : `${doneCount} of ${CHAPTERS.length} chapters done`,

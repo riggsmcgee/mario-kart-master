@@ -253,10 +253,14 @@ export function renderChapter(
   // The end of the lesson. A chapter with practice sends her to it and nowhere else — that button
   // is the whole point of the page ending. A chapter without one is finished here.
   if (meta.drill) {
+    // "Next: Practice" everywhere, never "Try it: <drill name>". (Riggs, 2026-08-12.) The button
+    // that leaves a page should say the same thing on all nine of them — naming the drill made
+    // every chapter's exit look like a different control, and the drill names its own page
+    // anyway. This also matches "Next: <chapter>" on the pages that have no practice.
     const tryButton = el(
       'a',
       { class: 'btn btn-go btn-try', href: hrefFor({ name: 'try', id: meta.id }) },
-      `Try it: ${meta.drill.title}`,
+      'Next: Practice',
     );
     tryButton.addEventListener('click', () => sfx.play('page'));
 
@@ -312,7 +316,12 @@ export function renderTry(
 
   let interactive: Mounted | null = null;
 
-  const page = el('article', { class: 'page wrap' });
+  // `page-practice` is the one-screen budget. (Riggs, 2026-08-12: "everything should fit on one
+  // computer screen with no scrolling".) The practice page has a fixed set of parts — a heading,
+  // one sentence, the drill, a way onward — so unlike the lesson pages it can genuinely be made
+  // to fit, and the CSS under this class does that by shrinking the furniture rather than the
+  // drill. See `site.css`.
+  const page = el('article', { class: 'page wrap page-practice' });
   const drill = meta.drill;
 
   page.append(

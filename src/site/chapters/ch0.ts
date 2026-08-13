@@ -1,8 +1,8 @@
 /**
- * Chapter 0: the promise. (2b1)
+ * Chapter 0: the goal. (2b1)
  *
  * The only chapter with nothing to do in it, which makes it the one most likely to be closed. It
- * has exactly one job: earn the next forty minutes of her evening before she has spent any of
+ * has exactly one job: earn the next hour of her evening before she has spent any of
  * them. Everything here is argument, and the argument is made in a deliberate order.
  *
  * **Concede first.** The hook already admits {rival} is faster; this section refuses to walk that
@@ -134,8 +134,8 @@ const content: ChapterContent = {
       skillsCard(ctx),
 
       proseFor(ctx, [
-        `Forty minutes, give or take. ${SKILLS.length} short chapters, in order, each one a small idea and one thing to try so it lands in your hands instead of just your head.`,
-        'Most of the work is not in here, and that is on purpose. A keyboard cannot teach your thumbs. Every chapter ends with a card telling you exactly what to go and do on the Switch, and *that* card is the real course — this website is just the bit that tells you what to point yourself at.',
+        `About an hour, and twelve minutes of that is a video. ${SKILLS.length} short chapters in order, and each one is two pages: the idea, and then a page where you get to try it, so it lands in your hands instead of just your head.`,
+        'Most of the work is not in here, and that is on purpose. A keyboard cannot teach your thumbs. The last chapter is a training programme for the Switch — forty short sessions with one job each — and *that* is the real course. This website is the bit that tells you what to point yourself at.',
         'Nothing here can be failed. There are stars, because everything is nicer with stars, but nothing locks, nothing is marked, and you can stop halfway through and come back. It remembers where you were.',
         'One condition. When it works — and it is going to work — I want to hear exactly how {rival} took it. That is the whole fee.',
       ]),
@@ -145,25 +145,19 @@ const content: ChapterContent = {
   interactive(mount: HTMLElement, ctx: ChapterContext): Mounted {
     const t = (text: string): string => ctx.t(text);
 
-    const heading = el('h3', null, t('Five things he mentioned'));
-    const comment = el(
-      'p',
-      null,
-      rich(
-        t(
-          'One from each part of the video. **Nothing here is marked** — get one wrong and it just tells you the answer, which is the entire point of a first chapter.',
-        ),
-      ),
-    );
-    const board = el(
-      'div',
-      { class: 'card stack' },
-      el('p', { class: 'eyebrow' }, 'Straight off the video'),
-      heading,
-      comment,
-    );
-
+    // No preamble card above the quiz.
+    //
+    // There was one, and measuring the page found it was 259px of a 900px screen spent restating
+    // the blurb three inches above it — on the page Riggs picked out as the worst offender for
+    // scrolling. The practice page's own one-line blurb already says "five quick ones, nothing is
+    // marked", so the card was pure duplication with a heading on it.
+    //
+    // What it was genuinely for is the *ending*, and that still exists: on completion the summary
+    // replaces the quiz rather than sitting above it, which is the same information in the place
+    // she is already looking.
     const quizMount = el('div', { attrs: { style: QUIZ_TOKENS } });
+    const done = el('div', { class: 'card stack' });
+    done.hidden = true;
     let completed = false;
 
     const quiz = new Quiz({
@@ -175,19 +169,25 @@ const content: ChapterContent = {
       onComplete: (summary) => {
         if (completed) return;
         completed = true;
-        heading.textContent = t('That is the hard part over');
-        comment.replaceChildren(
-          rich(
-            t(
-              `**${summary.correct} of ${summary.total}**, and it genuinely does not matter which — every one of those five gets a chapter of its own from here, at a quarter of the speed. Chapter 1 is the start line, and it is the easiest free speed in the game.`,
+        done.replaceChildren(
+          el('p', { class: 'eyebrow' }, 'Straight off the video'),
+          el('h3', null, t('That is the hard part over')),
+          el(
+            'p',
+            null,
+            rich(
+              t(
+                `**${summary.correct} of ${summary.total}**, and it genuinely does not matter which — every one of those five gets a chapter of its own from here, at a quarter of the speed. Chapter 1 is the start line, and it is the easiest free speed in the game.`,
+              ),
             ),
           ),
         );
+        done.hidden = false;
         ctx.finish({ score: summary.correct });
       },
     });
 
-    mount.replaceChildren(board, quizMount);
+    mount.replaceChildren(quizMount, done);
 
     return { dispose: () => quiz.dispose() };
   },
