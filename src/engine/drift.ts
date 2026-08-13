@@ -7,12 +7,27 @@
  * let go and get a boost out of a corner you had to take anyway.
  *
  * **It layers on top of `stepKart` rather than living inside it.** Three other drills share that
- * function and none of them wants a drift, so this module produces two numbers — extra yaw, and a
- * boost when the drift is released — and the drill feeds them in through hooks that already
- * exist. The extra yaw goes in as `assistYaw`, which `stepKart` adds to the player's steering
- * without touching the velocity vector; the effect of turning the heading while the kart keeps
+ * function and none of them wants a drift, so this module produces the numbers a drift needs and
+ * the drill feeds them in through hooks that already exist: yaw goes in as `assistYaw`, and the
+ * grip reduction is a per-tick copy of the kart config. Turning the heading while the kart keeps
  * travelling its old way *is* a slide, so the visible drift falls out of the physics rather than
  * being animated on top of it.
+ *
+ * **A drift replaces her steering; it does not add to it.** (Riggs, 2026-08-12: "you still turn
+ * just as sharp, so you can't drift for long — to get an orange I have to go in a full circle".)
+ * The first version added `yawBonus` on top of whatever she was already steering, which made a
+ * drifting kart turn *harder* than a normal one. That is backwards, and it produced exactly what
+ * he describes: the only way to hold a drift long enough to charge was to spiral.
+ *
+ * A real drift is a *commitment to a wide arc*. So while one is running, `stepKart` gets a steer
+ * input of zero and every bit of yaw comes from here — a modest fixed rate that traces a radius of
+ * roughly eighteen units at full speed, which is a long sweeping curve on a road ten units wide.
+ * Her steering still does something, but it *modulates* the arc rather than driving it: hold into
+ * the drift to tighten, ease off to run wide.
+ *
+ * **Neutral steering keeps the drift alive.** The first version ended it the moment she was not
+ * actively holding the corner, which meant she could never settle into one. Only three things stop
+ * a drift now: letting go, dropping below walking pace, or steering the other way.
  *
  * **Three tiers in the game, two here.** Blue sparks (mini-turbo) and orange (super mini-turbo)
  * are in. Purple is not, and Chapter 6 says why out loud: Bayesic's own video files it under
@@ -36,8 +51,26 @@ export type DriftConfig = {
   /** Boost awarded on release, in seconds, per tier. */
   blueBoost: number;
   orangeBoost: number;
-  /** Extra yaw while drifting, rad/s at full lock. This is what makes the back end come round. */
-  yawBonus: number;
+
+  /**
+   * The arc, rad/s. All three replace her steering rather than adding to it.
+   *
+   * `base` is what a drift does if she touches nothing: at the kart's 11.5 units/s that is a
+   * radius of about eighteen units, a long sweeper on a road ten units wide. `tighten` is holding
+   * into the corner, `widen` is easing off — the two together are the whole of the control she
+   * has, and neither is anywhere near the 2.0 rad/s a normal kart can pull.
+   */
+  baseYaw: number;
+  tightenYaw: number;
+  widenYaw: number;
+
+  /**
+   * Grip while drifting, as a fraction of normal. This is what makes it *look* like a drift: the
+   * kart's sideways velocity stops bleeding off, so the nose points into the corner while the kart
+   * keeps travelling toward the outside of it.
+   */
+  gripFactor: number;
+
   /**
    * How long after a hop the drift can still be started, in seconds. A grace window rather than a
    * single frame, because she is on a keyboard and "press two keys on the same tick" is not a
@@ -48,13 +81,25 @@ export type DriftConfig = {
   minSpeed: number;
 };
 
-/** Tuned against the test circuit's corners: a long sweeper charges orange, a tight one does not. */
+/**
+ * Tuned so the test circuit's long U-turn charges orange in one go and its hairpin does not —
+ * which is the chapter's entire lesson, expressed as numbers rather than as a paragraph.
+ *
+ * At `baseYaw` a drift sweeps about 71° per second, so orange at 1.6s is a corner of roughly 115°.
+ * The U-turn is a bit more than that; the hairpin is over long before it.
+ */
 export const DRIFT_CONFIG: DriftConfig = {
-  blueAt: 0.75,
-  orangeAt: 1.9,
+  blueAt: 0.6,
+  orangeAt: 1.6,
   blueBoost: 0.55,
-  orangeBoost: 1.1,
-  yawBonus: 1.15,
+  orangeBoost: 1.15,
+
+  baseYaw: 0.62,
+  tightenYaw: 0.95,
+  widenYaw: 0.3,
+
+  gripFactor: 0.3,
+
   hopWindow: 0.35,
   minSpeed: 3,
 };
@@ -111,15 +156,36 @@ export interface DriftInput {
 }
 
 export interface DriftResult {
-  /** Extra yaw to hand `stepKart` as `assistYaw`, rad/s. */
+  /** Yaw to hand `stepKart` as `assistYaw`, rad/s. While drifting this is *all* of the yaw. */
   yaw: number;
+  /**
+   * True while a drift is running, which means the caller must pass `stepKart` a steer input of
+   * **zero** — the arc above already accounts for what she is holding. Adding both is the bug this
+   * whole model was rewritten to fix.
+   */
+  overrideSteering: boolean;
+  /** Multiply the kart config's `grip` by this. 1 when not drifting. */
+  gripScale: number;
   /** Boost seconds to add to the kart. Non-zero only on the tick a drift is released. */
   boost: number;
   /** The tier just released, for sound and for the drill's counter. */
   released: DriftTier;
   tier: DriftTier;
   drifting: boolean;
+  /** True on the single tick a drift begins, for the hop. */
+  started: boolean;
 }
+
+const IDLE: DriftResult = {
+  yaw: 0,
+  overrideSteering: false,
+  gripScale: 1,
+  boost: 0,
+  released: 'none',
+  tier: 'none',
+  drifting: false,
+  started: false,
+};
 
 /**
  * Advance the drift by one fixed step.
@@ -140,54 +206,58 @@ export function stepDrift(
   if (drift.sinceHop !== null) drift.sinceHop += dt;
   if (input.hopped) drift.sinceHop = 0;
 
-  const drifting = drift.direction !== 0;
+  const wasDrifting = drift.direction !== 0;
 
   // --- release ---
-  // Letting go, stopping, or straightening up all end it. Straightening counts because a drift
-  // held through a straight is not a drift, and continuing to award charge for it would teach
-  // exactly the wrong habit.
-  if (drifting) {
+  // Three things end a drift: letting go of the key, dropping below walking pace, and steering
+  // the *other* way. Neutral steering does not, which is the point — a drift she has to keep
+  // actively holding into is a drift she can never settle into, and settling into one is the
+  // skill. Counter-steering ends it because that is her saying she wants the corner over.
+  if (wasDrifting) {
     const tooSlow = input.speed < config.minSpeed;
-    const straightened = Math.sign(input.steer) !== drift.direction;
-    if (!input.held || tooSlow || straightened) {
+    const counterSteered = input.steer !== 0 && Math.sign(input.steer) !== drift.direction;
+    if (!input.held || tooSlow || counterSteered) {
       const tier = tierFor(drift.charge, config);
       drift.released = tier;
       drift.releasedBoost =
         tier === 'orange' ? config.orangeBoost : tier === 'blue' ? config.blueBoost : 0;
       drift.direction = 0;
       drift.charge = 0;
-      return {
-        yaw: 0,
-        boost: drift.releasedBoost,
-        released: tier,
-        tier: 'none',
-        drifting: false,
-      };
+      return { ...IDLE, boost: drift.releasedBoost, released: tier };
     }
   }
 
   // --- start ---
-  // A hop, recently, with the wheel already turned and enough speed to be worth it.
-  if (!drifting && input.held && input.steer !== 0 && input.speed >= config.minSpeed) {
+  // A hop, recently, with the wheel already turned and enough speed to be worth it. Requiring the
+  // steer is what stops the other three drills' hop key from ever opening a drift by accident.
+  let started = false;
+  if (!wasDrifting && input.held && input.steer !== 0 && input.speed >= config.minSpeed) {
     const hopped = drift.sinceHop !== null && drift.sinceHop <= config.hopWindow;
     if (hopped && !input.airborne) {
       drift.direction = Math.sign(input.steer);
       drift.charge = 0;
       drift.sinceHop = null;
+      started = true;
     }
   }
 
-  if (drift.direction === 0) {
-    return { yaw: 0, boost: 0, released: 'none', tier: 'none', drifting: false };
-  }
+  if (drift.direction === 0) return IDLE;
 
   drift.charge += dt;
 
+  // Her steering modulates the arc rather than driving it. Into the drift tightens, off widens,
+  // neutral holds the base radius.
+  const holding = Math.sign(input.steer) === drift.direction;
+  const rate = input.steer === 0 ? config.baseYaw : holding ? config.tightenYaw : config.widenYaw;
+
   return {
-    yaw: config.yawBonus * drift.direction,
+    yaw: rate * drift.direction,
+    overrideSteering: true,
+    gripScale: config.gripFactor,
     boost: 0,
     released: 'none',
     tier: tierFor(drift.charge, config),
     drifting: true,
+    started,
   };
 }

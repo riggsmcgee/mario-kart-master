@@ -685,10 +685,13 @@ function buildSparks(): { group: THREE.Group; blobs: THREE.Mesh[] } {
   const group = new THREE.Group();
   const blobs: THREE.Mesh[] = [];
 
-  for (let i = 0; i < 8; i++) {
+  // Twelve, and bigger than they first were. The chapter's instruction is literally "watch the
+  // sparks turn from blue to orange", so if they are not readable from the chase camera at speed
+  // the drill has no feedback at all — which is exactly how the first version played.
+  for (let i = 0; i < 12; i++) {
     const blob = new THREE.Mesh(
-      new THREE.SphereGeometry(0.16 + (i % 3) * 0.05, 6, 5),
-      new THREE.MeshBasicMaterial({ color: PALETTE.sparkBlue, transparent: true, opacity: 0.9 }),
+      new THREE.SphereGeometry(0.26 + (i % 3) * 0.09, 6, 5),
+      new THREE.MeshBasicMaterial({ color: PALETTE.sparkBlue, transparent: true, opacity: 0.95 }),
     );
     group.add(blob);
     blobs.push(blob);
@@ -1212,16 +1215,21 @@ export function createKartScene(
         const material = blob.material as THREE.MeshBasicMaterial;
         material.color.setHex(colour);
 
-        // Streaming backwards and outwards, on staggered phases so the cluster shimmers rather
-        // than pulsing as one lump.
-        const phase = (time * 6 + i * 0.7) % 1;
+        // Two streams — one off each rear wheel, the inside one twice as dense. Sparks on one
+        // side only read as a rendering glitch from behind; sparks on both, weighted, read as the
+        // back of the kart working.
+        const inner = i % 3 !== 0;
+        const z = inner ? side : -side;
+
+        // Staggered phases so the cluster shimmers rather than pulsing as one lump.
+        const phase = (time * 5 + i * 0.41) % 1;
         blob.position.set(
-          -1.4 - phase * 1.6,
-          0.25 + Math.sin(time * 18 + i) * 0.16,
-          side + Math.sin(time * 11 + i * 2) * 0.22,
+          -1.5 - phase * 2.4,
+          0.3 + phase * 0.75 + Math.sin(time * 18 + i) * 0.14,
+          z + Math.sin(time * 11 + i * 2) * 0.3,
         );
-        blob.scale.setScalar(1 - phase * 0.7);
-        material.opacity = 0.95 * (1 - phase);
+        blob.scale.setScalar((inner ? 1 : 0.7) * (1 - phase * 0.55));
+        material.opacity = 0.95 * (1 - phase * 0.85);
       });
     },
     setBurst(progress, hit) {

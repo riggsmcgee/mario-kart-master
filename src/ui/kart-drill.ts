@@ -244,6 +244,8 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
   let lastHopAt: number | null = null;
   let driftTier: 'none' | 'blue' | 'orange' = 'none';
   let driftSide = 0;
+  /** When the drift hop started, for the renderer's bounce. Null when there is none. */
+  let hopAt: number | null = null;
 
   function refresh(): void {
     counter.textContent = format(score, target, unit);
@@ -346,16 +348,34 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
         kart.boostRemaining = Math.max(kart.boostRemaining, driftResult.boost);
         sfx.play('boost');
       }
+      // The hop. (Riggs, 2026-08-12: he could feel the boost but could not see the drift start.)
+      // Purely visual — it lifts the kart in the renderer and never touches `altitude`, because a
+      // genuinely airborne kart has no grip and would slide out of the drift it is beginning.
+      if (driftResult.started) hopAt = now;
     }
 
+    // While a drift is running it owns the steering: `stepKart` gets zero input and the arc
+    // arrives as assist yaw.
+    //
+    // The steer assist is turned down rather than off. Off is the principled answer — a drift is a
+    // commitment, and the assist exists to fight exactly the sort of sideways travel a drift is
+    // made of — but the first build of this drove her straight off the road and into the grass the
+    // moment she committed, which is not the lesson. A third of the usual correction is enough to
+    // keep a badly-aimed drift on the tarmac without ever pulling the kart straight.
+    const slide = driftResult?.overrideSteering === true ? driftResult : null;
+    const DRIFT_ASSIST = 0.34;
     const assist = computeSteerAssist(kart, path, surface.halfWidth, assistConfig);
+    const config = slide
+      ? { ...kartConfig, grip: kartConfig.grip * slide.gripScale }
+      : kartConfig;
+
     last = stepKart(
       kart,
-      kartConfig,
-      input.steer(),
+      config,
+      slide ? 0 : input.steer(),
       surface,
       dt,
-      assist.yawRate + (driftResult?.yaw ?? 0),
+      slide ? slide.yaw + assist.yawRate * DRIFT_ASSIST : assist.yawRate,
     );
 
     const events = track.update(
@@ -411,7 +431,16 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
     const poseX = lerp(kart.prevX, kart.x, alpha);
     const poseY = lerp(kart.prevY, kart.y, alpha);
     const poseHeading = lerpAngle(kart.prevHeading, kart.heading, alpha);
-    const poseAltitude = lerp(kart.prevAltitude, kart.altitude, alpha);
+    let poseAltitude = lerp(kart.prevAltitude, kart.altitude, alpha);
+
+    // A quarter-second bounce as a drift begins. Half a sine so it goes up and comes back down
+    // once, rather than oscillating.
+    const HOP_MS = 260;
+    if (hopAt !== null) {
+      const elapsed = now - hopAt;
+      if (elapsed >= HOP_MS) hopAt = null;
+      else poseAltitude += Math.sin((elapsed / HOP_MS) * Math.PI) * 0.7;
+    }
 
     view.kart.position.set(poseX, poseAltitude, poseY);
     view.kart.rotation.y = -poseHeading;
