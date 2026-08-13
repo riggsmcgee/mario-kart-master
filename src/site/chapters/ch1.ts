@@ -18,6 +18,14 @@
  * explicit that nothing here marks her. Five is also what the star rule in `chapters.ts` counts
  * ("good starts out of 5"), so the number lives there and this file follows it.
  *
+ * **She starts each go herself.** (Riggs, 2026-08-12, from Katharine's run: the instructions after
+ * a failed attempt "went too quickly".) The five goes used to run back to back on a 1.7-second
+ * timer, which meant the verdict — the one sentence saying whether she was early or late, and the
+ * entire reason this drill exists rather than a paragraph — was replaced before it had been read.
+ * Now the result stays up until she asks for the next one; see {@link CountdownDrill.arm}. It also
+ * removes the last timer from this file, so the drill has no clock of its own at all beyond the
+ * countdown itself.
+ *
  * **The window is left exactly as the component ships it.** Tuning the countdown belongs to gate
  * 1c2 and to one config object; a chapter that quietly widened its own window would make the
  * signed-off numbers a lie everywhere else.
@@ -42,9 +50,6 @@ import '../../ui/countdown.css';
 
 /** Matches the star rule in `chapters.ts`: two stars at 3, three at 4. */
 const ATTEMPTS = 5;
-
-/** Long enough to read the verdict and let go of the key, short enough to keep the rhythm. */
-const GAP_MS = 1700;
 
 /** The lab's three variable names, pointed at theme tokens for the length of one card. */
 const THEME_BRIDGE = '--line: var(--rule); --muted: var(--ink-soft); --fg: var(--ink);';
@@ -113,7 +118,6 @@ const content: ChapterContent = {
 
     let input: Input | null = null;
     let drill: CountdownDrill | null = null;
-    let timer: number | null = null;
     let attempt = 0;
     let good = 0;
 
@@ -128,11 +132,6 @@ const content: ChapterContent = {
     const root = el('div', { class: 'stack' }, stage, status, list, footer);
 
     const rows: HTMLLIElement[] = [];
-
-    function clearTimer(): void {
-      if (timer !== null) window.clearTimeout(timer);
-      timer = null;
-    }
 
     /** Stop the machinery without touching the DOM: the last verdict stays on screen to read. */
     function releaseRun(): void {
@@ -180,21 +179,15 @@ const content: ChapterContent = {
       }
       fillRow(index, result, isGood);
 
-      clearTimer();
       if (attempt < ATTEMPTS) {
         status.textContent = ctx.t(`Attempt ${attempt + 1} of ${ATTEMPTS}`);
-        timer = window.setTimeout(() => {
-          timer = null;
-          drill?.start();
-        }, GAP_MS);
+        drill?.arm(ctx.t(`Press ${key} when you are ready`));
         return;
       }
 
       status.textContent = ctx.t(`${good} good starts out of ${ATTEMPTS}`);
-      timer = window.setTimeout(() => {
-        timer = null;
-        endRun();
-      }, GAP_MS);
+      // Out of the drill's own tick: `endRun` disposes the loop that is currently calling this.
+      queueMicrotask(endRun);
     }
 
     function endRun(): void {
@@ -211,7 +204,6 @@ const content: ChapterContent = {
     }
 
     function startRun(): void {
-      clearTimer();
       releaseRun();
 
       attempt = 0;
@@ -261,7 +253,6 @@ const content: ChapterContent = {
 
     return {
       dispose() {
-        clearTimer();
         releaseRun();
         root.remove();
       },

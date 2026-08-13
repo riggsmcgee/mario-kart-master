@@ -124,6 +124,24 @@
   color: var(--fg);
 }
 
+/* --- "press when you are ready" ---
+   Between goes. Deliberately the loudest thing on the card once it appears, because the verdict
+   above it is now sitting there indefinitely and something has to say whose turn it is. */
+.countdown-ready[hidden] {
+  display: none;
+}
+
+.countdown-ready {
+  display: block;
+  margin-top: 0.2rem;
+  padding: 0.55rem 1.1rem;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--fg);
+}
+
 .countdown-scale {
   display: flex;
   justify-content: space-between;

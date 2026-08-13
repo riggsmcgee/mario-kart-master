@@ -80,6 +80,7 @@ export class CountdownDrill {
   private readonly onResult: ((result: CountdownResult) => void) | undefined;
 
   private readonly numeral: HTMLDivElement;
+  private readonly readyNote: HTMLDivElement;
   private readonly lamps: HTMLDivElement[] = [];
   private readonly verdict: HTMLDivElement;
   private readonly verdictDetail: HTMLDivElement;
@@ -94,6 +95,11 @@ export class CountdownDrill {
   private heldAtGo = false;
   private resolved = false;
   private rafId: number | null = null;
+
+  /** Between goes: the loop keeps sampling, but only to watch for "I am ready". */
+  private armed = false;
+  /** Set once the key has been seen up since arming. See {@link arm}. */
+  private releasedSinceArm = false;
 
   constructor(options: CountdownOptions) {
     this.mount = options.mount;
@@ -116,6 +122,10 @@ export class CountdownDrill {
     this.numeral = document.createElement('div');
     this.numeral.className = 'countdown-numeral';
     this.numeral.textContent = 'Ready';
+
+    this.readyNote = document.createElement('div');
+    this.readyNote.className = 'countdown-ready';
+    this.readyNote.hidden = true;
 
     this.verdict = document.createElement('div');
     this.verdict.className = 'countdown-verdict';
@@ -150,7 +160,15 @@ export class CountdownDrill {
       scale.append(tick);
     }
 
-    root.append(lights, this.numeral, this.verdict, this.verdictDetail, this.timeline, scale);
+    root.append(
+      lights,
+      this.numeral,
+      this.verdict,
+      this.verdictDetail,
+      this.timeline,
+      scale,
+      this.readyNote,
+    );
     this.mount.append(root);
 
     this.layoutTimeline();
@@ -186,9 +204,41 @@ export class CountdownDrill {
     place(this.perfectBand, this.config.perfectMs);
   }
 
+  /**
+   * Hold, and run the next countdown when she says so. (Riggs, 2026-08-12.)
+   *
+   * Katharine could not read the verdict after a miss: Chapter 1 used to wait 1.7 seconds and then
+   * relaunch, so the one sentence explaining *which way* she was wrong was gone before she had
+   * finished it — on a drill whose entire teaching device is that sentence. A fixed delay cannot
+   * be right anyway; it is either too short to read or too long to sit through, and which one
+   * depends on whether she already knew what went wrong.
+   *
+   * So the verdict, the detail and the marker all stay exactly where they are, for as long as she
+   * likes, and the next go starts on a key. Either accelerate or confirm will do — {@link Input}
+   * calls preventDefault on both Space and Enter while it is alive, so neither a button nor the
+   * usual keyboard affordances can be used here, and the gate has to be read off the input layer
+   * itself.
+   */
+  arm(message: string): void {
+    this.stopLoop();
+    this.armed = true;
+    // She is almost certainly still holding the key from the go that just ended. Requiring a
+    // release first is what stops the next countdown launching under her finger — which would be
+    // the auto-advance all over again, only faster.
+    this.releasedSinceArm = false;
+    this.readyNote.textContent = message;
+    this.readyNote.hidden = false;
+    this.numeral.textContent = 'Ready';
+
+    this.running = true;
+    this.rafId = requestAnimationFrame(this.frame);
+  }
+
   start(): void {
     this.stopLoop();
     this.running = true;
+    this.armed = false;
+    this.readyNote.hidden = true;
     this.resolved = false;
     this.pressedAt = null;
     this.heldAtGo = false;
@@ -219,6 +269,17 @@ export class CountdownDrill {
     this.rafId = requestAnimationFrame(this.frame);
 
     this.input.sample();
+
+    // Parked between goes, waiting for her. Nothing on screen changes until she asks it to.
+    if (this.armed) {
+      if (!this.input.isDown('accelerate') && !this.input.isDown('uiConfirm')) {
+        this.releasedSinceArm = true;
+      }
+      const asked = this.input.justPressed('accelerate') || this.input.justPressed('uiConfirm');
+      if (this.releasedSinceArm && asked) this.start();
+      return;
+    }
+
     const elapsed = performance.now() - this.startedAt;
 
     // Record the first press only. Mashing should not let you find the window by accident.
@@ -268,7 +329,15 @@ export class CountdownDrill {
   }
 
   private grade(): CountdownResult {
-    if (this.pressedAt === null) return { grade: 'none', errorMs: null };
+    if (this.pressedAt === null) {
+      // Holding from before the lights is not "no start" — it is the earliest start there is, and
+      // saying "you never pressed" to someone with their finger on the key is just baffling. This
+      // is reachable now that a go begins on a keypress: tap to start, forget to let go, and the
+      // key is already down when the 3 appears.
+      return this.heldAtGo
+        ? { grade: 'early', errorMs: -this.idealMs }
+        : { grade: 'none', errorMs: null };
+    }
 
     const errorMs = this.pressedAt - this.idealMs;
     const distance = Math.abs(errorMs);
