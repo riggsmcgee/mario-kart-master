@@ -1,0 +1,356 @@
+[
+  {
+    "id": "b-start-boost",
+    "situation": "The lights are counting down. 3… 2… and the 2 is starting to fade.",
+    "prompt": "When do you press accelerate?",
+    "diagram": {
+      "road": "straight",
+      "caption": "The line, the countdown, and nobody has moved yet.",
+      "markers": [
+        { "kind": "pack", "at": 0.6, "lane": 0.5 },
+        { "kind": "pack", "at": 0.6, "lane": -0.5 },
+        { "kind": "you", "at": 0.6, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "two-fades",
+        "label": "As the 2 disappears — and keep holding",
+        "correct": true,
+        "response": "That is the one. Start holding as the 2 fades and keep holding through GO, and the kart launches instead of pulling away. It happens before the race exists, which is why it is Chapter 1."
+      },
+      {
+        "id": "on-go",
+        "label": "The instant GO appears",
+        "response": "That is a perfectly normal start, and a normal start is what everybody else gets. The boost lives slightly earlier than feels right — as the 2 vanishes, not when GO lands."
+      },
+      {
+        "id": "on-three",
+        "label": "Straight away, on 3",
+        "response": "Too early, and the kart bogs down and spins its wheels — you actually come off the line slower. There is a window, and it opens as the 2 fades."
+      }
+    ],
+    "takeaway": "Hold as the 2 vanishes. Free speed, every single race."
+  },
+  {
+    "id": "b-green-shell",
+    "situation": "A green shell in your hands, and nobody in front of you worth aiming at.",
+    "prompt": "What is a green shell actually for?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Nothing ahead. Something is probably behind.",
+      "holding": ["shell-green"],
+      "markers": [
+        { "kind": "rival", "at": 0.12, "lane": 0.2, "label": "{rival}" },
+        { "kind": "you", "at": 0.45, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "armour",
+        "label": "Armour — hold it out behind the kart",
+        "correct": true,
+        "response": "An item held behind the kart blocks whatever arrives at your back bumper, every time, with no aiming at all. It costs nothing to carry, and it is the single habit that wins the most races."
+      },
+      {
+        "id": "fire",
+        "label": "Firing at whoever is ahead",
+        "response": "Green shells fly dead straight and never turn, so landing one on a moving kart is mostly luck. Meanwhile your back is bare, and the back is where shells arrive from."
+      },
+      {
+        "id": "save",
+        "label": "Keeping in the slot until you need it",
+        "response": "Close, but there is a difference between having an item and holding it — the button has to be down for it to trail along behind you. Sitting in the slot, it protects nothing."
+      }
+    ],
+    "takeaway": "Hold everything behind you. Holding is free, and it never misses."
+  },
+  {
+    "id": "b-two-slots",
+    "situation": "A banana in one slot, a coin in the other, and a row of item boxes coming up fast.",
+    "prompt": "What happens if you drive through a box with both slots full?",
+    "diagram": {
+      "road": "straight",
+      "caption": "Two slots, both full, and free items straight ahead.",
+      "holding": ["banana", "coin"],
+      "markers": [
+        { "kind": "you", "at": 0.28, "lane": 0, "label": "You" },
+        { "kind": "box", "at": 0.8, "lane": -0.55 },
+        { "kind": "box", "at": 0.8, "lane": 0 },
+        { "kind": "box", "at": 0.8, "lane": 0.55 }
+      ]
+    },
+    "answers": [
+      {
+        "id": "nothing",
+        "label": "Nothing at all — the box is wasted",
+        "correct": true,
+        "response": "You sail through a free item and come out the other side holding exactly what you went in with. Which is why you spend the junk on the approach: cash the coin, keep the banana, arrive with a slot open."
+      },
+      {
+        "id": "swap",
+        "label": "The game swaps your worst item out",
+        "response": "It does not, and this is the belief that costs people a box every lap. A full pair of slots means the box does nothing whatsoever."
+      },
+      {
+        "id": "third",
+        "label": "You pick it up as a third item",
+        "response": "Two slots is the lot. There is no third one, so a full pair is a closed door — and the only way through it is to spend something before you arrive."
+      }
+    ],
+    "takeaway": "Two slots. A full pair means the next box is wasted, so clear the junk on the way in."
+  },
+  {
+    "id": "b-bob-omb",
+    "situation": "A bob-omb, and it is ticking. {rival} is right behind you.",
+    "prompt": "What do you do with the bob-omb?",
+    "diagram": {
+      "road": "straight",
+      "caption": "She is right behind you, and the fuse is already lit.",
+      "holding": ["bomb"],
+      "markers": [
+        { "kind": "rival", "at": 0.16, "lane": 0.15, "label": "{rival}" },
+        { "kind": "you", "at": 0.6, "lane": 0, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "back",
+        "label": "Throw it backwards, straight away",
+        "correct": true,
+        "response": "Backwards is where she is, and the blast is wide enough that you do not have to be accurate about it. Do it now: a bob-omb goes off on its own eventually, and it does not care whose it was."
+      },
+      {
+        "id": "hold",
+        "label": "Hold it behind you like a banana",
+        "response": "Everything else, yes. Not this one — it is counting down the whole time it is in your hands, and when it goes off back there you are well within range."
+      },
+      {
+        "id": "forward",
+        "label": "Throw it forward at the pack ahead",
+        "response": "It will go off somewhere up the road, which is precisely where you are about to be driving."
+      }
+    ],
+    "takeaway": "Hold everything — except the one that is counting down. Bombs go backwards, immediately."
+  },
+  {
+    "id": "b-ramp-boost",
+    "situation": "A ramp on the main straight. Everybody else just drives over it.",
+    "prompt": "How do you get a boost out of a ramp?",
+    "answers": [
+      {
+        "id": "press-top",
+        "label": "Press the trick button as you leave the top of the ramp",
+        "correct": true,
+        "response": "One button, at the lip — the last scrap of ramp before there is nothing underneath you. It is the same shoulder button you drift with, and there is a free boost on top of every ramp on every track."
+      },
+      {
+        "id": "fast",
+        "label": "Hit it as fast as you can — the boost comes automatically",
+        "response": "Nothing is automatic about it, which is why most people drive over thousands of ramps and collect nothing. Speed does not earn you the trick; a button press does."
+      },
+      {
+        "id": "land",
+        "label": "Press it the moment you land",
+        "response": "Too late by then — the ramp has already let go of you. The moment is the top corner, on the way up and out."
+      }
+    ],
+    "takeaway": "Every ramp has a free boost on it. One button, at the lip."
+  },
+  {
+    "id": "b-trick-tell",
+    "situation": "You went off a ramp and you are not sure whether the trick came out.",
+    "prompt": "How do you know it worked?",
+    "answers": [
+      {
+        "id": "flourish",
+        "label": "The kart does a visible flip or spin in the air",
+        "correct": true,
+        "response": "That flourish is the whole feedback system. Flip means boost, no flip means no boost, and you never have to look at a number or listen for anything."
+      },
+      {
+        "id": "sound",
+        "label": "There is a noise",
+        "response": "There is, but you will be listening past the music, the engine and whoever is talking at you on the sofa. Watch the kart instead."
+      },
+      {
+        "id": "cannot",
+        "label": "You cannot really tell",
+        "response": "You can, and it is the nicest thing about this skill — the kart does an obvious little flip, and that is the receipt."
+      }
+    ],
+    "takeaway": "If the kart leaves the ground, press the button. The flip is the receipt."
+  },
+  {
+    "id": "b-pad-detour",
+    "situation": "A long right-hander. There is a boost pad out by the far kerb, a couple of kart lengths wide of the tidy line you would drive by instinct.",
+    "prompt": "Do you go and get it?",
+    "diagram": {
+      "road": "bend-right",
+      "caption": "The tidy line goes nowhere near it.",
+      "markers": [
+        { "kind": "you", "at": 0.16, "lane": -0.3, "label": "You" },
+        { "kind": "pad", "at": 0.62, "lane": 0.6, "label": "Boost pad" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "go",
+        "label": "Yes — swing wide and drive over it",
+        "correct": true,
+        "response": "A boost pad is worth going out of your way for. The few extra kart lengths cost you less than the boost gives back, and hardly anybody believes that, which is why hardly anybody does it."
+      },
+      {
+        "id": "skip",
+        "label": "No — the extra distance costs more than the boost gives",
+        "response": "This is the sensible-sounding answer and it is the wrong one. The detour is a couple of kart lengths; the boost is worth a great deal more than that."
+      },
+      {
+        "id": "brake",
+        "label": "Only if you can slow down enough to line it up properly",
+        "response": "Never brake for a pad — that is the one way to make it cost you. A pad is a great fat stripe of road, not a target you have to aim at, so you shuffle across and take it at full speed or you leave it."
+      }
+    ],
+    "takeaway": "The fast way round is not the tight way round. Go and get the pad — just never brake for one."
+  },
+  {
+    "id": "b-racing-line",
+    "situation": "One sharp corner, the whole width of the road to use, and a straight on the other side of it.",
+    "prompt": "Where do you put the kart through the corner?",
+    "diagram": {
+      "road": "bend-right",
+      "caption": "One corner, and nobody else on the road.",
+      "markers": [{ "kind": "you", "at": 0.14, "lane": 0, "label": "You" }]
+    },
+    "answers": [
+      {
+        "id": "wide-tight-wide",
+        "label": "Wide going in, tight through the middle, wide coming out",
+        "correct": true,
+        "response": "Longer on paper, faster in the kart. Starting wide lets you straighten the corner out, and finishing wide means you come out already pointing down the straight instead of fighting the wheel."
+      },
+      {
+        "id": "inside",
+        "label": "Hug the inside kerb the whole way round",
+        "response": "The shortest way round, and the slowest. Sitting on the inside means turning harder for longer, and you finish the corner pointed at the far kerb."
+      },
+      {
+        "id": "middle",
+        "label": "Stay in the middle and turn gently",
+        "response": "Tidy, and it wastes the two most useful bits of the road — the wide entry and the wide exit. The width is there to be used."
+      }
+    ],
+    "takeaway": "Wide in, tight through, wide out. Use the whole road; it is all yours."
+  },
+  {
+    "id": "b-coins",
+    "situation": "Halfway round lap two, and you are carrying nine coins.",
+    "prompt": "How many coins are actually worth collecting?",
+    "diagram": {
+      "road": "bend-right",
+      "caption": "A line of coins round the outside of the bend.",
+      "markers": [
+        { "kind": "coin", "at": 0.45, "lane": 0.3 },
+        { "kind": "coin", "at": 0.6, "lane": 0.45 },
+        { "kind": "coin", "at": 0.75, "lane": 0.5 },
+        { "kind": "you", "at": 0.25, "lane": 0.1, "label": "You" }
+      ]
+    },
+    "answers": [
+      {
+        "id": "ten",
+        "label": "Ten. After that they stop helping",
+        "correct": true,
+        "response": "Ten is the cap. Every coin up to ten makes your kart slightly faster; the eleventh does nothing for your speed at all. So the job is ten by the end of lap one, and then simply keeping them."
+      },
+      {
+        "id": "all",
+        "label": "As many as possible, all race",
+        "response": "Past ten they stop making you faster. Going out of your way for an eleventh is a detour that buys you nothing."
+      },
+      {
+        "id": "none",
+        "label": "They are just points — ignore them",
+        "response": "The single most common thing people get wrong. Coins are speed: ten of them is a real, measurable difference, and it lasts the whole race."
+      }
+    ],
+    "takeaway": "Ten coins by the end of lap one. Then just keep them."
+  },
+  {
+    "id": "b-drift-which",
+    "situation": "A long, lazy left-hander coming up — and after it, a sharp little right.",
+    "prompt": "Which corner is worth drifting?",
+    "diagram": {
+      "road": "bend-left",
+      "caption": "The long one first, the tight one after.",
+      "markers": [{ "kind": "you", "at": 0.2, "lane": 0.4, "label": "You" }]
+    },
+    "answers": [
+      {
+        "id": "long",
+        "label": "The long one",
+        "correct": true,
+        "response": "Long corners only. A drift needs a second or so of holding before the sparks arrive, and a long sweeper is the only place you get that. On the tight one you would spend the whole corner charging something that never lands."
+      },
+      {
+        "id": "tight",
+        "label": "The tight one — that is what drifting is for",
+        "response": "The opposite, in fact. A drift is a slide, and a slide is slower than driving straight; you only get that back if you hold it long enough to earn the boost."
+      },
+      {
+        "id": "both",
+        "label": "Both, always",
+        "response": "Drifting everything is the most common way to be slower while looking faster. Knowing which corners are worth it is most of the skill."
+      }
+    ],
+    "takeaway": "Long corners only. Short ones are quicker driven straight."
+  },
+  {
+    "id": "b-sparks",
+    "situation": "You are drifting round a long corner and the sparks behind the kart have just turned from blue to orange.",
+    "prompt": "What do you do now?",
+    "answers": [
+      {
+        "id": "release",
+        "label": "Let go of the drift as the corner opens up",
+        "correct": true,
+        "response": "Orange is worth nearly three blues, and letting go is what cashes it in — the boost fires the moment you release. Aim to let go on the way out, so the shove arrives pointing down the straight."
+      },
+      {
+        "id": "hold-forever",
+        "label": "Keep holding until the corner ends, whatever happens",
+        "response": "Holding past the exit means sliding down a straight, which is slower than driving down one. Take the orange and straighten up."
+      },
+      {
+        "id": "blue",
+        "label": "Let go straight away — you should have released on blue",
+        "response": "Blue is a real boost and it is better than nothing, but orange is worth nearly three of them. If the corner is long enough to reach orange, it is long enough to wait for it."
+      }
+    ],
+    "takeaway": "Blue, then orange, then let go on the way out. That is the whole drift."
+  },
+  {
+    "id": "b-kart-choice",
+    "situation": "Choosing a kart. One has a big top speed and takes an age to wind back up after a knock; the other is back at full pelt almost immediately.",
+    "prompt": "Which one should you be driving?",
+    "answers": [
+      {
+        "id": "accel",
+        "label": "The one that gets going again fastest",
+        "correct": true,
+        "response": "You get hit. Everybody gets hit — that is what the items are for — and the question that actually decides races is how long you spend slow afterwards. Pick-up beats top speed you would rarely reach anyway."
+      },
+      {
+        "id": "top-speed",
+        "label": "The one with the highest top speed",
+        "response": "Top speed is real, and it is the number that matters least for you: on a busy track you spend more time recovering than you do flat out."
+      },
+      {
+        "id": "same",
+        "label": "It makes no real difference",
+        "response": "It makes a bigger difference than almost anything else you can choose in a menu — and unlike everything else in this course, it is a decision you make once and then never think about again."
+      }
+    ],
+    "takeaway": "Pick the kart that gets going again fastest, not the one that goes fastest."
+  }
+]

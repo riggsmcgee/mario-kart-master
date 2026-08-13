@@ -5,10 +5,10 @@
     "prompt": "What do you do with the banana?",
     "diagram": {
       "road": "straight",
-      "caption": "{rival} on your bumper. The banana is still in your hands.",
+      "caption": "{rival} on your bumper, and the banana still in the slot.",
+      "holding": ["banana"],
       "markers": [
         { "kind": "rival", "at": 0.14, "lane": 0, "label": "{rival}" },
-        { "kind": "banana", "at": 0.42, "lane": 0 },
         { "kind": "you", "at": 0.58, "lane": 0, "label": "You" }
       ]
     },
@@ -39,9 +39,9 @@
     "diagram": {
       "road": "straight",
       "caption": "She is ahead, but not exactly holding a straight line.",
+      "holding": ["shell-green"],
       "markers": [
         { "kind": "rival", "at": 0.78, "lane": 0.45, "label": "{rival}" },
-        { "kind": "shell-green", "at": 0.28, "lane": 0 },
         { "kind": "you", "at": 0.44, "lane": -0.1, "label": "You" }
       ]
     },
@@ -105,10 +105,10 @@
     "prompt": "What do you do with the bob-omb?",
     "diagram": {
       "road": "straight",
-      "caption": "Behind you, and counting down.",
+      "caption": "She is right behind you, and the fuse is already lit.",
+      "holding": ["bomb"],
       "markers": [
         { "kind": "rival", "at": 0.16, "lane": 0.15, "label": "{rival}" },
-        { "kind": "bomb", "at": 0.42, "lane": 0 },
         { "kind": "you", "at": 0.6, "lane": 0, "label": "You" }
       ]
     },
@@ -139,10 +139,10 @@
     "diagram": {
       "road": "bend-right",
       "caption": "She is round the corner, where you cannot even see her.",
+      "holding": ["shell"],
       "markers": [
         { "kind": "rival", "at": 0.86, "lane": 0.2, "label": "{rival}" },
-        { "kind": "you", "at": 0.22, "lane": -0.3, "label": "You" },
-        { "kind": "shell", "at": 0.34, "lane": -0.3 }
+        { "kind": "you", "at": 0.22, "lane": -0.3, "label": "You" }
       ]
     },
     "answers": [
@@ -171,10 +171,10 @@
     "prompt": "What do you do about the red shell?",
     "diagram": {
       "road": "straight",
-      "caption": "Locked on, and closing.",
+      "caption": "Locked on, and closing. The banana is in the slot, not on the road.",
+      "holding": ["banana"],
       "markers": [
         { "kind": "shell", "at": 0.1, "lane": 0 },
-        { "kind": "banana", "at": 0.4, "lane": 0 },
         { "kind": "you", "at": 0.56, "lane": 0, "label": "You" }
       ]
     },
@@ -205,6 +205,7 @@
     "diagram": {
       "road": "straight",
       "caption": "Two slots, both full, and free items straight ahead.",
+      "holding": ["banana", "coin"],
       "markers": [
         { "kind": "you", "at": 0.28, "lane": 0, "label": "You" },
         { "kind": "box", "at": 0.8, "lane": -0.55 },
@@ -239,9 +240,9 @@
     "diagram": {
       "road": "straight",
       "caption": "Everybody has to drive at the boxes. Nobody has a choice about it.",
+      "holding": ["banana"],
       "markers": [
         { "kind": "you", "at": 0.4, "lane": 0, "label": "You" },
-        { "kind": "banana", "at": 0.3, "lane": 0 },
         { "kind": "box", "at": 0.82, "lane": -0.55 },
         { "kind": "box", "at": 0.82, "lane": 0 },
         { "kind": "box", "at": 0.82, "lane": 0.55 }
@@ -274,10 +275,10 @@
     "diagram": {
       "road": "straight",
       "caption": "Out in front, which is where the game hands you coins.",
+      "holding": ["coin"],
       "markers": [
         { "kind": "pack", "at": 0.12, "lane": 0 },
-        { "kind": "you", "at": 0.55, "lane": 0, "label": "You" },
-        { "kind": "coin", "at": 0.72, "lane": 0 }
+        { "kind": "you", "at": 0.55, "lane": 0, "label": "You" }
       ]
     },
     "answers": [
@@ -307,6 +308,7 @@
     "diagram": {
       "road": "bend-right",
       "caption": "The hairpin, and the long straight after it.",
+      "holding": ["mushroom"],
       "markers": [{ "kind": "you", "at": 0.22, "lane": -0.35, "label": "You" }]
     },
     "answers": [

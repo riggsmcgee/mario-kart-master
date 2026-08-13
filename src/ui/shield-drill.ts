@@ -336,7 +336,7 @@ export function createShieldDrill(options: ShieldDrillOptions): Mounted {
     view.syncKart(last.speed, poseAltitude, kart.steerAmount, dt);
 
     // The banana is only *behind* the kart while the key is down. Unheld, it sits in the item
-    // slot — the chip in the corner — which is exactly the distinction the chapter is teaching.
+    // slot in the top-left corner, which is exactly the distinction the chapter is teaching.
     const covered = input.isDown('item') && shield.hasItem;
     view.setItem(covered, time);
     view.setDroppedItem(shield.dropped);

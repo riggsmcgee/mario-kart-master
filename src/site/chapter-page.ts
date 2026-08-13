@@ -33,8 +33,6 @@ import { nextChapter, starsFor } from '../data/chapters';
 import type { ProgressStore } from '../backend/progress';
 import type { Sfx } from '../ui/sfx';
 import { celebrate } from '../ui/confetti';
-import { createVoiceover, type VoiceoverHandle } from '../ui/voiceover';
-import { VOICEOVER } from '../data/voiceover';
 import { el, rich } from './dom';
 import { fill } from './player';
 import { go, hrefFor } from './router';
@@ -44,6 +42,40 @@ export interface ChapterPageDeps {
   player: Player;
   progress: ProgressStore;
   sfx: Sfx;
+}
+
+/**
+ * Ignore a key that was already held when this button was given focus. (Riggs, 2026-08-13.)
+ *
+ * Chapter 1's drill is five countdowns held on Space. `finish()` moves focus to the next-chapter
+ * button the moment the fifth one lands — and if her thumb is still on Space at that instant, the
+ * key repeats onto a button that is now focused and the site walks itself into Chapter 2. Riggs
+ * called it "not a big deal, but a little disorientating", which is exactly what it is: nothing is
+ * lost, she has simply been moved somewhere she did not ask to go.
+ *
+ * The fix has to distinguish *held over* from *pressed just now*, because a keyboard reader
+ * pressing Space on a focused button must still work. A key that was already down when focus
+ * arrived only ever reaches this element as a **repeat**, so the rule is: a repeat never
+ * activates, and a release that was never preceded by a real press here never activates either.
+ * (Space fires the click on keyup, Enter on keydown, hence both halves.)
+ */
+function ignoreHeldKey(button: HTMLButtonElement): void {
+  let pressedHere = false;
+
+  button.addEventListener('keydown', (event) => {
+    if (event.key !== ' ' && event.key !== 'Enter') return;
+    if (event.repeat) {
+      event.preventDefault();
+      return;
+    }
+    pressedHere = true;
+  });
+
+  button.addEventListener('keyup', (event) => {
+    if (event.key !== ' ' && event.key !== 'Enter') return;
+    if (!pressedHere) event.preventDefault();
+    pressedHere = false;
+  });
 }
 
 /** Three stars, filled or hollow. */
@@ -131,6 +163,8 @@ function chapterShell(meta: ChapterMeta, deps: ChapterPageDeps) {
     sfx.play('page');
     go(next ? { name: 'chapter', id: next.id } : { name: 'home' });
   });
+  // This is the button `finish()` focuses, so it is the one a still-held Space would press.
+  ignoreHeldKey(nextButton);
 
   /** Draw the current done-state. Called on load and again whenever she finishes. */
   function paintStamp(fresh: boolean): void {
@@ -219,7 +253,6 @@ export function renderChapter(
   progress.startChapter(meta.id);
 
   let custom: Mounted | null = null;
-  let voice: VoiceoverHandle | null = null;
 
   const page = el('article', { class: 'page wrap' });
 
@@ -228,19 +261,13 @@ export function renderChapter(
     el('p', { class: 'chapter-hook' }, rich(t(meta.hook))),
   );
 
-  const transcript = VOICEOVER[meta.id];
-  if (transcript && transcript.length > 0) {
-    voice = createVoiceover({ chapterId: meta.id, transcript, t });
-    page.append(voice.root);
-  }
-
   // A chapter that renders its own body, and then genuinely owns it.
   //
   // Chapter 8's programme is not a hook-concept-video chapter, and bending the template around
-  // one page would cost the other eight something. So it keeps the heading, the hook and the
-  // voiceover — enough that it does not read as a different website — and everything below that
-  // is its own, including its own done row. The template stops here rather than adding a second
-  // copy of furniture the custom page has already drawn.
+  // one page would cost the other eight something. So it keeps the heading and the hook — enough
+  // that it does not read as a different website — and everything below that is its own, including
+  // its own done row. The template stops here rather than adding a second copy of furniture the
+  // custom page has already drawn.
   //
   // Mounted on a microtask for the same reason the drills are: it draws track schematics, and an
   // SVG that is not yet in the document measures zero.
@@ -254,7 +281,6 @@ export function renderChapter(
     return {
       dispose() {
         custom?.dispose();
-        voice?.dispose();
       },
     };
   }
@@ -271,14 +297,23 @@ export function renderChapter(
     // that leaves a page should say the same thing on all nine of them — naming the drill made
     // every chapter's exit look like a different control, and the drill names its own page
     // anyway. This also matches "Next: <chapter>" on the pages that have no practice.
+    //
+    // One word of it moves. (Riggs, 2026-08-13.) A chapter whose practice is a quiz says "Next:
+    // Quiz", because the promise on a button has to be the thing that is behind it — and the
+    // skip beside it changes with it, so the pair never disagree about what is being skipped.
+    const noun = meta.drill.kind === 'quiz' ? 'Quiz' : 'Practice';
     const tryButton = el(
       'a',
       { class: 'btn btn-go btn-try', href: hrefFor({ name: 'try', id: meta.id }) },
-      'Next: Practice',
+      `Next: ${noun}`,
     );
     tryButton.addEventListener('click', () => sfx.play('page'));
 
-    const skip = el('button', { class: 'btn btn-quiet', type: 'button' }, 'Skip the practice');
+    const skip = el(
+      'button',
+      { class: 'btn btn-quiet', type: 'button' },
+      `Skip the ${noun.toLowerCase()}`,
+    );
     skip.addEventListener('click', () => {
       ctx.finish();
       nextButton.click();
@@ -305,7 +340,6 @@ export function renderChapter(
   return {
     dispose() {
       custom?.dispose();
-      voice?.dispose();
     },
   };
 }

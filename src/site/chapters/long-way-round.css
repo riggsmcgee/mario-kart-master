@@ -1,0 +1,326 @@
+/* The long way round: Chapter 4's figure. (3b1, moved out of Chapter 0 on 2026-08-13.)
+
+   The site's one big animated moment, and the one place where the motion is carrying an argument
+   rather than decorating one. Read `long-way-round.ts` for what it is drawing and why.
+
+   **The rule every keyframe track here obeys.** The styles outside `@keyframes` are the *finished*
+   frame — lines fully drawn, pad lit, captions readable, green kart over the line. Each animation
+   starts somewhere earlier and lands back on exactly those values, and none of them set a fill
+   mode. So "animations off" and "animation complete" are the same picture, which is what lets the
+   reduced-motion block below be three lines instead of a second stylesheet.
+
+   Colours are the theme's, unlike `ch6.css`'s tarmac: the two karts are colour-keyed to the two
+   captions, and those want to stay in step with the site's red and green rather than with a
+   photograph of a road. */
+
+.lwr-figure {
+  margin: 0 0 var(--gap-lg);
+  padding: 0;
+  max-width: 46rem;
+}
+
+.lwr-figure .eyebrow {
+  margin-bottom: 0.6rem;
+}
+
+.lwr-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--card);
+  border-radius: var(--round-lg);
+  box-shadow: var(--lift);
+}
+
+/* --- the road ------------------------------------------------------------- */
+
+.lwr-verge {
+  fill: none;
+  stroke: var(--turf);
+  stroke-width: 108;
+  stroke-linecap: round;
+  opacity: 0.35;
+}
+
+.lwr-road {
+  fill: none;
+  stroke: #4a4f5e;
+  stroke-width: 96;
+  stroke-linecap: round;
+}
+
+/* --- the two lines -------------------------------------------------------- */
+/*
+ * `pathLength="100"` in the markup rescales both paths to 100 units regardless of their real
+ * length, so a dash offset of 40 means "40% still to draw" on either of them. That is the whole
+ * trick that keeps a line in step with the kart drawing it: both are driven off the same
+ * percentages, and neither needs to know how long it actually is.
+ */
+
+.lwr-line {
+  fill: none;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+}
+
+/*
+ * Each line is its own kart's colour, and the captions carry the same two dots. Three colours
+ * doing one job each: red is her, green is you, and orange — the pad, and the third caption's dot
+ * — is the reason the green one won. An earlier version drew the winning line in trim yellow
+ * because it was the prettiest thing on the page, which left a green kart trailing a yellow line
+ * under a green caption dot, and quietly asked the reader to hold three identities for two karts.
+ */
+
+.lwr-line-inner {
+  stroke: var(--kerb);
+  opacity: 0.85;
+}
+
+.lwr-line-outer {
+  stroke: var(--turf);
+}
+
+/* --- the karts ------------------------------------------------------------ */
+/*
+ * `transform-box: view-box` with a zero origin is what puts the *drawing's* origin on the path
+ * rather than the corner of its bounding box — the karts are drawn around (0, 0) for exactly this
+ * reason. `offset-rotate` is left at its default, so each kart points the way its line is going,
+ * which is the same convention the lap map's kart marker uses.
+ */
+
+.lwr-kart {
+  offset-distance: 100%;
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+/* --- the boost pad -------------------------------------------------------- */
+
+.lwr-pad {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 1;
+}
+
+/* --- the captions --------------------------------------------------------- */
+
+.lwr-captions {
+  list-style: none;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.lwr-cap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+  opacity: 1;
+  transform: none;
+}
+
+.lwr-cap::before {
+  content: '';
+  flex: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  transform: translateY(0.05rem);
+}
+
+.lwr-cap[data-who='rival']::before {
+  background: var(--kerb);
+}
+
+.lwr-cap[data-who='you']::before {
+  background: var(--turf);
+}
+
+/* The third caption is the conclusion, so it is the one allowed to look like one. */
+.lwr-cap[data-who='win'] {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.lwr-cap[data-who='win']::before {
+  background: var(--boost);
+}
+
+.lwr-again {
+  margin-top: 0.4rem;
+  padding-left: 0;
+  font-size: 0.95rem;
+}
+
+/* --- the animation -------------------------------------------------------- *
+ *
+ * Only under `.lwr-playing`, which the replay button takes off and puts back on. Every track below
+ * ends on the resting values above.
+ *
+ * **The numbers are measured, not chosen.** The two lines were handed to `getTotalLength()` in a
+ * browser: the outer one is 1124 units, the inner one 855 — so the wide way really is 31% further,
+ * which is the fact the whole picture rests on. The pad sits at 48.9% along the outer line, found
+ * by walking it and taking the closest point rather than by guessing at the geometry.
+ *
+ * Everything below follows from those three numbers:
+ *
+ *  - Red covers 855 units in 7.4s: 116 units a second, flat the whole way.
+ *  - Green covers her first 550 units — the stretch up to the pad — in 5.0s. That is 110 a second,
+ *    and it is *deliberately below red's 116*: the site's opening line is "she's faster than you",
+ *    and a picture where the slower kart is quietly the faster one would be arguing the opposite.
+ *  - Then the pad, and 574 units in 2.0s, which is where the race is won.
+ *
+ * Measured on the result: red leads until 5.6s of a 7.4s run, green goes past her on the bottom
+ * straight, and green crosses with red still 130-odd units short of the line. The overtake is late
+ * on purpose. An early one would make the wide lane look like the obvious choice, and the reason
+ * this chapter exists is that it is not the obvious choice.
+ */
+
+/* Red: constant pace, from the start line to short of the finish. */
+@keyframes lwr-ride-inner {
+  from {
+    offset-distance: 0%;
+  }
+}
+
+@keyframes lwr-draw-inner {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+
+/* Green: behind, then over the pad, then past her.
+ *
+ * 71.4% of 7.0s is the 5.0s mark, and 48.9% is where the pad is — so that stop is the crossing.
+ * The stop after it is the surge and the last one is it settling, which is what a dash panel
+ * actually does. The dash-offset stops are the same numbers inverted (offset = 100 − distance),
+ * and that is what holds a line to the kart drawing it: edit one and the other has to move with
+ * it or the road starts appearing under a kart that has not reached it. */
+@keyframes lwr-ride-outer {
+  0% {
+    offset-distance: 0%;
+  }
+  71.4% {
+    offset-distance: 48.9%;
+  }
+  82% {
+    offset-distance: 78%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes lwr-draw-outer {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  71.4% {
+    stroke-dashoffset: 51.1;
+  }
+  82% {
+    stroke-dashoffset: 22;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The pad fires as she crosses it, at green's 71.4%. Before that it is dim: it is scenery until
+   it is used, and the chapter's claim is about what it is worth *going out of your way for*. */
+@keyframes lwr-pad-fire {
+  0%,
+  68% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  73% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+  84%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lwr-cap-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+.lwr-playing .lwr-kart-inner {
+  animation: lwr-ride-inner 7.4s linear;
+}
+
+.lwr-playing .lwr-line-inner {
+  animation: lwr-draw-inner 7.4s linear;
+}
+
+.lwr-playing .lwr-kart-outer {
+  animation: lwr-ride-outer 7s linear;
+}
+
+.lwr-playing .lwr-line-outer {
+  animation: lwr-draw-outer 7s linear;
+}
+
+.lwr-playing .lwr-pad {
+  animation: lwr-pad-fire 7s linear;
+}
+
+/* `backwards` so a caption stays hidden through its delay rather than showing, vanishing, and
+   fading back in. It is the one place here that needs a fill mode, and it needs it before the
+   animation rather than after — the resting state still wins at the end. */
+.lwr-playing .lwr-cap {
+  animation: lwr-cap-in 0.5s ease-out backwards;
+}
+
+/* Each caption lands on the thing it is describing rather than on a tidy interval. The second one
+   arrives at 2.9s, which is where green commits to the wide lane and the choice is visibly being
+   made; the third at 5.9s, just after the overtake at 5.6s, so it reads as a verdict on something
+   she has watched rather than a promise about something she has not. */
+.lwr-playing .lwr-cap:nth-child(1) {
+  animation-delay: 0.6s;
+}
+
+.lwr-playing .lwr-cap:nth-child(2) {
+  animation-delay: 2.9s;
+}
+
+.lwr-playing .lwr-cap:nth-child(3) {
+  animation-delay: 5.9s;
+}
+
+/* --- reduced motion ------------------------------------------------------- */
+/*
+ * Stronger than theme.css's global rule, and deliberately so. That one collapses every duration to
+ * near zero, which is right for decoration but not here: these animations have delays of up to
+ * 5.6s, and collapsing the durations alone would leave a reader who asked for no motion waiting
+ * five seconds for the last caption to appear. Switching them off outright lands the whole figure
+ * on its finished frame immediately, which is the frame that makes the argument anyway.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  .lwr-figure *,
+  .lwr-figure *::before {
+    animation: none !important;
+  }
+}
+
+/* --- print ---------------------------------------------------------------- */
+
+@media print {
+  .lwr-again {
+    display: none;
+  }
+}

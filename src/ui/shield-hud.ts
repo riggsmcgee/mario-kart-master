@@ -10,9 +10,21 @@
  *
  *  - the **warning**, top centre, with a bar that drains toward impact so "how long have I got"
  *    is a length rather than a number;
- *  - the **item chip**, bottom left, because "do I even have anything to raise" decides whether
+ *  - the **item slot**, top left, because "do I even have anything to raise" decides whether
  *    holding the key does anything at all;
  *  - the **verdict**, centre, for the moment it resolves.
+ *
+ * **The item slot is where the game puts it, and it is a picture.** (Riggs, 2026-08-13: "Let's move
+ * the item box to the top left to reflect the game and make it a bit more visual.") It used to be a
+ * grey pill in the bottom-left corner reading "No item — drive through a box", which is a sentence
+ * in the wrong corner about the one thing this drill is entirely about. Two problems, one fix:
+ * bottom-left is the last place anybody who has played the game would look for their item, and a
+ * line of text has to be *read*, which means looking away from the road at the exact moment the
+ * siren is telling you not to.
+ *
+ * So it is a slot: a window in the top-left with the banana drawn inside it, one glance and done.
+ * The words survive underneath in six characters or fewer, because the slot's three states are
+ * empty, held and *out behind you*, and no picture on its own separates the last two.
  */
 
 export type ItemState = 'ready' | 'up' | 'empty';
@@ -50,11 +62,43 @@ function shellIcon(): SVGSVGElement {
   return svg;
 }
 
+/**
+ * The banana, in the slot. Original art, the same shape the quiz diagrams draw.
+ *
+ * Same argument as the shell above and the reason this HUD exists at all: a picture is read from
+ * the corner of the eye, and the corner of the eye is all this drill can spare.
+ */
+function bananaIcon(): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '-14 -14 28 28');
+  svg.setAttribute('class', 'shield-slot-item');
+  svg.setAttribute('aria-hidden', 'true');
+
+  const body = document.createElementNS(SVG_NS, 'path');
+  body.setAttribute('d', 'M -11 8 Q 0 -13 11 8 Q 0 1 -11 8 Z');
+  body.setAttribute('fill', '#ffd23f');
+  body.setAttribute('stroke', '#c99b0f');
+  body.setAttribute('stroke-width', '1.8');
+  body.setAttribute('stroke-linejoin', 'round');
+  svg.append(body);
+
+  const stalk = document.createElementNS(SVG_NS, 'path');
+  stalk.setAttribute('d', 'M 9 5 L 12 -1');
+  stalk.setAttribute('stroke', '#7a5f0a');
+  stalk.setAttribute('stroke-width', '2.6');
+  stalk.setAttribute('stroke-linecap', 'round');
+  stalk.setAttribute('fill', 'none');
+  svg.append(stalk);
+
+  return svg;
+}
+
 export class ShieldHud {
   private readonly root: HTMLDivElement;
   private readonly warning: HTMLDivElement;
   private readonly bar: HTMLDivElement;
-  private readonly chip: HTMLDivElement;
+  private readonly slot: HTMLDivElement;
+  private readonly slotNote: HTMLDivElement;
   private readonly verdict: HTMLDivElement;
   private readonly verdictTitle: HTMLDivElement;
   private readonly verdictDetail: HTMLDivElement;
@@ -92,8 +136,16 @@ export class ShieldHud {
     head.append(icon, text, arrow);
     this.warning.append(head, track);
 
-    this.chip = document.createElement('div');
-    this.chip.className = 'shield-chip';
+    const slotBox = document.createElement('div');
+    slotBox.className = 'shield-slot-box';
+    slotBox.append(bananaIcon());
+
+    this.slotNote = document.createElement('div');
+    this.slotNote.className = 'shield-slot-note';
+
+    this.slot = document.createElement('div');
+    this.slot.className = 'shield-slot';
+    this.slot.append(slotBox, this.slotNote);
 
     this.verdict = document.createElement('div');
     this.verdict.className = 'shield-verdict';
@@ -104,8 +156,10 @@ export class ShieldHud {
     this.verdictDetail.className = 'shield-verdict-detail';
     this.verdict.append(this.verdictTitle, this.verdictDetail);
 
-    this.root.append(this.warning, this.chip, this.verdict);
+    this.root.append(this.warning, this.slot, this.verdict);
     mount.append(this.root);
+
+    this.setItem('empty');
   }
 
   dispose(): void {
@@ -122,11 +176,17 @@ export class ShieldHud {
     this.warning.dataset.urgent = String(progress > 0.55);
   }
 
+  /**
+   * Three states, three words each at most.
+   *
+   * `empty` is the only one that has to say what to *do* about it, because it is the only one she
+   * cannot fix by pressing something she is already holding.
+   */
   setItem(state: ItemState): void {
-    this.chip.dataset.state = state;
-    if (state === 'up') this.chip.textContent = '🍌 Banana out back';
-    else if (state === 'ready') this.chip.textContent = '🍌 Banana ready — hold Shift';
-    else this.chip.textContent = 'No item — drive through a box';
+    this.slot.dataset.state = state;
+    if (state === 'up') this.slotNote.textContent = 'Out behind you';
+    else if (state === 'ready') this.slotNote.textContent = 'Hold Shift';
+    else this.slotNote.textContent = 'Drive through a box';
   }
 
   say(title: string, detail: string, tone: VerdictTone, ms = 1800): void {

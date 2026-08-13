@@ -21,7 +21,8 @@ import type { ProgressStore, SyncState } from '../backend/progress';
 import type { Sfx } from '../ui/sfx';
 import { CHAPTERS } from '../data/chapters';
 import { el, rich } from './dom';
-import { fill } from './player';
+import { forgetDoorman } from './doorman';
+import { fill, RIVAL } from './player';
 import { go } from './router';
 import type { Mounted, Player } from './types';
 
@@ -240,7 +241,31 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
       reset.textContent = 'Really clear it? Click once more.';
       return;
     }
+    /**
+     * **"Everything on this computer" has to mean everything.** (Riggs, 2026-08-13: *"does the clear
+     * progress button also reset the game for Kayla? Because the game for her doesn't seem to be
+     * pulling up."*)
+     *
+     * It did not, and that is exactly why. This button used to clear `progress.ts` and nothing else,
+     * while the site quietly writes **three** independent things to `localStorage`:
+     *
+     *  - the progress snapshot, which it did clear;
+     *  - `mkm.kayla.admitted.v1`, set once at the end of Kayla's experience — so a machine that had
+     *    been through it once was waved straight past it for good, which is the symptom he hit;
+     *  - the doorman's own "somebody has answered this" flag, so the question is not asked twice.
+     *
+     * The first was missed in a way worth naming: `forgetAdmission` was written for this button, in
+     * the same pass that created the flag, exported with a comment saying *"for the settings page's
+     * clear progress"* — and then never called. A helper written for a caller that never arrives is
+     * indistinguishable from a helper that works, because nothing fails.
+     *
+     * The general rule this now follows: a reset that knows about one storage key is a reset that
+     * will be wrong the first time a second one is added. All three are cleared here, together, and
+     * the site is handed back in the state it shipped in — at the door, asking who is training.
+     */
     progress.clearLocal();
+    forgetDoorman();
+    void import('./kayla/admission').then(({ forgetAdmission }) => forgetAdmission());
     reset.textContent = 'Cleared.';
     armed = false;
     go({ name: 'home' });
@@ -251,8 +276,94 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
       'section',
       { class: 'card stack' },
       el('h2', null, "Who's using this?"),
-      el('p', null, t('Currently set up for **{name}**.')),
+      el('p', null, rich(t('Currently set up for **{name}**.'))),
       el('div', { style: { display: 'flex', gap: '0.6rem', flexWrap: 'wrap' } }, changeUser, reset),
+    ),
+  );
+
+  // --- the other thing ------------------------------------------------------
+
+  /**
+   * A door into Kayla's half, for everyone else.
+   *
+   * Riggs, 2026-08-13: *"maybe a button for trying out Kay's game for everyone in the settings would
+   * be nice."*
+   *
+   * **Why it lives here and not on the front page.** The experience is built to be *found* — Kayla
+   * clicks her own name at the doorman out of nosiness and gets ten minutes of a website insisting
+   * there is nothing to see. Advertising it anywhere she will pass spends that discovery for her. The
+   * settings page is the one screen in the site she has no reason to open and everybody else does,
+   * which makes it the only place this button is safe.
+   *
+   * **It is a look round, not a run.** `preview: true`, so it plays identically and then writes
+   * nothing: no admission flag, no role change, nothing touched. Somebody demonstrating it to the end
+   * cannot accidentally spend Kayla's unlock on her behalf.
+   *
+   * **It opens over the whole window rather than being routed to.** Two reasons. A URL would put it
+   * one address bar away from being stumbled on, and the whole thing is a joke about there being
+   * nothing to visit. And the stage is a full-viewport column with a fixed subtitle strip and a fixed
+   * exit — dropped into the middle of a settings page it would sit under the site header with its
+   * furniture floating over the site's, which is the one thing it must never look like. `.k-over` in
+   * `kayla.css` is the same overlay the prototype bench uses, for the same reason.
+   */
+  let visiting: Mounted | null = null;
+  let over: HTMLElement | null = null;
+
+  const visit = el('button', { class: 'btn btn-quiet', type: 'button' }, "Have a look at Kayla's");
+
+  function leaveVisit(): void {
+    visiting?.dispose();
+    visiting = null;
+    over?.remove();
+    over = null;
+    document.body.classList.remove('k-over-open');
+    visit.disabled = false;
+    visit.textContent = "Have a look at Kayla's";
+    visit.focus();
+  }
+
+  visit.addEventListener('click', () => {
+    visit.disabled = true;
+    visit.textContent = 'Nothing to see here…';
+    void import('./kayla')
+      .then(({ renderKayla }) => {
+        over = el('div', { class: 'k-over' });
+        document.body.append(over);
+        document.body.classList.add('k-over-open');
+        visiting = renderKayla(over, {
+          sfx,
+          onLeave: leaveVisit,
+          // Nothing to admit anybody to — whoever is looking is already in. It ends, and it puts
+          // them back on the page they opened it from.
+          onAdmitted: leaveVisit,
+          preview: true,
+        });
+      })
+      .catch((error: unknown) => {
+        console.error('[settings] the Kayla build did not load', error);
+        visit.disabled = false;
+        visit.textContent = 'It would not load. Try again?';
+      });
+  });
+
+  page.append(
+    el(
+      'section',
+      { class: 'card stack' },
+      el('h2', null, 'The other thing'),
+      el(
+        'p',
+        null,
+        rich(
+          `There is a second version of this site behind ${RIVAL}'s name at the door. It is about ten minutes long, it is not a course, and it insists throughout that it does not exist.`,
+        ),
+      ),
+      el(
+        'p',
+        { class: 'eyebrow' },
+        'Looking at it from here changes nothing and saves nothing. The way out is the button in the corner.',
+      ),
+      visit,
     ),
   );
 
@@ -277,6 +388,15 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
     dispose() {
       unMute();
       unSync();
+      // Leaving settings while the visit is open has to take the visit with it — it owns timers, a
+      // speech queue and an audio context, it is parented to `body` rather than to this page, and
+      // `app.ts` only ever calls this one method. The scroll lock goes with it or the site is left
+      // unable to scroll on a page that no longer exists.
+      visiting?.dispose();
+      visiting = null;
+      over?.remove();
+      over = null;
+      document.body.classList.remove('k-over-open');
     },
   };
 }

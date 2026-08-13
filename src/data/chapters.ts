@@ -29,20 +29,31 @@
  *  - **Ch0 — Bayesic, "How to Play Mario Kart 8 Deluxe"** (12m32s). The anchor. Its own sections
  *    run Basics / Essential mechanics / Item management / Putting it together, which is the whole
  *    of Chapters 1–4 in one place from somebody who explains well.
- *  - **Ch5 — Bayesic, "What is the point of COINS?"** (5m00s). One mechanic, five minutes, and it
- *    ends by costing coins out in seconds-per-race. It is linked from the intro video's own
- *    description, which is how it was found.
  *  - **Ch6 — Bayesic, "Everything You Need to Know About Drifting"** (13m3s). Starts at 1:31, the
  *    uploader's "Basics of Drifting" mark. The two sections after 5:03 are competitive tech and
  *    she is told to stop there.
  *
- * All three are the same person, which was not the plan and is better than the plan: one voice
- * across the course reads as a recommendation rather than a pile of search results.
+ * Both are the same person, which was not the plan and is better than the plan: one voice across
+ * the course reads as a recommendation rather than a pile of search results.
+ *
+ * **Chapter 5's video was cut on 2026-08-13** (Riggs: "too technical and just says the same
+ * thing"). Bayesic's "What is the point of COINS?" passed the one-mechanic rule and still failed
+ * the reader: the chapter's own two sentences — ten coins, then keep them — are the whole of what
+ * she needs, and the five minutes underneath them are a frame-rate argument off an archived Reddit
+ * thread. A video that restates the page in more detail than the page wanted is a tax on watching
+ * it. The lesson keeps the claim; the arithmetic goes.
  *
  * **Cut, with reasons.** Shortcat's "FULL Beginner Guide" was Chapter 2's item video — it is
  * thirty-seven minutes long and reaches items at 11:03. SwitchPlay's "Complete Beginner's Guide"
  * was Chapter 5's; it is a nine-minute tour of the entire game, and its description states it was
  * narrated by an AI voice. On a present, that one disqualifies itself.
+ *
+ * **The bookends. (Riggs, 2026-08-13: "have her take a big quiz at the beginning and at the end to
+ * see how much she learned".)** Chapter 0's practice page and the front of Chapter 8 are the same
+ * twelve questions. Neither is a chapter's own exercise — they are one measurement taken twice, and
+ * the number that matters is the difference between them. `chapters/benchmark.ts` holds the
+ * reasoning. What this file contributes is that neither end needed a route of its own: Chapter 0's
+ * is an ordinary practice page, and Chapter 8 already renders itself.
  */
 
 export interface VideoRef {
@@ -75,6 +86,19 @@ export interface Drill {
   title: string;
   /** One line under it: what she is actually about to do. */
   blurb: string;
+  /**
+   * What the practice actually *is*, for the two buttons that lead into it and past it.
+   *
+   * (Riggs, 2026-08-13, on Chapter 0: "Replace with 'Next: Quiz'".) The lesson page used to say
+   * "Next: Practice" on all nine chapters — the right call when every practice was a driving
+   * drill, and wrong the moment one of them is twelve questions and nothing moves. A button that
+   * promises practice and delivers a quiz is a small lie told at the exact moment she is deciding
+   * whether to carry on.
+   *
+   * Two values, because there are two kinds of thing behind that button and no more. Absent means
+   * `practice`, so the seven driving chapters say nothing at all.
+   */
+  kind?: 'practice' | 'quiz';
 }
 
 /**
@@ -115,19 +139,24 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 0,
     skill: 'The goal',
     title: 'So you want to beat {rival} at Mario Kart?',
-    hook: '{rival} is faster than you. So we are going to beat her with homework instead.',
+    hook: '{rival} has played hundreds of hours of this. She knows about eight things you do not — and all eight can be written down.',
     video: {
       id: 'CpeyjM8dyuk',
       title: 'How to Play Mario Kart 8 Deluxe — The video I WISH I had when I first started',
       channel: 'Bayesic',
       note: 'Twelve minutes, and the only long one in the whole course. Watch it now and the next six chapters will feel like things you already half knew. He is the only person you will hear from besides me.',
     },
+    // The before half of the benchmark. See `chapters/benchmark.ts` for why it is taken twice and
+    // why this half deliberately keeps its answers to itself.
     drill: {
-      title: 'Five from the video',
+      title: 'Twelve questions, cold',
+      kind: 'quiz',
       blurb:
-        'Five quick ones, straight off the back of that video. Nothing is marked and nothing is locked — a wrong answer just explains itself.',
+        'You are meant to get most of these wrong — nothing here has been taught yet. Every answer explains itself, so a wrong one is the useful kind.',
     },
-    stars: { unit: 'right out of 5', two: 3, three: 4 },
+    // No stars, on purpose. This is a reading taken before the teaching starts, and handing out
+    // stars for a cold guess would make the number mean something it does not. The score is kept
+    // — it is half of the comparison at the end — but it is never dressed up as a result.
   },
   {
     id: 'ch1',
@@ -145,7 +174,12 @@ export const CHAPTERS: ChapterMeta[] = [
     id: 'ch2',
     number: 2,
     skill: 'Item smarts',
-    title: 'The banana behind you',
+    // "Defensive driving", not "The banana behind you". (Riggs, 2026-08-13.) The old title was the
+    // better sentence and the worse signpost: every chapter title is also the label on the button
+    // that leaves the chapter before it, and "Next: The banana behind you" tells somebody who has
+    // not read the chapter nothing about what they are about to be taught. The banana survives as
+    // the drill's name, which is where it was always doing its work.
+    title: 'Defensive driving',
     hook: 'Stop throwing things. Carry them behind you instead.',
     drill: {
       title: 'Hold the banana',
@@ -184,12 +218,10 @@ export const CHAPTERS: ChapterMeta[] = [
     skill: 'Lines and coins',
     title: 'The fast way round a corner',
     hook: 'Wide going in. Tight through the middle. Wide coming out.',
-    video: {
-      id: 'IlQRlP7FAlc',
-      title: 'What is the point of COINS in Mario Kart 8 Deluxe?',
-      channel: 'Bayesic',
-      note: 'Five minutes, one subject. He works out at the end roughly how many seconds a race full coins is worth, which is the number nobody ever tells you.',
-    },
+    // No video. (Riggs, 2026-08-13: "Just remove the video from Ch 5. It's too technical and just
+    // says the same thing.") It was five minutes on what coins are worth, and the chapter already
+    // says it in two sentences — so its whole contribution was a screenful of frame-rate arithmetic
+    // off a Reddit thread, aimed at somebody who wants to know whether to drive over the coin.
     drill: {
       title: 'Follow the line',
       blurb:
@@ -223,7 +255,10 @@ export const CHAPTERS: ChapterMeta[] = [
     id: 'ch7',
     number: 7,
     skill: 'Your kart',
-    title: 'Pick your weapon',
+    // "Pick your kart", not "Pick your weapon". (Riggs, 2026-08-13.) The joke title was writing a
+    // cheque the chapter does not cash: nothing in here is a weapon, and the title is also the
+    // label on Chapter 6's exit button, where it has to say what is behind it.
+    title: 'Pick your kart',
     hook: 'Pick the kart that gets going again fastest, not the one that goes fastest.',
     drill: {
       title: 'Build your kart',
@@ -237,6 +272,10 @@ export const CHAPTERS: ChapterMeta[] = [
     skill: 'The plan',
     title: 'The {rival} Plan',
     hook: 'Forty sessions. One a day, weekdays off at the weekend, one job each.',
+    // No `drill`, and so no practice page. The after half of the benchmark used to live at
+    // `#/chapter/ch8/try`; on 2026-08-13 Riggs moved it to the front of the chapter itself —
+    // "have the quiz be the first thing in the chapter, the actual plan comes after the quiz is
+    // done" — so the custom page owns both states and there is nothing at `/try` to route to.
     custom: true,
   },
 ];

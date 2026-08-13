@@ -23,7 +23,14 @@
  * file should say what is wrong, not render a blank card.
  */
 
-import { renderDiagram, type DiagramSpec, type MarkerKind, type RoadShape } from './quiz-diagram';
+import {
+  HELD_KINDS,
+  renderDiagram,
+  type DiagramSpec,
+  type HeldKind,
+  type MarkerKind,
+  type RoadShape,
+} from './quiz-diagram';
 
 export interface QuizAnswer {
   id: string;
@@ -75,6 +82,7 @@ const MARKER_KINDS: ReadonlySet<string> = new Set<MarkerKind>([
   'shell-green',
   'bomb',
   'coin',
+  'mushroom',
   'pad',
   'box',
 ]);
@@ -152,6 +160,21 @@ function parseDiagram(raw: unknown, where: string): DiagramSpec {
   });
 
   const spec: DiagramSpec = { road: road as RoadShape, markers: parsed };
+
+  const holding = source['holding'];
+  if (holding !== undefined) {
+    if (!Array.isArray(holding)) fail(where, 'has a "holding" that is not an array');
+    if (holding.length > 2) {
+      fail(where, `holds ${holding.length} items; the game gives you two slots`);
+    }
+    spec.holding = holding.map((entry, i) => {
+      if (typeof entry !== 'string' || !HELD_KINDS.has(entry)) {
+        fail(`${where} holding ${i}`, `is "${String(entry)}", which is not something you can hold`);
+      }
+      return entry as HeldKind;
+    });
+  }
+
   if (typeof source['caption'] === 'string') spec.caption = source['caption'];
   return spec;
 }

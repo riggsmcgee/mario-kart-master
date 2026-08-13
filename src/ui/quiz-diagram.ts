@@ -14,6 +14,19 @@
  *
  * Colours are fixed rather than themed: this is a picture of a place, and a road that turns pale
  * grey in light mode and charcoal in dark mode stops reading as tarmac.
+ *
+ * **What is in your hands is drawn, not only described. (Riggs, 2026-08-13: "show the items that
+ * you have visually in the corner as well as in the text. Apply to all relevant questions.")**
+ *
+ * Every card in the Chapter 2 deck turns on one thing — what you are holding — and that one thing
+ * was the only part of the situation the picture did not show. Two cards tried: they put the held
+ * item on the tarmac behind the kart, which is a picture of a banana *dropped*, and the caption
+ * underneath had to say "the banana is still in your hands" to argue with it.
+ *
+ * So the diagram grew an item slot, in the top-left, where the game puts it. It is a HUD and it is
+ * drawn like one: over the top of the world, last, so nothing about the road can hide it. A card
+ * with `holding` no longer needs a marker on the road for the item it is asking about, and the
+ * three cards that had one lost it.
  */
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -48,14 +61,56 @@ const COLOUR = {
   padChevron: '#fff6de',
   box: '#2fc4b2',
   boxTrim: '#ffffff',
+  mushroom: '#e8453c',
+  mushroomSpot: '#fdf3e3',
+  mushroomStalk: '#f6efe0',
   label: '#ffffff',
   labelHalo: '#1f3b22',
+  /**
+   * A *light* window with a dark frame, not the dark chip the first version used.
+   *
+   * Found by looking at all ten Chapter 2 cards rather than at the two that were designed against.
+   * A dark slot flatters a banana and a red shell and swallows the bob-omb whole — it is a
+   * near-black sphere, and on `rgba(18,22,30,…)` the only part of it left was the lit fuse. Every
+   * holdable item is either bright or dark, so the background has to be one or the other, and
+   * light is the one that keeps all six.
+   */
+  slot: '#f0f3f7',
+  slotEdge: '#1f2530',
 };
 
 export type RoadShape = 'straight' | 'bend-left' | 'bend-right';
 
 export type MarkerKind =
-  'you' | 'rival' | 'pack' | 'banana' | 'shell' | 'shell-green' | 'bomb' | 'coin' | 'pad' | 'box';
+  | 'you'
+  | 'rival'
+  | 'pack'
+  | 'banana'
+  | 'shell'
+  | 'shell-green'
+  | 'bomb'
+  | 'coin'
+  | 'mushroom'
+  | 'pad'
+  | 'box';
+
+/**
+ * What can sit in the item slot.
+ *
+ * Narrower than {@link MarkerKind} because the slot is a picture of your hands: a rival, the pack
+ * and a stretch of painted road are not things anybody is holding, and letting a deck ask for one
+ * would draw a kart the size of a postage stamp in the corner rather than fail.
+ */
+export type HeldKind = 'banana' | 'shell' | 'shell-green' | 'bomb' | 'coin' | 'mushroom';
+
+export const HELD_KINDS: ReadonlySet<string> = new Set<HeldKind>([
+  'banana',
+  'shell',
+  'shell-green',
+  'bomb',
+  'coin',
+  'mushroom',
+]);
 
 export interface DiagramMarker {
   kind: MarkerKind;
@@ -70,6 +125,11 @@ export interface DiagramMarker {
 export interface DiagramSpec {
   road: RoadShape;
   markers: DiagramMarker[];
+  /**
+   * What is in your item slots, drawn in the corner. One or two — two is what the game gives you,
+   * and a third would be a picture of something that cannot happen.
+   */
+  holding?: HeldKind[];
   /** One line under the picture, for anything the picture cannot say. */
   caption?: string;
 }
@@ -174,7 +234,15 @@ function kart(body: string, trim: string): SVGGElement {
   return group;
 }
 
-function marker(kind: MarkerKind): SVGGElement {
+/**
+ * One marker.
+ *
+ * `still` drops anything that is drawing *motion* — a shell's speed streaks, in practice. On the
+ * road those streaks are what separate "a shell is coming" from "a shell is lying there"; in the
+ * item slot they would be a picture of a shell already on its way, which is the opposite of what
+ * holding one means.
+ */
+function marker(kind: MarkerKind, still = false): SVGGElement {
   switch (kind) {
     case 'you':
       return kart(COLOUR.you, COLOUR.youTrim);
@@ -212,10 +280,20 @@ function marker(kind: MarkerKind): SVGGElement {
       const colour = kind === 'shell' ? COLOUR.shell : COLOUR.shellGreen;
       const group = svg('g');
       // Motion streaks first, so the orb sits on top of them.
-      for (const x of [-6, 0, 6]) {
-        group.append(
-          svg('rect', { x: x - 1, y: 10, width: 2, height: 9, rx: 1, fill: colour, opacity: 0.5 }),
-        );
+      if (!still) {
+        for (const x of [-6, 0, 6]) {
+          group.append(
+            svg('rect', {
+              x: x - 1,
+              y: 10,
+              width: 2,
+              height: 9,
+              rx: 1,
+              fill: colour,
+              opacity: 0.5,
+            }),
+          );
+        }
       }
       group.append(svg('circle', { cx: 0, cy: 0, r: 9, fill: colour }));
       group.append(svg('rect', { x: -9, y: -2, width: 18, height: 4, fill: COLOUR.shellBand }));
@@ -239,8 +317,32 @@ function marker(kind: MarkerKind): SVGGElement {
     }
     case 'coin': {
       const group = svg('g');
-      group.append(svg('circle', { cx: 0, cy: 0, r: 8, fill: COLOUR.coin }));
+      // Rimmed in its own darker gold: a flat yellow disc has an edge against tarmac and almost
+      // none against the pale item slot, and the rim costs nothing in either place.
+      group.append(
+        svg('circle', {
+          cx: 0,
+          cy: 0,
+          r: 8,
+          fill: COLOUR.coin,
+          stroke: COLOUR.coinCore,
+          'stroke-width': 1.5,
+        }),
+      );
       group.append(svg('circle', { cx: 0, cy: 0, r: 3.4, fill: COLOUR.coinCore }));
+      return group;
+    }
+    case 'mushroom': {
+      // Stalk first, cap over it, so the cap's flat underside is the join rather than a seam.
+      const group = svg('g');
+      group.append(
+        svg('rect', { x: -5, y: -1, width: 10, height: 10, rx: 3.5, fill: COLOUR.mushroomStalk }),
+      );
+      group.append(
+        svg('path', { d: 'M -12 0 Q -12 -12 0 -12 Q 12 -12 12 0 Z', fill: COLOUR.mushroom }),
+      );
+      group.append(svg('circle', { cx: -5, cy: -5, r: 2.6, fill: COLOUR.mushroomSpot }));
+      group.append(svg('circle', { cx: 4, cy: -6.5, r: 2, fill: COLOUR.mushroomSpot }));
       return group;
     }
     case 'pad': {
@@ -281,7 +383,67 @@ function marker(kind: MarkerKind): SVGGElement {
 }
 
 /** Markers that are objects rather than vehicles do not care which way the road runs. */
-const UNROTATED: ReadonlySet<MarkerKind> = new Set(['banana', 'coin', 'box', 'bomb']);
+const UNROTATED: ReadonlySet<MarkerKind> = new Set(['banana', 'coin', 'box', 'bomb', 'mushroom']);
+
+// --- the item slot ---------------------------------------------------------
+
+/** One cell per slot, top-left, laid out the way the game lays them out. */
+const SLOT = { x: 12, y: 12, size: 42, gap: 7 };
+
+/**
+ * What you are holding, drawn as the game draws it: a rounded window with the item inside.
+ *
+ * Captioned in words as well, because the picture is carrying real information and the rule
+ * everywhere else on this site is that nothing is left to the picture alone (3e1). "In your hands"
+ * rather than "items": the whole of Chapter 2 is the difference between an item you *have* and one
+ * you are *holding*, and the caption may as well be teaching it too.
+ */
+function itemSlots(kinds: readonly HeldKind[]): SVGGElement {
+  const group = svg('g');
+
+  kinds.forEach((kind, index) => {
+    const cell = svg('g', {
+      transform: `translate(${SLOT.x + index * (SLOT.size + SLOT.gap)} ${SLOT.y})`,
+    });
+    cell.append(
+      svg('rect', {
+        x: 0,
+        y: 0,
+        width: SLOT.size,
+        height: SLOT.size,
+        rx: 10,
+        fill: COLOUR.slot,
+        stroke: COLOUR.slotEdge,
+        'stroke-width': 2.5,
+      }),
+    );
+
+    const icon = marker(kind, true);
+    // Scaled down a touch: the road markers are drawn to about ±16 units, and a slot is 42 across
+    // with a border to stay inside.
+    icon.setAttribute('transform', `translate(${SLOT.size / 2} ${SLOT.size / 2}) scale(0.92)`);
+    cell.append(icon);
+
+    group.append(cell);
+  });
+
+  const caption = svg('text', {
+    x: SLOT.x,
+    y: SLOT.y + SLOT.size + 15,
+    'font-size': 11,
+    'font-weight': 700,
+    'letter-spacing': 0.4,
+    fill: COLOUR.label,
+    stroke: COLOUR.labelHalo,
+    'stroke-width': 3.5,
+    'stroke-linejoin': 'round',
+    style: 'paint-order: stroke',
+  });
+  caption.textContent = 'in your hands';
+  group.append(caption);
+
+  return group;
+}
 
 function label(text: string): SVGTextElement {
   const node = svg('text', {
@@ -351,6 +513,11 @@ export function renderDiagram(spec: DiagramSpec, alt: string): SVGSVGElement {
     if (item.label) holder.append(label(item.label));
     root.append(holder);
   }
+
+  // Last, so it is over everything. It is a HUD: on a left-hand bend the road runs out through
+  // this exact corner, and a slot that could be hidden by the scenery would be no use on the one
+  // card that needed it most.
+  if (spec.holding && spec.holding.length > 0) root.append(itemSlots(spec.holding));
 
   return root;
 }

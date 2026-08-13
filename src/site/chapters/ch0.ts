@@ -1,70 +1,45 @@
 /**
  * Chapter 0: the goal. (2b1)
  *
- * The only chapter with nothing to do in it, which makes it the one most likely to be closed. It
- * has exactly one job: earn the next hour of her evening before she has spent any of
- * them. Everything here is argument, and the argument is made in a deliberate order.
+ * The only chapter with nothing to teach, which makes it the one most likely to be closed. It has
+ * exactly one job: earn the next hour of her evening before she has spent any of it.
  *
- * **Concede first.** The hook already admits {rival} is faster; this section refuses to walk that
- * back. A present that opens by telling her the problem is not really a problem reads as flattery
- * and gets closed politely. Only after the concession does the turn land — reactions are one way
- * to win a race, preparation is another, and only one of them can be practised at a kitchen
- * table on a Tuesday.
+ * **The argument is no longer about reflexes.** (Riggs, 2026-08-13: "I don't feel like the emphasis
+ * on reflexes are very applicable. Let's just craft the narrative around {rival} being a gamer and
+ * knowing a few key things that differentiate her.")
  *
- * **Kendahl carries the paragraph that matters.** Everything else on this page is a nephew's
- * claim. Kendahl is evidence she already has: same house, same sofa, same sister, no flashy
- * technique anywhere, and she wins anyway. Evidence-she-can-check beats expertise-she-cannot,
- * which is why the case study appears in the intro and not only in Chapter 5 where it is taught.
+ * The old version opened by conceding that {rival} is faster and then turned on it — reactions are
+ * one way to win a race, preparation is another. It read well and it was arguing with a claim
+ * nobody in this house has made. {rival} does not beat her mum on reaction time; she beats her
+ * because she has played hundreds of hours of this and has picked up things nobody ever said out
+ * loud. That is a much smaller and much more useful gap, because it is made of specific facts and
+ * facts can be handed over in an evening.
  *
- * **The chapter list is read from CHAPTERS rather than retyped.** Copy that duplicates data
- * drifts, and a promise that lists eight things and then delivers seven is a small betrayal at
- * the exact moment trust is being built. The count in the sentence is computed for the same
- * reason.
+ * So the shape of the page changed with it. It no longer concedes anything, because there is
+ * nothing to concede: the honest framing is *she knows some things, here they are, most of the
+ * game is not on this list and does not need to be.* The promise it makes is explicitly not "you
+ * will understand Mario Kart" — it is "you will be told the eight things that pay best", which is
+ * a promise this website can actually keep.
  *
- * **The practice page is five questions about the video.** (Riggs, 2026-08-12.) This chapter used
- * to have nothing to do at all, on the argument that a chapter selling "the browser part is small"
- * should not open with a browser exercise. That argument survives, and the lesson page is still
- * pure pitch.
+ * **The big picture moved out.** (Same conversation: "I like this, but why is it in the opening
+ * chapter?") The animated U-turn now opens Chapter 4, whose rule it is actually illustrating. See
+ * `long-way-round.ts`.
  *
- * It is no longer motionless, though, and the distinction is worth keeping straight. The opener
- * (`ch0-opener.ts`, 3b1) animates, but it is not an exercise: it asks for no input, scores
- * nothing, and can be scrolled past without losing anything. What the old note was protecting was
- * the rule that this page must not *demand* anything of her before it has earned the right to.
- * A picture that argues on her behalf does not.
+ * **The practice page is the benchmark, taken cold.** Twelve questions covering the whole course,
+ * answered before any of it has been taught. Every one of them explains itself the moment she
+ * answers — that is Riggs's call on 2026-08-13, from Katharine's playtest, and `benchmark.ts`
+ * carries the argument. The same twelve come back at the end of Chapter 8.
  *
- * What changed is the video's job. It used to be one of eight; it is now the anchor of the whole
- * course, covering in twelve minutes what Chapters 1 to 4 then take slowly. That makes "did she
- * watch it" a question worth asking, and the five cards are drawn one per section from the
- * uploader's own chapter markers — the start line, coins, tricks, drifting, items — so a right
- * answer confirms she watched and a wrong one teaches the thing anyway.
- *
- * It is not a gate and it is not marked. Every wrong answer explains itself warmly and she can
- * walk straight past it, which is the rule everywhere else in this course too.
+ * It is not a gate and it cannot be failed — the same rule as everywhere else here. It is the one
+ * page in the course where getting things wrong is the intended outcome, and it is the only way the
+ * last page gets to show her a number that means anything.
  */
 
 import { CHAPTERS } from '../../data/chapters';
-import fromTheVideo from '../../data/quiz/from-the-video.json';
-import { Quiz, fillQuiz, parseQuiz } from '../../ui/quiz';
-import '../../ui/quiz.css';
+import { createIntroVideo } from '../../ui/intro-video';
+import { BENCHMARK_TOTAL, createBenchmark } from './benchmark';
 import { el, prose, rich } from '../dom';
 import type { ChapterContent, ChapterContext, Mounted } from '../types';
-import { createOpener } from './ch0-opener';
-
-/**
- * `quiz.css` was written for the Phase 1 testbed and reaches for its palette variables. Mapping
- * them onto the house tokens here scopes the bridge to the element the quiz renders into, exactly
- * as Chapter 2 does — one deck, two chapters, one mapping each and no global override.
- */
-const QUIZ_TOKENS = [
-  '--accent: var(--boost)',
-  '--line: var(--rule)',
-  '--muted: var(--ink-soft)',
-  '--fg: var(--ink)',
-  '--bg: #3a1c00',
-].join('; ');
-
-/** Parsed at import, so a typo in the deck fails loudly rather than drawing a blank card. */
-const DECK = parseQuiz(fromTheVideo);
 
 /** Everything after this chapter. Chapter 0 is the pitch, not one of the eight things. */
 const SKILLS = CHAPTERS.filter((chapter) => chapter.number > 0);
@@ -99,7 +74,7 @@ function skillsCard(ctx: ChapterContext): HTMLElement {
       'p',
       { style: { color: 'var(--ink-soft)', marginBottom: '0' } },
       ctx.t(
-        'Not one of those is a reflex. {rival} has never had to learn a single one of them, because she has never needed to.',
+        'Every one of those is something to know rather than something to be good at. {rival} collected them one at a time, over years, without anybody handing her a list.',
       ),
     ),
   );
@@ -111,28 +86,25 @@ const content: ChapterContent = {
       'div',
       { class: 'stack' },
 
-      proseFor(ctx, [
-        'Reaction speed is one way to win a race. It is the only one {rival} has got.',
-      ]),
-
-      // The picture goes here rather than at the top or the bottom, and the position is the
-      // argument. (3b1.)
+      // Riggs's own clip, and the only one in the course. It is absent from the page entirely until
+      // the file exists — see `intro-video.ts` — so this line costs nothing until he records it.
       //
-      // The line above is the concession — she really is faster — and the drawing is the turn.
-      // Putting it before the concession would have it contradicting a claim nobody had made yet;
-      // putting it after the next four paragraphs would bury the one moment on this site that is
-      // worth watching, on the page most likely to be closed early.
-      createOpener({ t: (text) => ctx.t(text) }),
+      // No teardown handle is kept, and none is needed: `concept()` returns a node rather than
+      // mounting one (`types.ts`), and a `<video>` inside the returned tree stops when the tree is
+      // dropped. That was not true of the audio player it replaces, which owned an `Audio` object
+      // living outside the DOM.
+      createIntroVideo({ t: (text) => ctx.t(text) }).root,
 
       proseFor(ctx, [
-        'Because most of Mario Kart is not reflexes at all. Free speed on the start line, before anybody has moved. Free speed on every ramp. Free speed painted on the road in boost pads, usually in a lane nobody drives in. Items that do more for you held than thrown.',
-        'None of that needs fast hands. All of it needs someone to have mentioned it to you once — and nobody has mentioned it to {rival}. Why would they? She is winning.',
-        'So here is the deal, {name}. She keeps her reactions. You quietly collect **everything else**.',
+        '{rival} is a gamer. She has put hundreds of hours into this game and games like it, and somewhere in all of those hours she picked up a set of things the game never bothers to tell anybody.',
+        'That set is the whole of the gap. It is not a talent and it is not something she is doing faster than you — it is a handful of facts about Mario Kart that you either know or you do not, and every single one of them can be written down.',
+        'So that is what this is. Not all of Mario Kart: it is a big game, most of it does not matter, and nobody is going to make you fluent in it over one evening. **What you are getting is the short list** — the things that pay the most for the least learning, in order, with the biggest one first.',
       ]),
 
       skillsCard(ctx),
 
       proseFor(ctx, [
+        'Free speed on the start line, before anybody has moved. Free speed on top of every ramp. Free speed painted on the road in boost pads, usually in a lane nobody drives in. Items that do more for you held than thrown. None of it is difficult, and all of it is invisible until somebody points at it.',
         `About an hour, and twelve minutes of that is a video. ${SKILLS.length} short chapters in order, and each one is two pages: the idea, and then a page where you get to try it, so it lands in your hands instead of just your head.`,
         'Most of the work is not in here, and that is on purpose. A keyboard cannot teach your thumbs. The last chapter is a training programme for the Switch — forty short sessions with one job each — and *that* is the real course. This website is the bit that tells you what to point yourself at.',
         'Nothing here can be failed. There are stars, because everything is nicer with stars, but nothing locks, nothing is marked, and you can stop halfway through and come back. It remembers where you were.',
@@ -141,42 +113,46 @@ const content: ChapterContent = {
     );
   },
 
+  /**
+   * The cold reading.
+   *
+   * No preamble card above the quiz. There was one, and measuring the page found it was 259px of a
+   * 900px screen spent restating the blurb three inches above it — on the page Riggs picked out as
+   * the worst offender for scrolling. The practice page's own one-line blurb says the one thing she
+   * needs to know before she starts: most of these are meant to go wrong.
+   */
   interactive(mount: HTMLElement, ctx: ChapterContext): Mounted {
     const t = (text: string): string => ctx.t(text);
 
-    // No preamble card above the quiz.
-    //
-    // There was one, and measuring the page found it was 259px of a 900px screen spent restating
-    // the blurb three inches above it — on the page Riggs picked out as the worst offender for
-    // scrolling. The practice page's own one-line blurb already says "five quick ones, nothing is
-    // marked", so the card was pure duplication with a heading on it.
-    //
-    // What it was genuinely for is the *ending*, and that still exists: on completion the summary
-    // replaces the quiz rather than sitting above it, which is the same information in the place
-    // she is already looking.
-    const quizMount = el('div', { attrs: { style: QUIZ_TOKENS } });
+    const quizMount = el('div');
     const done = el('div', { class: 'card stack' });
     done.hidden = true;
     let completed = false;
 
-    const quiz = new Quiz({
+    const quiz = createBenchmark({
       mount: quizMount,
-      questions: fillQuiz(DECK, t),
-      // Never a buzzer on a wrong answer. The plan is explicit that nothing here marks her, and
-      // this is the chapter where that promise is being made rather than kept.
-      onAnswer: (result) => ctx.sfx.play(result.correct ? 'right' : 'nudge'),
+      ctx,
       onComplete: (summary) => {
         if (completed) return;
         completed = true;
         done.replaceChildren(
-          el('p', { class: 'eyebrow' }, 'Straight off the video'),
-          el('h3', null, t('That is the hard part over')),
+          el('p', { class: 'eyebrow' }, 'Filed away'),
+          el('h3', null, t('That is your starting line')),
           el(
             'p',
             null,
             rich(
               t(
-                `**${summary.correct} of ${summary.total}**, and it genuinely does not matter which — every one of those five gets a chapter of its own from here, at a quarter of the speed. Chapter 1 is the start line, and it is the easiest free speed in the game.`,
+                `**${summary.correct} of ${BENCHMARK_TOTAL}**, and there is no version of that number worth being pleased or annoyed about — nobody had told you any of it yet, which is the only reason it was worth asking. It is a photograph of today, and it goes in the drawer.`,
+              ),
+            ),
+          ),
+          el(
+            'p',
+            { style: { marginBottom: '0' } },
+            rich(
+              t(
+                'Every chapter from here takes one of those twelve slowly, at a quarter of the speed. You get the same twelve at the very end, next to this number. Chapter 1 is the start line, and it is the easiest free speed in the game.',
               ),
             ),
           ),

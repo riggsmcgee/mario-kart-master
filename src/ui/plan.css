@@ -90,6 +90,21 @@
 
 /* --- the toolbar: how far through the programme she is -------------------- */
 
+/* The signpost to `#/plan`, which is this grid with nothing under it. A line of prose with a link
+   in it rather than a button, on purpose: the page already has one primary control per job, and
+   Riggs's note about two orange buttons doing different things was about exactly this page. */
+.plan-nightly {
+  margin: 0 0 var(--gap);
+  padding: 0.7rem 0.9rem;
+  border-left: 4px solid var(--boost);
+  background: var(--card);
+  border-radius: 0 var(--round) var(--round) 0;
+}
+
+.plan-nightly-link {
+  font-weight: 700;
+}
+
 .plan-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -956,8 +971,45 @@
   padding: 0.45em 0.9em;
 }
 
-.plan-page-head {
-  margin-bottom: 0;
+/* The one row above the grid: who this is and how far in, then the button that prints it.
+   Replaced a two-line heading block on 2026-08-13 — the grid is what this page is for, and it now
+   starts where the sentence about it used to. */
+.plan-page-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding-bottom: var(--gap);
+  margin-bottom: var(--gap);
+  border-bottom: 3px dashed var(--rule);
+}
+
+.plan-page-count {
+  margin: 0.15rem 0 0;
+  color: var(--ink-soft);
+}
+
+.plan-page-print {
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
+  text-align: right;
+  /* Wide enough for the two-line note and narrow enough that it never fights the grid for width. */
+  max-width: 24rem;
+}
+
+.plan-page-print p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--t-small);
+}
+
+@media (max-width: 46rem) {
+  .plan-page-print {
+    justify-items: start;
+    text-align: left;
+  }
 }
 
 /*
@@ -1133,5 +1185,52 @@
      * with the job. Mid-grey survives a domestic inkjet; anything lighter does not. */
     color: #555;
     font-size: 6.5pt;
+  }
+
+  /* --- the cup guide, on paper ---------------------------------------------
+   *
+   * Added 2026-08-13, with the material itself: "make sure all relevant info is captured on the
+   * pdf, even if it takes up more than one page."
+   *
+   * That last clause is the licence this block needed, and it changes one rule. Every other
+   * `.sheet-block` says `break-inside: avoid`, which is right for a section that fits on a page and
+   * a disaster for one that cannot — four tracks with four lists each is taller than A4 whatever
+   * anybody wants, and `avoid` on an oversized box does not shrink it, it just pushes the overflow
+   * somewhere nobody looks. So the block breaks freely and the *track* is the unit that does not,
+   * which is the honest granularity: nothing lands with its heading on one page and its list on the
+   * next, and the guide runs to however many pages it runs to.
+   */
+  .sheet-block-tracks {
+    break-inside: auto;
+  }
+
+  .sheet-track {
+    break-inside: avoid;
+    margin-bottom: 0.5rem;
+  }
+
+  .sheet-track h3 {
+    font-size: 10pt;
+    margin: 0.3rem 0 0.1rem;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .sheet-track h4 {
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #444;
+    margin: 0.25rem 0 0.05rem;
+    /* A heading orphaned at the foot of a page is a heading for nothing. */
+    break-after: avoid;
+  }
+
+  .sheet-track-blurb {
+    margin: 0 0 0.15rem;
+    font-style: italic;
+  }
+
+  .sheet-track .sheet-list li::before {
+    content: '▸ ';
   }
 }

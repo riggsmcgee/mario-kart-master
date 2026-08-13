@@ -31,6 +31,14 @@
  * ration her attempts. The window is still drawn, as a green stripe on the diagram, which is the
  * honest way to show a duration to someone who has to feel it rather than count it.
  *
+ * **The shake gets a mention.** (Riggs, 2026-08-13: "We should mention that you can shake the
+ * remote instead of pressing the button to get the ramp boost if that is preferred.") Worth having
+ * for two reasons beyond it being true. The whole chapter's obstacle is a vague fear of the button,
+ * and a second way in dissolves that for anyone the button is not working for. And it costs one
+ * paragraph, which is the going rate for removing somebody's only reason not to try. The one
+ * caveat is stated with it: the shake does tricks and nothing else, so Chapter 6's drift still
+ * wants the button, and a reader who learned "shake for everything" would arrive there stuck.
+ *
  * **Why six ramps and why there.** Six is the target, so a single flawless lap could finish it —
  * but three laps are allowed, which turns eighteen chances into a target of six and makes the
  * plan's "ends on a win" rule arithmetic rather than luck. The positions are hand-placed against
@@ -263,6 +271,9 @@ const content: ChapterContent = {
         ),
         ctx.t(
           '**It is the shoulder button under your finger, and it is the same button you drift with** in Chapter 6. Tap it and you get a trick. Hold it into a corner and you get a drift. One button, two jobs, and the game works out which one you meant.',
+        ),
+        ctx.t(
+          '**Or just flick the controller.** A sharp shake does exactly the same thing as the button — same trick, same boost — and plenty of people find it easier to feel than to press. Try both once and keep whichever your hands prefer. The only thing worth knowing is that the shake is for tricks only; the drift in Chapter 6 needs the button.',
         ),
         ctx.t(
           'You will know instantly whether you got it, because **the kart does a flip.** That flourish is the receipt: flip means boost, no flip means no boost. You never have to check anything.',

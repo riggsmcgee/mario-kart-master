@@ -178,8 +178,13 @@ function driverPicker(
     el(
       'p',
       { class: 'driver-note ms' },
-      t(
-        'Every one of these drives **identically** — same weight, same everything. Swap as often as you like; it changes nothing but the face.',
+      // `rich`, not a bare string. `**identically**` was printing its own asterisks on screen
+      // (Riggs, 2026-08-13) — `el()` puts a plain string in as a text node, so the emphasis markers
+      // only ever mean anything once something has run them through the formatter.
+      rich(
+        t(
+          'Every one of these drives **identically** — same weight, same everything. Swap as often as you like; it changes nothing but the face.',
+        ),
       ),
     ),
   );

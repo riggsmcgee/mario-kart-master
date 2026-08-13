@@ -79,8 +79,10 @@ export function renderHome(mount: HTMLElement, deps: HomeDeps): Mounted {
         'p',
         { class: 'hero-lede' },
         rich(
+          // Reframed 2026-08-13, in step with Chapter 0: the gap is hours and a handful of
+          // unmentioned facts, not reaction time. See `chapters/ch0.ts`.
           t(
-            "She's faster than you. She is not better prepared than you — and that's the one we can fix.",
+            "She knows a handful of things about this game that nobody ever mentioned to you. That's the whole gap — and it's a short list.",
           ),
         ),
       ),

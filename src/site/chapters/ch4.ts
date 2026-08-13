@@ -37,9 +37,10 @@
  * her to *plan* a lap, because in the drill the arrows are visible ahead of her and she is
  * reacting to them, which is precisely the habit this chapter argues against. So the drill hands
  * over to five map cards: a road, some arrows, and no kart to drive — where the only thing being
- * asked is which line takes the boosts. The drill is disposed at the handover rather than left
- * sitting there, because it owns a WebGL context and a render loop, and the quiz is a paragraph
- * further down the same page she has not left.
+ * asked is which line takes the boosts. The handover is automatic and has no button on it
+ * (2026-08-13, see `startMapTest`), and the drill is disposed on the first answer rather than at
+ * the handover, because it owns a WebGL context and a render loop but also owns the "Try it again"
+ * she may still want.
  *
  * **Names.** {@link Quiz} paints its copy with `textContent` straight from the JSON, so it never
  * sees `ctx.t()` — the card data is templated here, on the way in, which keeps the rule that no
@@ -55,6 +56,7 @@ import { Quiz, parseQuiz, type QuizQuestion, type QuizSummary } from '../../ui/q
 import spotThePad from '../../data/quiz/spot-the-pad.json';
 import { el, frag, prose, rich } from '../dom';
 import type { ChapterContent, ChapterContext, Mounted } from '../types';
+import { createLongWayRound } from './long-way-round';
 
 /**
  * The lap, as eight arrows.
@@ -141,10 +143,24 @@ const content: ChapterContent = {
     return frag(
       el('h2', null, 'Boost pads'),
       prose([
-        'Painted on the road, on every track, there are strips that shove you forward when you drive over one. They are called **boost pads**. Usually orange arrows, though not on every track — so what you are looking for is a painted strip with arrows on it, in whatever colour that track happens to use.',
+        'Painted on the road, on every track, there are strips that shove you forward when you drive over one. They are called **boost pads**.',
+        // Riggs, 2026-08-13: "Just say that I'm representing them with orange arrows. They're often
+        // not orange." The old sentence tried to teach the exception and the rule at once —
+        // "usually orange, though not on every track, so what you are looking for is…" — which is
+        // three clauses of hedging about a thing she has not seen yet. Naming the drawing as a
+        // drawing is shorter and cannot be got wrong: this is how *I* am drawing them; out there,
+        // look for the shape.
+        'I draw them as **orange arrows** all the way through this course. Out in the game they are often not orange at all — every track picks its own colour. The shape is the constant: a painted strip with arrows on it, pointing the way you are going.',
         'Free speed. You do not press anything and there is no timing to get wrong.',
         'Here is the whole chapter: **a boost pad is worth going out of your way for.** Even when it is on the far side of the road. Even when reaching it means taking the long way round a corner. The few extra kart lengths cost you less than the boost gives back — and hardly anyone believes that, which is why hardly anyone does it.',
       ]),
+
+      // The picture, immediately under the rule it is a picture of. (Moved here from Chapter 0 on
+      // 2026-08-13 — see `long-way-round.ts` for why it was in the wrong chapter.) It is doing the
+      // job the deleted worked example used to do, in one watchable corner instead of four
+      // sentences: red takes the short way, green takes the long way over a pad, green wins.
+      createLongWayRound({ t: (text) => ctx.t(text) }),
+
       el(
         'div',
         // The card is an aside between two runs of prose, and neither the card nor a paragraph
@@ -155,7 +171,11 @@ const content: ChapterContent = {
           'p',
           { style: { marginBottom: '0' } },
           rich(
-            'Never slow down for one. Shuffling across a straight to reach a pad is free; braking to line one up costs more than it pays. A pad is a great fat stripe of road, not a target you have to aim at.',
+            // "Slowing down" meant "braking", and only the author knew that. (Riggs, 2026-08-13.)
+            // Read cold it sounds like a rule against easing off at all, which would contradict
+            // the sentence directly after it — you *do* move across the road for a pad, and moving
+            // across costs a little speed. Naming the pedal removes the ambiguity in one word.
+            '**Never brake for one.** Shuffling across a straight to line yourself up with a pad is free, and you should do it. Touching the brake to make sure you hit one costs more than the pad pays back. A pad is a great fat stripe of road, not a target you have to aim at.',
           ),
         ),
       ),
@@ -177,11 +197,20 @@ const content: ChapterContent = {
 
     const drillSlot = el('div');
 
-    const handoverButton = el(
-      'button',
-      { class: 'btn btn-go', type: 'button' },
-      'Show me the first one',
-    );
+    /**
+     * Part two arrives on its own, with no button on it. (Riggs, 2026-08-13.)
+     *
+     * There used to be a "Show me the first one" here, and the practice page therefore ended with
+     * two orange buttons on screen at once: this one, which starts the map test, and the template's
+     * "Next: <chapter>", which leaves. "Having functionally two different Next buttons is
+     * confusing. Just have one button that leads into the next practice." He is right — they look
+     * identical and they go to completely different places, and the one that stays on the page is
+     * the one that looks like leaving.
+     *
+     * So the handover is a heading and a sentence, and the quiz simply appears under it when the
+     * lap ends. Nothing was lost by deleting the button: it never asked a question, it only
+     * required a click to answer it.
+     */
     const handover = el(
       'div',
       { class: 'card', hidden: true },
@@ -189,10 +218,9 @@ const content: ChapterContent = {
       el('h3', null, 'Now the map test'),
       el(
         'p',
-        null,
+        { style: { marginBottom: '0' } },
         'Five corners, no driving. Just say which line you would take — because out on the Switch, the deciding is what you will actually be doing.',
       ),
-      handoverButton,
     );
 
     const quizSlot = el('div', { attrs: { style: QUIZ_TOKENS } });
@@ -238,7 +266,7 @@ const content: ChapterContent = {
 
       onFinish(score) {
         padsHit = Math.max(padsHit, score);
-        handover.hidden = false;
+        startMapTest();
         // Focus is left on the drill's own "Try it again" button. Yanking it down here would
         // quietly take away the second go she might have wanted.
       },
@@ -294,24 +322,34 @@ const content: ChapterContent = {
       ctx.finish({ score: padsHit });
     }
 
-    handoverButton.addEventListener('click', () => {
-      handover.hidden = true;
-      // The drill has done its job, and it is holding a WebGL context and a render loop she is
-      // about to scroll away from.
-      drill?.dispose();
-      drill = null;
+    /**
+     * Reveal the map test. Called once, the moment the lap ends.
+     *
+     * **The drill is not torn down here, and that is the whole trade.** It owns a WebGL context and
+     * a render loop, so the old code disposed it at the handover click — which was fine when a
+     * click was what got you here. Without the button there is no such moment, and disposing on
+     * `onFinish` would take away the "Try it again" the drill has just drawn, on a page whose one
+     * promise is that nothing is ever taken back. So it stays alive until she commits to part two
+     * by answering the first card, which is the last instant at which another lap is plausible.
+     */
+    function startMapTest(): void {
+      if (quiz) return;
+      handover.hidden = false;
 
       quiz = new Quiz({
         mount: quizSlot,
         questions,
-        onAnswer: (result) => ctx.sfx.play(result.correct ? 'right' : 'nudge'),
+        onAnswer: (result) => {
+          drill?.dispose();
+          drill = null;
+          ctx.sfx.play(result.correct ? 'right' : 'nudge');
+        },
         onComplete: finished,
       });
 
-      // Focus the first answer: it scrolls the card into view and hands the keyboard straight to
-      // the thing she is meant to use next. Keyboard is her only input device.
-      quizSlot.querySelector<HTMLButtonElement>('.quiz-answer')?.focus();
-    });
+      // No focus grab. The drill has just put focus on its own "Try it again", and pulling the
+      // page down to the quiz would answer a question she has not been asked yet.
+    }
 
     return {
       dispose() {

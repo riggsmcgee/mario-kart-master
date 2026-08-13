@@ -63,7 +63,7 @@ const ROUTES = [
   // checking at least as much as the lessons do, because a `/try` route that quietly falls back to
   // the lesson is exactly the class of bug that got this file its `expect` column in the first
   // place. Each one expects its *drill* heading, which only the practice page draws.
-  ['ch0-try', '/#/chapter/ch0/try', 'Five from the video'],
+  ['ch0-try', '/#/chapter/ch0/try', 'Twelve questions, cold'],
   ['ch1-try', '/#/chapter/ch1/try', 'Five starts'],
   ['ch2-try', '/#/chapter/ch2/try', 'Hold the banana'],
   ['ch3-try', '/#/chapter/ch3/try', 'Six ramps'],
@@ -71,8 +71,16 @@ const ROUTES = [
   ['ch5-try', '/#/chapter/ch5/try', 'Follow the line'],
   ['ch6-try', '/#/chapter/ch6/try', 'Six corners'],
   ['ch7-try', '/#/chapter/ch7/try', 'Build your kart'],
+  // Chapter 8 has no practice page: the second half of the benchmark stands at the front of the
+  // chapter itself, which is what `ch8-plan` above expects to find.
 
   ['testbed', '/testbed/', 'The Testing Ground'],
+
+  // Kayla's ten minutes (4e4). Shot at its prototype harness rather than through the doorman,
+  // because the real route into it is a click on her own name and this file drives URLs. What it
+  // is checking is the thing this file exists for: that the chunk loads and the module does not
+  // throw on line one. The beats themselves are exercised by playing them.
+  ['kayla', '/src/proto/kayla/index.html', 'There Is No Course'],
 ];
 
 /**
@@ -85,7 +93,7 @@ const ROUTES = [
  * on purpose. Matching the request URL is what the rule always meant.
  */
 const ALLOWED_MISSING = [
-  /\/audio\/ch\d\.mp3$/i, // voiceovers not recorded yet (3c2), and the player copes by design
+  /\/media\/intro\.mp4$/i, // Riggs's one intro clip, until the file lands — see `intro-video.ts`
   /favicon/i,
   // Google's font CDN, which is not ours and drops the odd request. `theme.css` names a full
   // fallback stack for all three faces, so a miss costs the look and nothing else. A genuinely
@@ -203,6 +211,18 @@ for (const [name, path, expect] of ROUTES) {
     // Case-insensitive, and whitespace-normalised, because the eyebrow is uppercased in CSS and
     // innerText reports the transformed text.
     const flat = text.replace(/\s+/g, ' ').toLowerCase();
+    // Emphasis markers that never got formatted. (Added 2026-08-13, after Riggs found
+    // `**identically**` printing its own asterisks on Chapter 7's practice page.)
+    //
+    // Copy in this project carries `**bold**`, and `dom.ts`'s `rich()` is the only thing that turns
+    // that into a `<strong>`. Pass the same string to `el()` and it becomes a text node with the
+    // asterisks still in it — which typechecks, lints, renders, and is wrong. Nothing but looking
+    // at the page catches it, so the thing that already looks at every page may as well.
+    const stray = /\*\*\S/.exec(text);
+    if (stray) {
+      const at = text.slice(Math.max(0, stray.index - 40), stray.index + 60).replace(/\s+/g, ' ');
+      problems.push(`unformatted "**" in the copy — needs rich(): …${at}…`);
+    }
     if (expect && !flat.includes(expect.replace(/\s+/g, ' ').toLowerCase())) {
       problems.push(`expected to find "${expect}" on the page — served the wrong view?`);
     }

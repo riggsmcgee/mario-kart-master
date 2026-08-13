@@ -30,6 +30,433 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 ## Log
 
+### 2026-08-13 — Session 22 (Opus 5)
+
+**Steps touched:** 4e6 (There Is No Course, third pass — seven notes from Riggs playing it again)
+
+**"10/10 in the beginning. Think about how you can keep the pace up throughout the whole thing. As it
+stands, I don't think she would make it through this. Maybe cut it down to 5 minutes."** The most
+useful note this build has had, and it is not really about length. The opening was already right;
+what fell off was **rate of new information**, and a piece that has stopped surprising you is long at
+any duration. So the cut was made where the surprises repeat rather than evenly: the hole's appetite
+is seven words down to five, the assessment is four questions down to three, the ledger wants two
+chapters opened rather than three, and the ending lost a three-panel confirmation gauntlet that was
+the same joke performed three times. Every beat still happens; none of them happens twice. A machine
+playing it end to end with no hesitation now takes **3m35s**, from about 6m30s.
+
+**"Work the speech narrator into the actual game. Start with it narrating by default. No need for
+the speech reader and transcript buttons."** Done, and the toggle was the wrong call in the first
+place. The second pass hid speech behind a control on the theory that a synthesiser would trample
+the clarinet reveal in beat 4. Both halves of that were wrong. The clarinet is not upstaged — it is
+what she hears for the whole muted stretch between beats 3 and 4, which sets the reveal up far better
+than a toggle nobody was going to press. And **the mute war only becomes what it is meant to be once
+there is a real voice to take away**: pressing that button now stops a sentence mid-word and leaves
+the thing typing at her in a dead strip, which is the version of that joke the file's own comments
+have been describing since it was written. Both narrator controls are gone, and the transcript with
+them — a record of a monologue is a feature of a document, and this is not one.
+
+**"When the audio is off, speech is automatically off. Works better into the bit."** Exactly right,
+and it is one predicate: `voiced && !sfx.muted && speech.usable`. Three ways to be silent, all of
+them the same silence, none of them a control that sits outside the fiction. The site's own mute now
+also cancels mid-utterance rather than only suppressing the next line.
+
+**"Have more banter at the beginning."** His copy, near enough verbatim, because it is better than
+what it replaced: *there is nothing to see here → why am I here? → I have been instructed to make
+sure that YOU do not visit the site → …no, sorry, I am the janitor → just cleaning up.* It works
+because it fails in the right order — the thing gives away that there is a site and that somebody
+gave an instruction about her specifically, then panics and produces a cover story transparent from
+both sides. The old opening was four flat lines of denial, and denial is not funny without somebody
+visibly failing at it. The full stop now comes off during the cover story rather than during a
+lecture, and **the fall fires on whichever comes first, the speech finishing or a 24-second clock**,
+so the interruption lands on the beat she is on rather than on a wall clock that is wrong for both a
+listener and a skipper.
+
+**"The pace of the reader is a lot better, but there is too much time between separate thoughts.
+Long pauses waiting for something to do."** Two separate faults under one complaint. The dwell added
+in the second pass was solving a problem the voice now solves better — a spoken line is legible for
+exactly as long as it takes to say it, so holding it for another 2.6 seconds afterwards buys nothing
+and costs the silence between thoughts. Holds are now two numbers: ~200–620ms when the line was
+spoken, ~460–1200ms when it was typed. Separately, **the hint ladder was measuring the wrong thing**
+— time since somebody last called `say()`, not time since anything last happened — so with the rungs
+brought down to 16/34/62s a hint fired into the middle of the new twenty-second opening. It now
+measures silence, which is what a hint ladder was always for.
+
+**"The final bit takes way too long"** and **"the multiple yes buttons at the end actually isn't that
+funny."** Both true, and the second explains the first. A button that runs away from the cursor is
+funny **once**, as a surprise, and the surprise is over in about a second and a half; three panels of
+it is that second and a half performed three times while she waits to be let into a website she has
+just spent five minutes earning. It was also spending the goodwill of the *ending*, the one place in
+the piece that should not be making her work. There is now **one form and one press**, and the
+escalation survives as a line — *"I had four more of those. I am not going to use them"* — which is
+the whole rule-of-three break with none of the rule of three. The audience assembles the version they
+did not have to sit through and it is always funnier than the one you build. Beat 8 is 49s, from 80s.
+
+**Three bugs, all found by playing rather than reading.**
+
+- **Beat 7's pointer slot was drawn underneath the narrator strip.** `elementFromPoint` at the middle
+  of the drop target returned the subtitle line, and the pointer itself sat thirty pixels below the
+  fold — so the last interaction in the piece, the one carrying its emotional turn, could not be
+  dropped on at all. Two causes: the scene had no bottom clearance for a `position: fixed` strip, and
+  `scrollIntoView({ block: 'nearest' })` has no idea fixed elements exist and will happily park a
+  node flush against the bottom of the viewport, behind one. Fixed with `padding-bottom` plus
+  `scroll-margin-bottom`, and by putting the pointer and its slot in the same flex column so two
+  things that have to be dragged between each other cannot drift apart in the layout.
+- **A near-miss on the progress bar started a text selection** and dragged a blue smear across the
+  page, the strip and the bin as she pulled it right. The handle took the pointer events and the
+  track took nothing, so a press an inch to the left hit no handler and nothing called
+  `preventDefault`. The whole track takes it now, which is also how every slider on the web behaves.
+- **`speechSynthesis.speak()` was called outside its own `try`**, inside a `setTimeout` the method had
+  already returned from. An engine that throws in there raised an uncaught error and — worse — never
+  fired `end`, so the line waited forever. Now caught, and with speech as the default channel there
+  is also a **watchdog** on every spoken line: `estimate × 2.2 + 3s` and the clock wins. That API is
+  the least reliable on the platform and it is now load-bearing.
+
+**Verified** by playing the whole thing through the real door with a stubbed local voice, so the
+*spoken* path is what actually ran — headless Chromium ships no voices, and without the stub every
+run would have silently tested the fallback. All eight beats, the pointer caught mid-flight and
+binned, the phrase played back, the pointer handed back and refused, admitted, and out into chapter 1.
+Zero console errors.
+
+**Left open.** `public/media/kayla.mp4` is still Riggs's to record; the ending plays complete without
+it. Nobody has yet watched a person do this.
+
+### 2026-08-13 — Session 21 (Opus 5)
+
+**Steps touched:** 4e4 (second pass, on six pieces of feedback from playing it)
+
+**Riggs played it and sent six things.** All six are done, and two of them changed the shape of the
+piece.
+
+**"It's very fast paced and difficult to keep up."** Measured across all 106 lines, the strip was
+delivering **256 words per minute**. An adult reads prose at about 238; caption standards for
+material you are also watching cap at 130–160. It was outrunning a reader giving it full attention,
+while also asking her to solve a puzzle. Underneath that was the real fault — **no dwell at all**: a
+line became readable at the instant its last character landed and was gone 420ms later, so 92% of
+lines could not be read in the time they were given. Three fixes, only one of which is "slow down":
+a **two-line stack** (the previous line stays, dimmed, while the next types — roughly doubling the
+readable window at no cost in wall-clock time), a **hold that scales with length** (500ms + 22ms per
+character, 1.4× for anything naming a control), and 32ms per character instead of 26. Plus a
+**transcript** she can open at any time, because the structural version of "I missed that" is not
+fixed by any amount of dwell.
+
+**"Are there any voice generators?"** Yes — `SpeechSynthesis`, which is the only text-to-speech on
+the web platform. It is wired up behind a plainly-labelled **Read aloud** toggle, off by default, and
+the default is the design decision: the narrator's voice has been a clarinet since the first typed
+character and beat 4 spends ninety seconds cashing that in, so an English synth voice over the top
+defuses the fuse before it is lit. The engineering is one filter — `localService === true` — which
+removes the network call, Chrome's 15-second cutoff and the missing boundary events in a single move,
+because all three belong to Chrome's *remote* "Google …" voices specifically.
+
+**"Not clear why the mouse disappears — maybe a trash can appears and the device says don't put it in
+there."** Built, and it is better than the thing it replaced. The corner tray is now a **bin** that
+slides in the instant she catches the pointer, with a prohibition on it — the genre's own central
+device, and the only instruction in ten minutes she is guaranteed to disobey. Nothing is destroyed:
+the pointer sits in the bin for the next seven minutes, which is what lets the last beat reach in and
+hand it back. Catching and binning are now **two separate steps**, so the reflex moment succeeds
+permanently the instant her finger lands on it and nothing afterwards can take it away.
+
+**"Two wrong answers, only one is actually correct."** A real contradiction, and the worst kind of
+puzzle bug — it does not look like a bug, it looks like the game being arbitrary. The beat teaches
+*get them wrong* and then refused one of the wrong answers. Every non-expert option is now accepted,
+each with its own reply, and there are four questions rather than three.
+
+**"Kayla is on the list — we are just hiding the site from her."** Reframed throughout. Not *you are
+not authorised* but *there is nothing here, please go away*, which is both closer to the source and
+turns the last line ("nothing on this page was ever locked") into a confession rather than a
+technicality. Alongside it: **the full stop** is now a drawn 16px disc rather than a scaled glyph —
+at 16px type a full stop is three pixels across, and 2.8× of three pixels is still a speck — and it
+never quite settles until she touches it. **The hole** now inverts: after seven words by hand it
+stops taking instructions and pulls everything still standing into itself, spiralling, before the
+floor gives way.
+
+**And the new ending, beat 8.** Beat 7 is now a false ending. Something arrives the narrator was not
+told about — a video from Riggs, with a written note as the designed fallback until he records it —
+and then three confirmations in which **the theatre escalates and the resistance collapses**: the
+forms get more pompous, the small print denser, the Yes button larger, while its dodge budget goes
+2, then 1, then 0. The No never changes: same word, same size, same place, always working, which is
+the whole difference between parodying a coercive pattern and being one. It cannot be failed — hard
+dodge counts rather than distances, a six-second stop, a twenty-second stop, and on keyboard it never
+dodges at all. Then she gets **real access**: a local flag, never a role change, because promoting
+her to `other` would sync straight to Jodi's profile and is the exact launch-blocker 4f1 already
+caught once in this corner.
+
+**Bugs found by playing it, not by reading it.** `PointerEvent.detail` is always 0 on `pointerdown`,
+so the keyboard guard on the dodging button suppressed the dodge for everybody — the button never
+moved. The narrator's skip handler listened in the capture phase, so every arrow press a keyboard
+player used to drag something also destroyed the line explaining it; it now ignores anything a beat
+has `preventDefault`ed. A HEAD request returning 200 does not mean there is a video there — Vite
+answers unknown paths with `index.html` and a cheerful 200 — so the probe checks the content type.
+And `display: flex` beats the user agent's `[hidden]`, so the bin sat on screen from the first frame
+of beat 1, six minutes before anything had been thrown away.
+
+**Verified end to end** through the real door after every change: all eight beats, zero console
+errors, the bin catching the pointer, the gauntlet reaching the fourth panel, and the admitted state
+opening chapter 1 while the locked state still bounces a deep link home.
+
+**Left open.** Still nobody has watched a person do this. `public/media/kayla.mp4` is Riggs's to
+record and the ending is complete without it. The assessment's four questions are written from the
+chapters but every mechanic in them deserves one read by somebody with the game in front of them.
+
+
+### 2026-08-13 — Session 20, third pass (Opus 5)
+
+**Steps touched:** 4d1, 3c (retired), 2b1. Two notes, one of them a subtraction.
+
+**The plan page could not print the plan, and that is what the note was really about.** "This should
+be the top of the plan page. With the pdf right before it. By FAR the most important detail that is
+missing." `#/plan` had a "Print the sheet" button in the strip at the bottom, and what it printed was
+that page — the grid and three cards — because `.plan-sheet` was built inside Chapter 8's `custom`
+and no other document contained one. The button had been lying since the page was written. The sheet
+is now `site/plan-sheet.ts`, both pages build the same one, and the button sits directly above the
+grid as the page's only primary control. Verified in print media: `.plan-screen` hidden,
+`.plan-sheet` shown, three A4 pages out of `#/plan` as well as out of Chapter 8.
+
+The two-line heading went with it. "Right then, {name}. What are we doing tonight?" was a good line
+and it was furniture between the top of the window and the only thing this page is for; the grid
+answers that question better than the sentence about it did, and now starts where it used to.
+
+**The nine voiceover scripts are gone.** "You can remove the scripts from all the chapters. I'm
+recording what I want now. I think I'll just do one video on chapter 0 to explain the site."
+
+Worth recording as a subtraction rather than a loss. That was ~2,000 words written across 3c1 to be
+read into a phone by one person, and none of the nine was ever recorded. They were also, by design,
+the _same material_ as the pages they sat on — which makes them the one part of this website whose
+absence costs a reader nothing, and the one part whose production cost fell entirely on Riggs.
+`data/voiceover.ts`, `ui/voiceover.ts`, `scripts/voiceover-doc.mjs` and `docs/voiceover-scripts.md`
+are deleted; the `.vo` styles went with them.
+
+`ui/intro-video.ts` takes their place on Chapter 0 alone, and follows the rule the audio player set:
+**no file means no block.** Not a greyed-out control, not a placeholder — the section is simply not
+on the page until `public/media/intro.mp4` exists, and appears with no code change when it does.
+Local rather than a YouTube embed, because this one is him, in his own house, talking to his aunt.
+
+No teardown handle is kept for it, and none is needed: `concept()` returns a node rather than
+mounting one, and a `<video>` inside that tree dies with it. The old player needed disposal because
+it owned an `Audio` object living outside the DOM.
+
+**The clip landed the same evening**, so Chapter 0 is finished rather than waiting. It arrived as
+189 MB — 2:50 of 1280x720 H.264 at 9.1 Mbps, which is about eight times what a face against a wall
+needs and well past the 100 MB that git refuses outright. Re-encoded rather than resized, because
+the resolution was already right: CRF 23, preset slow, AAC 128k, `+faststart` so it starts playing
+before it has finished downloading. 37 MB out, 1.6 Mbps, same 720p30. ffmpeg is not on this machine
+and was not installed onto it — a static build went into the session scratchpad and stayed there.
+
+The heading says "Three minutes from me first" and not two, because the player prints `2:50` eight
+pixels underneath it.
+
+**Checks.** 22/22 on `npm run shoot`. `#/plan` driven in print media to confirm what actually comes
+out of the printer, and the resulting PDF counted at three pages with all four tracks on it. The
+video was checked the way it will actually fail — not by trusting the render pass, which ignores a
+missing `intro.mp4` by design, but by loading Chapter 0, reading `duration`, `videoWidth` and
+`videoHeight` off the element, calling `play()` and confirming the clock moved.
+
+**Open.** `npm run lint` fails on `.drive-end.mjs`, a scratch file in the repo root belonging to the
+Kayla work (4e4) rather than to this pass, and left alone on purpose. `npx eslint src scripts` is
+clean.
+
+---
+
+### 2026-08-13 — Session 20, second pass (Opus 5)
+
+**Steps touched:** 4d1, 2b1, 2b6, 2b8, 4e2, 1d1 — Riggs's second batch of the day, arriving on top of
+the first. Verbatim in [docs/playtest-notes.md](docs/playtest-notes.md).
+
+**Two of these reversed things written a few hours earlier, and both reversals are right.**
+
+**The cold quiz explains itself again.** The benchmark's first run had been built blind, deliberately,
+so that the score at the end of the course measured the course rather than a memory of twelve cards.
+Riggs, with better evidence than the argument had: "telling them why the answer was right or wrong on
+each question was a great addition that Katharine learned a lot from." The two goods were never equal
+— a clean measurement is worth something to whoever reads the numbers afterwards; an explanation at
+the moment she gives a wrong answer is worth something to the person the site is for, twelve minutes
+into a course she has not committed to. `reveal` is deleted from `ui/quiz.ts` rather than left sitting
+there unused, and the copy at both ends stopped promising a purity it no longer has.
+
+**The quiz moved to the front of Chapter 8.** "Have the quiz be the first thing in the chapter. The
+actual plan comes after the quiz is done. Not scrollable at the start." It had been a card near the
+top of a page whose next four screens are the thing she came for — which is not how a feature gets
+rejected, it is how one gets quietly never used. Chapter 8 now has two states keyed on its own
+`status`: unfinished → the twelve questions with nothing under them and a skip that finishes the
+chapter the way the template's own skip does; finished → the plan, with both scores on top and a quiet
+way back to the questions. Keyed on status rather than on a stored score, so it can never become a
+gate she meets every evening for two months. `#/chapter/ch8/try` is gone; `ch8.ts` grew a
+`benchmarkGate` and a `renderPlan` where it used to have one long `custom`.
+
+**The nightly page existed and nothing said so.** "This work page can be its own thing, own page.
+Without a long scroll after… this is the central point." `#/plan` has been exactly that since
+2026-08-12 — the grid, tonight's job, no scroll — and the only link to it was `app.ts` redirecting a
+bare URL once the course is finished. It gets a line of prose with a link in it, in the programme
+section, rather than a second orange button doing a different job on the same page.
+
+**The printed sheet is three pages now.** "Make sure all relevant info is captured on the pdf, even if
+it takes up more than one page." The cup guide was the one thing on screen that never reached paper,
+and it is the material she most wants at arm's length: per track, the four things, how to drive it,
+what is in the way, the Time Trial job. The schematics do not travel and were not taken. `.sheet-block`
+says `break-inside: avoid`, which is correct for a section that fits on a page and actively harmful for
+one that cannot, so the new block breaks freely and the *track* is the unit that does not.
+
+**The rest.**
+
+- **`**identically**` was printing its own asterisks** on Chapter 7's practice page. One missing
+  `rich()`. The interesting part is that this class of bug typechecks, lints and renders, so
+  `npm run shoot` now fails any route with a stray `**` in its body text — and found a second one on
+  the settings page within a minute of being written. Both fixed.
+- **Chapter 7 is "Pick your kart"**, not "Pick your weapon".
+- **Chapter 5's video is cut.** It passed the one-mechanic rule and still failed the reader.
+- **The doorman is centred**, and it took measuring to find out why it was not: `text-align: center`
+  centres text inside a box and says nothing about where the box is, so the mascot sat against the
+  left edge of an 832px column and the eyebrow's text landed 144px left of the page's centre line
+  under a heading that was dead on it. The "too far down" half was not a bug — 245px above, 245 below
+  — and was changed anyway, to optical centring behind a `min-height` query, because a composition
+  whose weight is all in the bottom row reads low however the arithmetic comes out.
+
+**Checks.** 22/22 on `npm run shoot`, with the new emphasis check live. Chapter 8's full journey driven
+in a browser: arrive → quiz only, no plan in the DOM; answer twelve → plan with the scoreboard on top
+and no retake link (the scores are right there); leave and come back → plan straight away with the
+retake link; retake → quiz; skip → plan. The sheet was printed to PDF and read: three A4 sides, four
+tracks, everything that is on screen. The doorman was measured at 700/900/1080px tall to confirm the
+lift never pushes content off the top.
+
+**Open.** Chapter 8's page still scrolls before the quiz, because the voiceover transcript sits above
+it and `ui/voiceover.ts` renders that expanded on every chapter by plan requirement (3c3: "the
+transcript is always visible"). Nothing of the *plan* is reachable by scrolling, which is what the note
+was about, but if "not scrollable at the start" meant the literal screenful then the transcript is the
+thing to collapse, and that is a decision about all nine chapters rather than this one.
+
+---
+
+### 2026-08-13 — Session 20 (Opus 5)
+
+**Steps touched:** 2b1, 2b4, 2b5, 2a2, 1d1, 1e1, 3b1, 3c1, 4d1 — a full pass against Riggs's
+marked-up screenshots and two written chapter notes. Verbatim in
+[docs/playtest-notes.md](docs/playtest-notes.md); the reasoning is in the decision log.
+
+**The two that were more than a page each.**
+
+**Chapter 0 no longer argues about reflexes.** It opened by conceding Kayla is faster and turning on
+it — reactions are one way to win, preparation is another — and Riggs struck the framing: she is a
+gamer who has put hundreds of hours in and picked up things nobody ever said out loud. Truer, and
+more useful, because a set of facts can be handed over in an evening and a pair of hands cannot. The
+promise changed with it: the course does not teach Mario Kart, it hands over the short list, and it
+now says so in as many words. Prose, hook, home lede, skills card, voiceover script and the README's
+argument section all moved together — the voiceover mattered most, because it renders on the page as
+the transcript and would have sat three inches above the new copy contradicting it.
+
+**Twelve questions at both ends.** "Have her take a big quiz at the beginning and at the end to see
+how much she learned." It is Chapter 0's practice page and Chapter 8's, the same deck both times, and
+the thing that took the thinking is that **the first run explains nothing**. Rule 2 of the quiz
+component is that a wrong answer earns a reason rather than a buzzer, which is right everywhere else
+and would wreck this: explain twelve answers in Chapter 0 and the score at the end measures how well
+she remembers twelve cards. So `Quiz` grew `reveal: false`, the blurb says out loud that no answers
+are coming, and Chapter 0 lost its star rule — stars on a cold guess dress a measurement up as a
+result. No router work, no new storage: both halves are ordinary practice pages and the two readings
+are the two chapters' own `bestScore`, which already syncs. `chapters/benchmark.ts` carries the
+argument; `from-the-video.json` is gone, five of its questions folded into the new deck.
+
+**The rest, in the order they arrived.**
+
+- **One forward button per page.** Chapter 4's practice had "Show me the first one" and "Next:
+  <chapter>" side by side, same weight, going to completely different places. The map test arrives on
+  its own now. The drill is disposed on the first quiz answer rather than at the old handover click,
+  which is the last moment another lap is plausible — deleting the button must not delete the
+  "Try it again" the drill has just drawn.
+- **"Never brake for one."** The exception card said "never slow down", which only its author knew
+  meant braking, and which read as an argument against the sentence directly after it.
+- **Boost pads are drawn orange, not usually orange.** Naming the drawing as a drawing is shorter
+  than hedging about the colour and cannot be got wrong.
+- **What is in your hands is drawn.** The quiz diagrams and the Chapter 2 drill both grew an item
+  slot in the top-left, where the game keeps it. Two cards had been drawing the held item lying on
+  the tarmac with a caption arguing against the picture; those markers are gone. The slot's window is
+  light, which was found by looking at all ten cards rather than the two it was designed against — on
+  a dark slot the bob-omb is a black sphere and all you can see is the fuse.
+- **A held Space no longer presses the button that appears under it.** `finish()` focuses the
+  next-chapter button, so a thumb still down at the end of Chapter 1's fifth countdown walked the
+  site into Chapter 2. `ignoreHeldKey` blocks repeats and blocks a release with no matching press on
+  that element; verified both ways in a real browser, including that a fresh Space still works.
+- **Chapter 2 is "Defensive driving".** Every chapter title is also the label on the button that
+  leaves the chapter before it, and that button now reads what Riggs asked for.
+- **"Next: Quiz" and "Skip the quiz"** where the practice is a quiz. One optional field on `Drill`.
+- **Chapter 3 mentions the shake.** One paragraph, with the one caveat that matters: it does tricks
+  and not drifts, so Chapter 6 still wants the button.
+- **The animated U-turn is Chapter 4's now** ("I like this, but why is it in the opening chapter?").
+  Moved verbatim; `ch0-opener.ts`/`ch0.css` renamed to `long-way-round.*` and the `op-` class prefix
+  with them, because a file called `ch0-opener` that only Chapter 4 imports is a trap for later.
+
+**Checks.** `npm run shoot` is 23/23 including the new `ch8-try` route. Beyond that, everything with
+a moving part was driven in a real browser rather than reasoned about: all ten Chapter 2 diagrams
+shot one at a time (which is how the dark item slot was caught), Chapter 4's practice driven for
+three laps to watch the map test arrive with no button on it, Chapter 1 run with Space held through
+the fifth countdown, and the benchmark taken cold and then retaken so the before/after card could be
+read on screen.
+
+**Open.** Nothing from this batch. The benchmark's before reading is stored best-of like every other
+score, so retaking Chapter 0's practice after the course could raise it — she has no reason to (the
+run reveals nothing) and the ordinary rule that a replay never costs her anything is worth more than
+the edge case.
+
+---
+
+### 2026-08-13 — Session 19 (Opus 5)
+
+**Steps touched:** 4e4 (new)
+
+**Kayla's lockout was the funniest page on the site and she was going to look at it once.** Riggs's
+ask: she loves *There Is No Game: Wrong Dimension*, so give her that. It is now seven beats and about
+ten minutes, in `src/site/kayla/`, and the notice she starts on is the old lockout word for word —
+the gag only works if she believes it for the first fifteen seconds.
+
+**The hardest part is not the puzzles, it is the first ninety seconds.** The failure mode is never
+"she finds it hard", it is "she reads the notice, shrugs, clicks Change user, gone in nine seconds".
+So nothing waits for her: at 2.4s the full stop at the end of the last sentence sags off its
+baseline, and at 4.2s it comes off and **flies to the corner of the screen to rest against the Change
+user button**. That is the whole design of the beat — the one element she is guaranteed to be looking
+at is her exit, so putting the first puzzle piece against the door handle turns "will she notice the
+object" into a question that answers itself. It stops short of the button rather than overlapping it,
+because a grabbable span sitting on the exit would eat the click that leaves.
+
+**What the research changed.** Two agents on the source material came back with the same two
+findings, and both are complaints rather than praise: the narrator gives hints before you have had a
+go, and you are locked out of scenes while it talks. Both are structural here now. Hints wait 25s,
+60s, then 110s before saying the answer outright, and `narrator.solved()` exists so a hint fired four
+seconds before she solves something cannot play *after* she solves it. Every line is skippable with
+any key — and the narrator notices, once, that she is reading ahead of it, which is the most personal
+thing this site can say because it is about something she is doing right then.
+
+**The two ideas the thing turns on.** The access form rejects her for getting Mario Kart questions
+*right*, and only admits her when she answers the way her mum would have a year ago: the site's own
+thesis pointed at the one person it was never written for, and the only mechanic in this project that
+puts Kayla inside Jodi's head. And the ending is a **dossier**, not a message — every chapter Jodi
+has been drilled on, handed over as intelligence on an opponent, with two months' warning. The single
+ask is "pick the Mushroom Cup, it is the one she has been learning", and it says *do not let her win*
+in bold, because she would spot that instantly and be right to be insulted.
+
+**The clarinet was always there.** The narrator has been voiced in one since the first typed
+character — `reed.ts` builds a `PeriodicWave` with every even partial set to zero, which is what a
+stopped cylindrical pipe does and why the instrument overblows a twelfth. Beat 4 is where she finds
+out she can play it. When a vent squeaks it squeaks up a twelfth, correctly, and the narrator says
+so. That line is aimed at an audience of one.
+
+**Bugs worth recording, because four of them were the same bug.** Four beats were written with their
+interactions wired *after* an `await narrator.say(...)`, and every one produced an object that was
+plainly finished and completely inert for the eight seconds she was most likely to try it. Two live
+drag handles ended up on the same node across the beat-1/beat-2 handoff, so the hole teleported back
+into the sentence on her first move — `grabbable` now reads the node's existing transform rather than
+assuming zero. The mute war branched on the launch counter instead of the press counter, so the
+second silencing replayed the first one's speech and the pointer was never sent at all. And the exit
+button was created, wired, styled, and never appended to the DOM, which is a fair reminder that "the
+way out is always visible" is worth exactly what the DOM says it is worth.
+
+**Verified by playing it**, not by reading it: the whole chain runs end to end through the real door
+with zero console errors, and beat by beat through the new prototype harness at `src/proto/kayla/`.
+Keyboard-only play of beat 1 works, and the exit is first in tab order.
+
+**Left open.** Nobody has watched a person do this. 4e3's question — funny, not mean — is still the
+only one that matters, and the harness page is written as three questions for whoever tests it. One
+idea from the design critique is deliberately unbuilt: a beat where the thing she is asked to fix is
+a real mistake in a chapter written for her mum, so the conspirator turn happens as an *action* five
+minutes before the ending explains it. It is the strongest version of the whole argument and it wants
+a new mechanic at exactly the point the pacing says to stop inventing them.
+
 ### 2026-08-13 — Session 18 (Opus 5)
 
 **Steps touched:** **1b6** · **1c2** · **1d2** · **1e2** · **1f4** · **1g1** (all closed) · **3f1**

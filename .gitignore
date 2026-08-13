@@ -15,6 +15,15 @@ supabase/.branches
 # Render checks from scripts/shoot.mjs. Useful to look at, pointless to version.
 screenshots
 
+# Ad-hoc browser drivers and one-off captures, written to answer a question and then finished
+# with. They live at the root because playwright resolves from the project; they are nobody's
+# reference and they must not be linted.
+/.drive*.mjs
+/.probe.mjs
+/.play.mjs
+/.beat.mjs
+/shot-*.png
+
 .DS_Store
 Thumbs.db
 
