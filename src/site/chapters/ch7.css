@@ -206,3 +206,94 @@
   font-size: var(--t-small);
   color: var(--ink-faint);
 }
+
+/*
+ * The driver swap. (Riggs, 2026-08-12: "give an option to change your character and see the other
+ * options without committing after you've already selected".)
+ *
+ * Styled as chips rather than as cards, and placed *inside* the setup panel rather than beside the
+ * builds, because it is not a fifth choice competing with the four builds — it is a detail of the
+ * choice she has already made. Nothing here can be got wrong, so nothing here looks like a
+ * decision.
+ */
+.driver-picker {
+  margin: 1.1rem 0 0.4rem;
+  padding-top: 1rem;
+  border-top: 2px dashed var(--rule);
+}
+
+.driver-picker .eyebrow {
+  margin: 0 0 0.5rem;
+}
+
+.driver-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.driver-chip {
+  appearance: none;
+  font: inherit;
+  font-family: var(--display);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 2px solid var(--rule);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: var(--round-pill);
+  padding: 0.35em 0.95em;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.driver-chip:hover {
+  border-color: var(--ink-faint);
+}
+
+.driver-chip:focus-visible {
+  outline: 3px solid var(--boost);
+  outline-offset: 2px;
+}
+
+/* Never colour alone: the current driver is also the only chip with a heavy border (3e1). */
+.driver-chip[data-on='true'] {
+  background: var(--box-wash);
+  border-color: var(--box);
+  border-width: 3px;
+  padding: calc(0.35em - 1px) calc(0.95em - 1px);
+}
+
+.driver-note {
+  margin: 0.55rem 0 0;
+  color: var(--ink-soft);
+}
+
+/*
+ * Cards and setup side by side, once there is room. (One-screen budget, 2026-08-12.)
+ *
+ * Stacked, this page is 1172px at 1440x900 — the only practice page that still does not fit, and
+ * the reason is simply that a setup panel underneath a grid of builds is two tall things in a
+ * column. Beside each other they are one tall thing.
+ *
+ * It also reads better: the instructions for the build she has picked end up level with the card
+ * she picked, rather than a scroll away from it.
+ */
+@media (min-width: 64rem) {
+  .combo-picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 1fr);
+    gap: var(--gap);
+    align-items: start;
+  }
+
+  .combo-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .combo-setup {
+    position: sticky;
+    top: 1rem;
+  }
+}

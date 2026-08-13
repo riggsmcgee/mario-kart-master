@@ -61,12 +61,13 @@ export type Stats = Record<StatKey, number>;
  * hairs; a browser that offered eight kinds of "medium" would be answering a question nobody
  * asked.
  */
-export type WeightClass = 'feather' | 'light' | 'medium' | 'cruiser' | 'heavy';
+export type WeightClass = 'feather' | 'light' | 'medium' | 'mid-heavy' | 'cruiser' | 'heavy';
 
 export const WEIGHT_CLASS_LABELS: Record<WeightClass, string> = {
   feather: 'Featherweight',
   light: 'Light',
   medium: 'Medium',
+  'mid-heavy': 'Medium-heavy',
   cruiser: 'Cruiserweight',
   heavy: 'Heavy',
 };
@@ -118,6 +119,7 @@ const CLASS_BARS: Record<WeightClass, Bars> = {
   feather: [2, 5, 1, 4.75, 3.5],
   light: [2.5, 4.5, 2, 4.25, 3.5],
   medium: [3.25, 3.5, 3, 3.5, 3],
+  'mid-heavy': [3.6, 3.1, 3.5, 3.1, 2.9],
   cruiser: [4, 2.75, 4, 2.75, 2.75],
   heavy: [4.5, 2.25, 5, 2.25, 2.5],
 };
@@ -160,8 +162,19 @@ export const CHARACTERS: readonly Character[] = [
   character('daisy', 'Daisy', 'medium'),
   character('birdo', 'Birdo', 'medium'),
   character('yoshi', 'Yoshi', 'medium'),
-  character('mario', 'Mario', 'medium'),
-  character('luigi', 'Luigi', 'medium'),
+
+  // Mario and Luigi are *not* in Peach's class, and this used to say they were.
+  //
+  // It stopped being a harmless simplification the day Chapter 7 started printing the class out:
+  // the chapter now claims in so many words that "Peach, Daisy, Birdo and Yoshi are the same
+  // kart", and the driver swap offers whatever `sameClassAs` returns. With these two in there it
+  // was offering her a swap that would quietly change how the kart drives, underneath a sentence
+  // promising it would not. A simplification that a page is actively asserting is no longer a
+  // simplification; it is a wrong answer.
+  character('mario', 'Mario', 'mid-heavy'),
+  character('luigi', 'Luigi', 'mid-heavy'),
+  character('iggy', 'Iggy', 'mid-heavy'),
+  character('ludwig', 'Ludwig', 'mid-heavy'),
 
   character('rosalina', 'Rosalina', 'cruiser', 'Tall, unbothered, and hard to shift off a line.'),
   character('waluigi', 'Waluigi', 'cruiser', 'Heavy enough to hold his ground, and still turns.'),

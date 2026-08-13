@@ -25,10 +25,12 @@
 
 import {
   ARCHETYPES,
+  CHARACTERS,
   loadCombo,
   sameClassAs,
   saveCombo,
   type ArchetypeId,
+  type Character,
   type Combo,
 } from '../../data/parts';
 import { el, frag, prose, rich } from '../dom';
@@ -131,14 +133,71 @@ function buildCard(id: ArchetypeId, headline: boolean, t: (text: string) => stri
   return { card, label };
 }
 
+/**
+ * The drivers she could have instead, as a row of buttons. (Riggs, 2026-08-12.)
+ *
+ * The chapter already tells her that a weight class is one kart with several costumes; this is
+ * that fact made usable. Swapping between them changes nothing about the build — which is exactly
+ * why it can be offered freely, with no confirmation and no consequence, at any point including
+ * long after she has chosen.
+ *
+ * It exists because the first version made the pick feel final: three cards, click one, done. A
+ * decision that cannot be revisited is one people put off, and this is explicitly the least
+ * important decision in the course.
+ */
+function driverPicker(
+  current: Character,
+  t: (text: string) => string,
+  onPick: (driver: Character) => void,
+): HTMLElement {
+  const options = [current, ...sameClassAs(current.id)].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+
+  const row = el('div', { class: 'driver-row' });
+  for (const driver of options) {
+    const button = el(
+      'button',
+      {
+        class: 'driver-chip',
+        type: 'button',
+        data: { on: String(driver.id === current.id) },
+        attrs: { 'aria-pressed': String(driver.id === current.id) },
+      },
+      driver.name,
+    );
+    button.addEventListener('click', () => onPick(driver));
+    row.append(button);
+  }
+
+  return el(
+    'div',
+    { class: 'driver-picker' },
+    el('p', { class: 'eyebrow' }, 'Or be somebody else'),
+    row,
+    el(
+      'p',
+      { class: 'driver-note ms' },
+      t(
+        'Every one of these drives **identically** — same weight, same everything. Swap as often as you like; it changes nothing but the face.',
+      ),
+    ),
+  );
+}
+
 /** What to do on the Switch, for the build she actually chose. */
-function setupPanel(id: ArchetypeId, t: (text: string) => string): HTMLElement {
+function setupPanel(
+  id: ArchetypeId,
+  driver: Character,
+  t: (text: string) => string,
+  onPickDriver: (next: Character) => void,
+): HTMLElement {
   const combo = ARCHETYPES[id];
   const copy = COPY[id];
 
   const steps = [
     'On the Switch, start a race — Grand Prix, VS, anything at all — and stop when it asks who you are.',
-    `Driver: **${combo.character.name}**.`,
+    `Driver: **${driver.name}**.`,
     `Next screen is the kart itself: **${combo.body.name}**.`,
     `Then the wheels: **${combo.tyres.name}**. This is the one that matters most.`,
     `Then the glider: **${combo.glider.name}**. Gliders change the least of anything here, so swap it for one you like the look of if you want.`,
@@ -156,6 +215,7 @@ function setupPanel(id: ArchetypeId, t: (text: string) => string): HTMLElement {
       'Here is exactly how to set it. It takes about ninety seconds, and you never have to do it again.',
     ),
     el('ol', { class: 'combo-steps' }, ...steps.map((step) => el('li', null, rich(t(step))))),
+    driverPicker(driver, t, onPickDriver),
     el(
       'p',
       { class: 'combo-bridge' },
@@ -287,6 +347,34 @@ const content: ChapterContent = {
 
     /** True once she has chosen in this visit, so a re-pick does not re-throw the fanfare. */
     let chosen = false;
+    /** Which build is showing, and who is driving it. The driver is hers to change at any point. */
+    let current: ArchetypeId | null = null;
+    let driver: Character | null = null;
+
+    /** Repaint the setup panel for the current build and driver, and save the pair. */
+    const write = (id: ArchetypeId, who: Character): void => {
+      const combo = ARCHETYPES[id];
+      saveCombo({
+        archetype: id,
+        title: COPY[id].title,
+        character: who.name,
+        body: combo.body.name,
+        tyres: combo.tyres.name,
+        glider: combo.glider.name,
+      });
+      setup.replaceChildren(setupPanel(id, who, t, (next) => pickDriver(next)));
+    };
+
+    /**
+     * Swapping the face. Deliberately silent and consequence-free: it does not stamp the chapter,
+     * does not make a sound, and cannot be got wrong, because within a weight class every driver
+     * is the same kart.
+     */
+    const pickDriver = (next: Character): void => {
+      if (!current) return;
+      driver = next;
+      write(current, next);
+    };
 
     const choose = (id: ArchetypeId, fromHer: boolean): void => {
       for (const [key, built] of cards) {
@@ -296,17 +384,16 @@ const content: ChapterContent = {
         built.label.textContent = picked ? 'This one is yours' : 'Choose this one';
       }
 
+      // Changing build resets the driver to that build's own, unless she is already driving
+      // somebody from the same weight class — in which case her choice of face survives the
+      // change of kart, which is what anybody would expect it to do.
       const combo = ARCHETYPES[id];
-      saveCombo({
-        archetype: id,
-        title: COPY[id].title,
-        character: combo.character.name,
-        body: combo.body.name,
-        tyres: combo.tyres.name,
-        glider: combo.glider.name,
-      });
+      const keepsDriver =
+        driver !== null && driver.weightClass === combo.character.weightClass ? driver : null;
 
-      setup.replaceChildren(setupPanel(id, t));
+      current = id;
+      driver = keepsDriver ?? combo.character;
+      write(id, driver);
 
       if (!fromHer) return;
 
@@ -330,6 +417,8 @@ const content: ChapterContent = {
     const saved = loadCombo();
     if (saved && cards.has(saved.archetype)) {
       chosen = true;
+      // Restore the face she picked as well as the build, when it is still a driver we know about.
+      driver = CHARACTERS.find((item) => item.name === saved.character) ?? null;
       choose(saved.archetype, false);
     } else {
       setup.replaceChildren(
