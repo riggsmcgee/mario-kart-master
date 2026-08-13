@@ -14,7 +14,9 @@
  *    carries its own response, so the card can say *why that one loses* — which is the actual
  *    lesson.
  * 3. **Authored as plain JSON.** Chapter 2 wants eight to twelve of these. Writing them has to
- *    be typing sentences into a list, or they will not get written.
+ *    be typing sentences into a list, or they will not get written. Write the correct answer
+ *    **first**, every time — {@link rotateAnswers} moves it before anything reaches the screen,
+ *    so the file stays readable and the reader still cannot pass by pressing 1.
  *
  * The one thing worth knowing about the code: JSON has no compiler, so {@link parseQuiz} checks
  * the file at load and throws with the question index and the missing field. A typo in a data
@@ -79,6 +81,38 @@ const MARKER_KINDS: ReadonlySet<string> = new Set<MarkerKind>([
 
 function fail(where: string, problem: string): never {
   throw new Error(`Quiz data: ${where} ${problem}.`);
+}
+
+/** FNV-1a. Not cryptography — it only has to be stable across reloads and well spread. */
+function hashId(id: string): number {
+  let hash = 2166136261;
+  for (let i = 0; i < id.length; i++) {
+    hash ^= id.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+/**
+ * Move the right answer off the top of the list.
+ *
+ * Every card in every deck is authored correct-answer-first, because that is the sane way to write
+ * one — say what is true, then say why the other two look right. Rendered in that order it meant
+ * the answer was button 1 on all twenty cards in the course, which Riggs caught on 2026-08-12. A
+ * quiz you can pass by pressing 1 is not teaching anything.
+ *
+ * Rotating by `(index + hash(id))` rather than by either alone is a measured choice. The hash on
+ * its own clusters — it put nothing at all in slot 1 across the whole ten-card Chapter 2 deck,
+ * which is the same bug with a different favourite. The index on its own cycles 1, 3, 2, 1, 3, 2,
+ * so every deck opens on slot 1 and the pattern is visible by the fourth card. Together they came
+ * out 7/5/8 across the twenty, with all three slots used in every deck.
+ *
+ * Deterministic on purpose. A card she comes back to must have its answers in the same places, or
+ * revisiting a chapter quietly turns into a memory test with the furniture moved.
+ */
+function rotateAnswers(answers: QuizAnswer[], id: string, index: number): QuizAnswer[] {
+  const shift = (index + hashId(id)) % answers.length;
+  return [...answers.slice(shift), ...answers.slice(0, shift)];
 }
 
 function str(value: unknown, where: string, field: string): string {
@@ -161,12 +195,13 @@ export function parseQuiz(raw: unknown): QuizQuestion[] {
       fail(where, `marks ${rightOnes.length} answers "correct": true; it needs exactly one`);
     }
 
+    const id = str(source, where, 'id');
     const question: QuizQuestion = {
-      id: str(source, where, 'id'),
+      id,
       situation: str(source, where, 'situation'),
       prompt: str(source, where, 'prompt'),
       takeaway: str(source, where, 'takeaway'),
-      answers,
+      answers: rotateAnswers(answers, id, index),
     };
     if (source['diagram'] !== undefined) question.diagram = parseDiagram(source['diagram'], where);
     return question;
