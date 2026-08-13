@@ -71,7 +71,10 @@ const titles = extract(
 );
 
 const fill = (text) =>
-  text.replace(/\{name\}/g, NAME).replace(/\{rival\}/g, RIVAL).replace(/\\'/g, "'");
+  text
+    .replace(/\{name\}/g, NAME)
+    .replace(/\{rival\}/g, RIVAL)
+    .replace(/\\'/g, "'");
 
 /** Markdown blockquote, wrapped at 98 columns to match the rest of the file. */
 function quote(lines) {

@@ -283,9 +283,7 @@ function driverCard(t: (text: string) => string): HTMLElement {
     el(
       'p',
       { class: 'ms', style: { color: 'var(--ink-soft)', margin: '0' } },
-      t(
-        `Drives exactly like Peach: ${alts.map((item) => item.name).join(', ')}. Take your pick.`,
-      ),
+      t(`Drives exactly like Peach: ${alts.map((item) => item.name).join(', ')}. Take your pick.`),
     ),
   );
 }

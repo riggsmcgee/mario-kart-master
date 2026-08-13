@@ -504,7 +504,9 @@ function stickArrow(direction: 'left' | 'centre' | 'right'): SVGSVGElement {
 
   // The stick's gate: a circle it moves inside, so a centred stick reads as "resting" rather
   // than as "no picture here".
-  box.append(svg('circle', { cx: 24, cy: 24, r: 17, fill: 'none', stroke: '#d7e0ec', 'stroke-width': 3 }));
+  box.append(
+    svg('circle', { cx: 24, cy: 24, r: 17, fill: 'none', stroke: '#d7e0ec', 'stroke-width': 3 }),
+  );
 
   if (direction === 'centre') {
     box.append(svg('circle', { cx: 24, cy: 24, r: 6, fill: 'currentColor' }));

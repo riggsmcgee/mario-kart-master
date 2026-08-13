@@ -210,9 +210,7 @@ const content: ChapterContent = {
 
       prose([
         'And the unglamorous bit holding it up: **be smooth.** Most of the speed people lose is not lost in corners at all — it is lost sawing left-right-left-right down a straight, trying to sit exactly in the middle of the road. Pick a line, sit on it, stop fiddling.',
-        ctx.t(
-          'Which is exactly what Kendahl does, incidentally. Make of that what you like.',
-        ),
+        ctx.t('Which is exactly what Kendahl does, incidentally. Make of that what you like.'),
       ]),
 
       heading('Coins are speed. Ten of them.'),

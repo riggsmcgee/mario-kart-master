@@ -35,7 +35,13 @@ import { lineError, type LineError, type RacingLine } from '../engine/racing-lin
 // No charge bar in the HUD, deliberately: the sparks on the kart are the feedback, and the
 // chapter's whole instruction is "watch for them to turn orange". A bar in the corner would teach
 // her to watch the bar, which is not a thing her Switch has.
-import { DRIFT_CONFIG, createDrift, resetDrift, stepDrift, type DriftResult } from '../engine/drift';
+import {
+  DRIFT_CONFIG,
+  createDrift,
+  resetDrift,
+  stepDrift,
+  type DriftResult,
+} from '../engine/drift';
 import { ChaseCamera, CHASE_CAMERA_CONFIG } from '../engine/chase-camera';
 import { createKartScene } from './kart-scene';
 import { el } from '../site/dom';
@@ -365,9 +371,7 @@ export function createKartDrill(options: KartDrillOptions): Mounted {
     const slide = driftResult?.overrideSteering === true ? driftResult : null;
     const DRIFT_ASSIST = 0.34;
     const assist = computeSteerAssist(kart, path, surface.halfWidth, assistConfig);
-    const config = slide
-      ? { ...kartConfig, grip: kartConfig.grip * slide.gripScale }
-      : kartConfig;
+    const config = slide ? { ...kartConfig, grip: kartConfig.grip * slide.gripScale } : kartConfig;
 
     last = stepKart(
       kart,
