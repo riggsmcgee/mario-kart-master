@@ -155,14 +155,41 @@ function quadsGeometry(quads: Array<[number, number, number][]>): THREE.BufferGe
  * at distance the depth buffer cannot tell 2cm apart, so it picks a winner per pixel, per
  * frame. `order` counts upward from the road.
  */
-function decalMaterial(color: number, order: number): THREE.MeshLambertMaterial {
-  return new THREE.MeshLambertMaterial({
-    color,
-    polygonOffset: true,
-    polygonOffsetFactor: -order,
-    polygonOffsetUnits: -order * 2,
-  });
+function decalOffset(order: number): {
+  polygonOffset: true;
+  polygonOffsetFactor: number;
+  polygonOffsetUnits: number;
+} {
+  return { polygonOffset: true, polygonOffsetFactor: -order, polygonOffsetUnits: -order * 2 };
 }
+
+function decalMaterial(color: number, order: number): THREE.MeshLambertMaterial {
+  return new THREE.MeshLambertMaterial({ color, ...decalOffset(order) });
+}
+
+/**
+ * Where each flat layer sits in the stack painted on the road. Higher wins.
+ *
+ * Boost pads are up at the top, above the road markings, and that is a fix rather than a
+ * preference (Riggs, 2026-08-12: "boost pads aren't appearing until you get really close to them…
+ * it looks like it might be something with the road covering them up from a far"). It was exactly
+ * that. The pad slab is a 14cm-tall box and had no offset at all, while the road underneath it is
+ * pulled toward the camera by `polygonOffsetFactor: -2`. `factor` scales with the polygon's depth
+ * slope, and a road seen from a low chase camera is close to edge-on in the distance — so far down
+ * the straight the road's bias grew until it swallowed the pad, and the pad only surfaced once she
+ * was near enough for 14cm to out-argue it. Which made the one thing the drill asks her to do —
+ * plan a line to something ahead — impossible until it was too late to steer.
+ */
+const DECAL = {
+  apron: 1,
+  road: 2,
+  edgeLine: 3,
+  kerb: 4,
+  racingLine: 4,
+  startLine: 5,
+  pad: 6,
+  padChevron: 7,
+} as const;
 
 /**
  * The racing line, painted on the road. (Chapter 5.)
@@ -405,8 +432,8 @@ function buildKerbs(points: PathPoint[], halfWidth: number): THREE.Group {
     }
   }
 
-  group.add(new THREE.Mesh(quadsGeometry(red), decalMaterial(PALETTE.kerbRed, 4)));
-  group.add(new THREE.Mesh(quadsGeometry(white), decalMaterial(PALETTE.kerbWhite, 4)));
+  group.add(new THREE.Mesh(quadsGeometry(red), decalMaterial(PALETTE.kerbRed, DECAL.kerb)));
+  group.add(new THREE.Mesh(quadsGeometry(white), decalMaterial(PALETTE.kerbWhite, DECAL.kerb)));
   return group;
 }
 
@@ -428,8 +455,8 @@ function buildStartLine(surface: PathSurface, points: PathPoint[]): THREE.Group 
 
   const columns = 10;
   const size = (surface.halfWidth * 2) / columns;
-  const dark = decalMaterial(0x2b2f38, 5);
-  const light = decalMaterial(0xf7f7f7, 5);
+  const dark = decalMaterial(0x2b2f38, DECAL.startLine);
+  const light = decalMaterial(0xf7f7f7, DECAL.startLine);
 
   for (let row = 0; row < 2; row++) {
     for (let column = 0; column < columns; column++) {
@@ -886,7 +913,7 @@ function buildFurniture(items: PlacedFurniture[]): FurnitureHandles {
         mesh = new THREE.Group();
         const slab = new THREE.Mesh(
           new THREE.BoxGeometry(item.halfLength * 2, 0.14, item.halfWidth * 2),
-          new THREE.MeshLambertMaterial({ color: PALETTE.pad }),
+          decalMaterial(PALETTE.pad, DECAL.pad),
         );
         slab.position.y = 0.07;
         mesh.add(slab);
@@ -897,7 +924,10 @@ function buildFurniture(items: PlacedFurniture[]): FurnitureHandles {
         for (let i = 0; i < 4; i++) {
           const chevron = new THREE.Mesh(
             new THREE.BoxGeometry(0.55, 0.06, item.halfWidth * 1.5),
-            new THREE.MeshBasicMaterial({ color: PALETTE.padChevron }),
+            new THREE.MeshBasicMaterial({
+              color: PALETTE.padChevron,
+              ...decalOffset(DECAL.padChevron),
+            }),
           );
           const base = -item.halfLength + (span / 4) * i;
           chevron.position.set(base, 0.16, 0);
@@ -1041,27 +1071,27 @@ export function createKartScene(
   scene.add(
     new THREE.Mesh(
       ribbonGeometry(points, -(halfWidth + 5), halfWidth + 5, -0.1),
-      decalMaterial(PALETTE.grassDark, 1),
+      decalMaterial(PALETTE.grassDark, DECAL.apron),
     ),
   );
 
   scene.add(
     new THREE.Mesh(
       ribbonGeometry(points, -halfWidth, halfWidth, 0),
-      decalMaterial(PALETTE.road, 2),
+      decalMaterial(PALETTE.road, DECAL.road),
     ),
   );
 
   scene.add(
     new THREE.Mesh(
       ribbonGeometry(points, halfWidth - 0.5, halfWidth, 0.02),
-      decalMaterial(PALETTE.roadEdge, 3),
+      decalMaterial(PALETTE.roadEdge, DECAL.edgeLine),
     ),
   );
   scene.add(
     new THREE.Mesh(
       ribbonGeometry(points, -halfWidth, -halfWidth + 0.5, 0.02),
-      decalMaterial(PALETTE.roadEdge, 3),
+      decalMaterial(PALETTE.roadEdge, DECAL.edgeLine),
     ),
   );
 
@@ -1071,7 +1101,7 @@ export function createKartScene(
     scene.add(
       new THREE.Mesh(
         racingLineGeometry(points, options.racingLine, 1.5, 0.03),
-        decalMaterial(PALETTE.line, 4),
+        decalMaterial(PALETTE.line, DECAL.racingLine),
       ),
     );
   }
