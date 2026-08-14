@@ -1,12 +1,12 @@
 # public/media
 
-Two clips of Riggs to camera, both optional, both absent by default. `intro.mp4` and `kayla.mp4`.
+One clip of Riggs to camera: `intro.mp4`.
 
-Keep both **H.264 in an MP4** (`libx264` + AAC). That is the one combination Safari and Chrome both
+Keep it **H.264 in an MP4** (`libx264` + AAC). That is the one combination Safari and Chrome both
 play without argument — a `.mov` straight off a phone is usually HEVC, which Chrome on Windows will
-not decode. And keep each one **under 50 MB**: this directory is committed and served from GitHub
-Pages, which warns past 50 and refuses past 100. A 720p talking head at ~2 Mbps is about 15 MB a
-minute, and 720p is plenty for a face.
+not decode. And keep it **under 50 MB**: this directory is committed and served from GitHub Pages,
+which warns past 50 and refuses past 100. A 720p talking head at ~2 Mbps is about 15 MB a minute, and
+720p is plenty for a face.
 
 ## `intro.mp4` — Chapter 0
 
@@ -26,17 +26,16 @@ If it is ever re-cut, three minutes is the ceiling — Chapter 0 is the page mos
 early, and it already asks for twelve minutes of video after this one. The heading in
 `intro-video.ts` names the length, so a re-cut that changes it should change that line too.
 
-## `kayla.mp4` — the other end
+## `kayla.mp4` — dropped
 
-A short piece to camera congratulating Kayla for getting through
-*There Is No Course* (the ten minutes behind her own name at the doorman), and telling her that if
-she really wants it, the site is hers. It plays as beat 8, right after the narrator has said
-goodbye and meant it.
+There was going to be a second clip: Riggs congratulating Kayla for getting through *There Is No
+Course* and telling her the site was hers if she wanted it. Beat 8 was built to play it, with a
+written note as the fallback if the file never arrived.
 
-**It is optional and the ending is complete without it.** `beats/admission.ts` probes for the file
-with a HEAD request before painting anything, and if it is absent she gets a written note in the
-site's own type instead — no poster frame, no dead play button, nothing that reads as broken. Drop
-the file in and it becomes a video with no code change, which is the same arrangement
-`src/ui/intro-video.ts` uses at the other end.
+**Dropped before launch (2026-08-13), and the note became the ending.** The player, the HEAD probe
+and the branch were removed with it — a code path that can never run is not optionality, it is a
+skeleton. The note was written to stand on its own rather than to apologise for something missing,
+which is the only reason the cut cost nothing.
 
-A minute is plenty; two is long.
+If it is ever wanted, it is a small amount of work to put back and the git history has it. Do not
+re-add a probe for a file nobody is going to make.

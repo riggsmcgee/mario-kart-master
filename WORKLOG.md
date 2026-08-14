@@ -198,8 +198,16 @@ which is exactly the pattern being sent up. Caught in a screenshot, not in the c
 
 End to end: **3m17s**, from 3m35s, and the two stretches he named are the two that shrank.
 
-**Left open.** `public/media/kayla.mp4` is still Riggs's to record; the ending plays complete without
-it. Nobody has yet watched a person do this.
+**Then: "I think we're dropping the video. Ready to ship."** So `kayla.mp4` is gone, and the written
+note that had been its fallback is now the ending. The `<video>` element, the HEAD probe and the
+whole `hasVideo` branch went with it — about forty lines and one pointless request per playthrough —
+along with the `.k-video` rule and a stale sentence in `intro-video.ts` pointing at a file nobody is
+going to make. **A code path that can never run is not optionality, it is a skeleton**, which is the
+note he gave two passes ago applied to my own hedging. It cost nothing to remove only because the
+note was written to stand on its own rather than to apologise for something missing — that was the
+right call at the time and it is what made this a five-minute change instead of a rewrite.
+
+**Left open.** Nobody has yet watched a person do this.
 
 ### 2026-08-13 — Session 21 (Opus 5)
 

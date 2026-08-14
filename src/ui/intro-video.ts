@@ -16,8 +16,7 @@
  * **The file is not here yet, and the page is correct without it.** Same rule the audio player
  * followed: no file means no player — not a greyed-out control, not a "coming soon", not something
  * that throws when clicked. The block simply is not on the page. Drop `intro.mp4` into
- * `public/media/` — beside `kayla.mp4`, which does the same job at the other end of the site — and it
- * appears with no code change.
+ * `public/media/` and it appears with no code change.
  *
  * **A local file rather than a YouTube embed.** The two other videos in the course are somebody
  * else's and belong on YouTube; this one is him, in his own house, talking to his aunt. Uploading it

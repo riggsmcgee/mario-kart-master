@@ -1,5 +1,5 @@
 /**
- * Beat 8 — the video, the one form, and the way in. (4e4, third pass)
+ * Beat 8 — the note, the one form, and the way in. (4e4)
  *
  * Riggs, 2026-08-13: *"After she completes the mini-game I'll record a video congratulating her,
  * saying that if she really wants, then she can go to the site."* And: *"if she makes it all the way
@@ -7,6 +7,19 @@
  *
  * So beat 7 is a false ending. It says goodbye, it means it, and then something arrives that the
  * narrator was not told about.
+ *
+ * ## It is a note, and it was built to be a video
+ *
+ * The video was dropped before launch (*"I think we're dropping the video"*), and the fallback it
+ * had been given — a note in the site's own type, addressed to her, signed — became the thing
+ * itself. The player, the probe and the branch went with the decision, because a code path that can
+ * never run is not optionality, it is a skeleton, and this file has already been through one pass of
+ * removing those.
+ *
+ * The note was written to be complete on its own rather than to apologise for something missing,
+ * which is the only reason this cut cost nothing. Something arriving in the narrator's folder with
+ * her name on it does not need to move to land — the surprise is that it exists and that it is not
+ * from him.
  *
  * ## What the third pass cut, and why it was right
  *
@@ -28,9 +41,9 @@
  *
  * ## Three things this beat still gets right on purpose
  *
- * **The narrator shuts up during the video.** It has not stopped talking for five minutes; silence is
+ * **The narrator stops talking while she reads it.** It has not shut up for five minutes; silence is
  * the only expressive thing it has never spent. No commentary, no jealousy. Afterwards it does not
- * review the video — it complains about jurisdiction, which is funnier and stays in character.
+ * discuss the note — it complains about jurisdiction, which is funnier and stays in character.
  *
  * **The No is real.** Same word, same size, same place, always working. That single restraint is the
  * difference between parodying a confirmation dialogue and being one.
@@ -43,42 +56,19 @@ import { el, rich } from '../../dom';
 import { admit } from '../admission';
 import { deferred, type Beat, type Stage } from '../stage';
 
-/** Where Riggs's recording goes when he makes it. Absent until then, and that is a designed state. */
-const VIDEO_SRC = `${import.meta.env.BASE_URL}media/kayla.mp4`;
-
 /**
- * What the note says when there is no video yet.
+ * The note. The only thing in five minutes that is not the narrator talking.
  *
- * Written to be complete on its own rather than to apologise for something missing. Same principle
- * as `intro-video.ts`: a control that is absent reads as deliberate, and one that is present and
- * broken reads as a bug. Riggs replaces this, records over it, or leaves it.
+ * Three lines and a signature, and every one of them does a job the site cannot do in its own voice:
+ * it says somebody expected her to fail, that she did not, and what he actually wants from her. The
+ * narrator has spent the whole piece being a website; this is a person, briefly, and the contrast is
+ * the entire effect.
  */
 const NOTE = [
   'You got through it. I did not think anyone would.',
   'The site is yours if you want it. All of it — not the version I built for your mum.',
   'Pick the Mushroom Cup. Do not go easy on her.',
 ];
-
-/**
- * Is there actually a video there?
- *
- * **A 200 is not enough**, and finding that out cost a test run. Vite's dev server — and a great many
- * static hosts — answer an unknown path with the app shell and a cheerful 200, so a plain `ok` check
- * reports a video where there is a web page. The content type is the thing that actually
- * distinguishes them.
- *
- * Belt and braces: even a passing probe is only a promise about the bytes, so the player also falls
- * back to the written note if the file turns out not to decode.
- */
-async function videoExists(): Promise<boolean> {
-  try {
-    const response = await fetch(VIDEO_SRC, { method: 'HEAD' });
-    if (!response.ok) return false;
-    return (response.headers.get('content-type') ?? '').toLowerCase().startsWith('video/');
-  } catch {
-    return false;
-  }
-}
 
 export const admission: Beat = {
   id: 'admission',
@@ -91,57 +81,24 @@ export const admission: Beat = {
 
     await stage.wait(800);
 
-    // Probed before anything is painted, so there is never a flash of broken player.
-    const hasVideo = await videoExists();
-
     scene.replaceChildren();
     const stageRoot = scene.closest<HTMLElement>('.k-stage');
     stageRoot?.setAttribute('data-layer', 'warm');
 
-    const watched = deferred();
-
-    if (hasVideo) {
-      const video = el('video', {
-        class: 'k-video',
-        controls: true,
-        preload: 'metadata',
-        playsInline: true,
-      });
-      video.src = VIDEO_SRC;
-      video.addEventListener('ended', () => watched.resolve());
-      // The probe said yes and the bytes said no. Do not sit on a dead player.
-      video.addEventListener('error', () => watched.resolve());
-
-      scene.append(
-        el(
-          'div',
-          { class: 'k-panel k-post' },
-          el('p', { class: 'k-stencil' }, 'One (1) unscheduled item'),
-          video,
-          el('p', { class: 'k-fine' }, 'From Riggs, who built this.'),
-        ),
-      );
-
-      // She presses play herself. Autoplay would be blocked anyway, and it is better authorship:
-      // the one thing in this experience that is a gift rather than an obstacle should be opened.
-      void narrator.say('…', 'That is not from me.');
-      narrator.nudge('It is a video. Of a person. Press it.', 'Press the play button.');
-
-      // If she never plays it, or the file will not decode, the beat still moves on.
-      await Promise.race([watched.promise, stage.wait(150_000)]);
-    } else {
-      scene.append(
-        el(
-          'div',
-          { class: 'k-panel k-post' },
-          el('p', { class: 'k-stencil' }, 'One (1) unscheduled item'),
-          el('h2', null, 'Kayla —'),
-          ...NOTE.map((line) => el('p', null, line)),
-          el('p', { class: 'k-fine' }, '— Riggs, who built this'),
-        ),
-      );
-      await narrator.say('…', 'That is not from me.');
-    }
+    // The note is painted first and the voice reacts to it second, which is the fix from the third
+    // pass and the reason there is nothing to wait through here: she is reading by the time it
+    // speaks, and what it says is two words long.
+    scene.append(
+      el(
+        'div',
+        { class: 'k-panel k-post' },
+        el('p', { class: 'k-stencil' }, 'One (1) unscheduled item'),
+        el('h2', null, 'Kayla —'),
+        ...NOTE.map((line) => el('p', null, line)),
+        el('p', { class: 'k-fine' }, '— Riggs, who built this'),
+      ),
+    );
+    await narrator.say('…', 'That is not from me.');
 
     narrator.hush();
 
