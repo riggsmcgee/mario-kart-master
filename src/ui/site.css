@@ -581,18 +581,6 @@ kbd {
   pointer-events: none;
 }
 
-/* --- sync readout --------------------------------------------------------- */
-
-.sync {
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  color: var(--ink-faint);
-}
-
-.sync[data-status='error'] {
-  color: var(--kerb-ink);
-}
-
 /* --- small screens -------------------------------------------------------- */
 
 @media (max-width: 720px) {

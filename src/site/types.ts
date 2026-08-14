@@ -12,8 +12,7 @@
  * later audit, because a hardcoded "Jodi" simply has nowhere to live.
  */
 
-import type { ProgressStore } from '../backend/progress';
-import type { PlayerRole } from '../backend/schema';
+import type { PlayerRole, ProgressStore } from '../store/progress';
 import type { ChapterMeta } from '../data/chapters';
 import type { Sfx } from '../ui/sfx';
 

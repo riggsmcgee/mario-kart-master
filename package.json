@@ -16,7 +16,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "shoot": "node scripts/shoot.mjs --serve",
-    "check:videos": "node scripts/check-videos.mjs"
+    "check:videos": "node scripts/check-videos.mjs",
+    "check:regress": "node scripts/regress.mjs",
+    "check:contrast": "node scripts/contrast.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -27,13 +29,11 @@
     "globals": "^16.5.0",
     "playwright": "^1.62.1",
     "prettier": "^3.6.2",
-    "supabase": "^2.113.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.1.12"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.112.2",
     "three": "^0.185.1"
   }
 }

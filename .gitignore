@@ -3,14 +3,10 @@ dist
 dist-ssr
 *.local
 
-# Supabase keys live here (1f1). Never commit.
+# The site has no secrets and no backend any more, but a stray .env must still never be
+# committed — the rule is cheaper to keep than to remember to re-add.
 .env
 .env.*
-!.env.example
-
-# Supabase CLI scratch: which project this machine is linked to, and local db state.
-supabase/.temp
-supabase/.branches
 
 # Render checks from scripts/shoot.mjs. Useful to look at, pointless to version.
 screenshots

@@ -44,7 +44,7 @@
  */
 
 import benchmarkDeck from '../../data/quiz/benchmark.json';
-import type { ProgressStore } from '../../backend/progress';
+import type { ProgressStore } from '../../store/progress';
 import { Quiz, fillQuiz, parseQuiz, type QuizSummary } from '../../ui/quiz';
 import { el } from '../dom';
 import type { ChapterContext } from '../types';

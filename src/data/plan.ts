@@ -9,15 +9,15 @@
  *
  * **Every checkable item has a stable string id, and ids are append-only.**
  *
- * Those ids are the primary key in Supabase's `plan_checks` table (see the 1f1 migration). A row
- * *is* the tick. Renaming `plan.skill.ch1.hold` — or renumbering a list so that item three
- * becomes item four — does not rename anything in the database: it silently unticks a box she
- * earned, on every device, forever, with no error anywhere. So ids are semantic rather than
- * positional (`plan.skill.ch5.ghost-stadium`, never `plan.item.14`), which means the display
- * order can be shuffled freely and nothing has to be renumbered. Adding is free. Deleting leaves
- * a harmless orphan row. Renaming is the one move that costs something, so it does not happen.
+ * Those ids are the key each tick is stored under. The stored entry *is* the tick. Renaming
+ * `plan.skill.ch1.hold` — or renumbering a list so that item three becomes item four — does not
+ * rename anything already saved: it silently unticks a box she earned, with no error anywhere. So
+ * ids are semantic rather than positional (`plan.skill.ch5.ghost-stadium`, never `plan.item.14`),
+ * which means the display order can be shuffled freely and nothing has to be renumbered. Adding is
+ * free. Deleting leaves a harmless orphan entry. Renaming is the one move that costs something, so
+ * it does not happen.
  *
- * **Everything checkable is a one-off.** `plan_checks` has no notion of a week and no reset, so a
+ * **Everything checkable is a one-off.** A tick has no notion of a week and no reset, so a
  * box that needs unticking every Monday would be a chore rather than a plan. The repeating work —
  * the weekly rhythm itself — is described and never ticked; each drill below is instead phrased
  * as a first time ("play one whole race where…"), which is genuinely done once and then becomes

@@ -12,8 +12,7 @@
  * to a chapter, so the lockout cannot be walked around by typing a URL.
  */
 
-import { getAuthState, onAuthChange, consumeAuthFragment } from '../backend/auth';
-import { getProgressStore } from '../backend/progress';
+import { getProgressStore } from '../store/progress';
 import { CHAPTERS, getChapter } from '../data/chapters';
 import { getSfx } from '../ui/sfx';
 import { turboJodi } from '../ui/mascot';
@@ -276,27 +275,6 @@ export function startApp(root: HTMLElement): void {
   }
 
   // --- boot -----------------------------------------------------------------
-
-  /**
-   * If she has just come back from the email link, take the tokens out of the fragment and sign
-   * her in with them — synchronously enough that the router never sees `#access_token=…`, which it
-   * would read as a wrong turn.
-   *
-   * The session decides who we sync as. Everything renders immediately regardless: the course
-   * never waits on the network to draw itself, so this resolves into an already-painted page and
-   * `onAuthChange` below repaints the header when it does.
-   */
-  void consumeAuthFragment().then(() =>
-    getAuthState().then((auth) => {
-      void progress.setUser(auth.userId);
-    }),
-  );
-
-  onAuthChange((auth) => {
-    void progress.setUser(auth.userId);
-    player = playerFor(progress.getRole(), progress.getDisplayName());
-    paintHeader();
-  });
 
   /**
    * Once the course is finished, the front door is the plan. (Riggs, 2026-08-12.)

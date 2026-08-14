@@ -31,8 +31,8 @@
  * one opponent guaranteed to be exactly her speed.
  *
  * **Ids are stable, semantic and append-only**, for the same reason as everything else that gets
- * ticked: an id is the primary key in Supabase's `plan_checks` table, and renaming one unticks a
- * box she earned, on every device, with no error anywhere. Reordering the display is free.
+ * ticked: an id is the key a tick is stored under, and renaming one unticks a box she earned,
+ * with no error anywhere. Reordering the display is free.
  * Renaming is not, so it does not happen — including through this reshape, which changed every
  * session's *content* and not one of its ids.
  *

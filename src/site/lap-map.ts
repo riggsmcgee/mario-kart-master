@@ -23,7 +23,7 @@
 
 import type { ChapterMeta } from '../data/chapters';
 import { CHAPTERS } from '../data/chapters';
-import type { ChapterStatus } from '../backend/schema';
+import type { ChapterStatus } from '../store/progress';
 import { el } from './dom';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';

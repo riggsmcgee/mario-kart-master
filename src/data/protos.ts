@@ -91,16 +91,6 @@ export const PROTOS: Proto[] = [
     status: 'signed-off',
   },
   {
-    id: 'auth',
-    title: 'Backend piece (Supabase)',
-    step: '1f1–1f3',
-    gate: '1f4',
-    blurb:
-      'Magic-link sign in, session persistence, and the profile row — which is the real test: ' +
-      'it proves the signup trigger and row-level security both work.',
-    status: 'signed-off',
-  },
-  {
     id: 'kayla',
     title: 'There Is No Course',
     step: '4e4',

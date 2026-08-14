@@ -30,7 +30,7 @@
 
 import type { ChapterMeta } from '../data/chapters';
 import { nextChapter, starsFor } from '../data/chapters';
-import type { ProgressStore } from '../backend/progress';
+import type { ProgressStore } from '../store/progress';
 import type { Sfx } from '../ui/sfx';
 import { celebrate } from '../ui/confetti';
 import { el, rich } from './dom';

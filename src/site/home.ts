@@ -11,8 +11,7 @@
  */
 
 import { CHAPTERS, type ChapterMeta } from '../data/chapters';
-import type { ProgressStore } from '../backend/progress';
-import type { ChapterStatus } from '../backend/schema';
+import type { ChapterStatus, ProgressStore } from '../store/progress';
 import { turboJodi } from '../ui/mascot';
 import { el, rich } from './dom';
 import { createLapMap } from './lap-map';

@@ -31,7 +31,7 @@
 import { getChapter } from '../data/chapters';
 import { SESSION_COUNT, allSessionIds } from '../data/regimen';
 import { RACE_DAY_RULES, readCombo } from '../data/plan';
-import type { ProgressStore } from '../backend/progress';
+import type { ProgressStore } from '../store/progress';
 import type { Sfx } from '../ui/sfx';
 import { createPlanGrid } from '../ui/plan-grid';
 import '../ui/plan.css';

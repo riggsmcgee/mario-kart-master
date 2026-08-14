@@ -64,7 +64,14 @@ npm run dev          # http://localhost:5173
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier, write |
 | `npm run shoot` | **Render check** — drives Chromium over every route, fails on any console error |
+| `npm run check:regress` | **Behaviour check** — re-runs all seven defects from the pre-send pass. Needs `npm run dev` |
+| `npm run check:contrast` | **Accessibility check** — contrast and type size of every text node on every route. Needs `npm run dev` |
 | `npm run check:videos` | Asks YouTube's oEmbed endpoint whether all six embedded videos still exist and are still embeddable. No key, no quota, no account |
+
+The three checks divide up cleanly: `shoot` proves every page *paints*, `check:regress` proves the
+site still *behaves* — clicking through the doorman, clearing progress, taking Kayla's piece apart —
+and `check:contrast` proves it is still *legible*. Every defect `check:regress` covers passed a
+typecheck and a lint on the day it shipped, which is the entire argument for it existing.
 
 `npm run shoot` is the one worth knowing about. Twice in this project "it builds and lints" turned
 out not to mean "it renders", so this loads all 22 routes in a real browser, asserts a known string
@@ -85,8 +92,9 @@ a framework would be more machinery than page.
   the renderer strictly downstream of the physics.
 - **Routing** is hash-based, because GitHub Pages has no SPA fallback and a deep link has to survive
   a cold load.
-- **Progress** is local-first and merged best-of, so it works signed out. Signing in is optional and
-  only syncs; Supabase provides magic-link auth and row-level security.
+- **Progress** is localStorage and nothing else. Every read is synchronous, every write lands
+  immediately, and there is no account, no server and no network path anywhere in the site. It
+  works offline from the second load onward, and it does not follow her to another computer.
 - **All art is original.** Every shape in the 3D scenes is built from primitives in code. No
   Nintendo assets, names, characters or geometry are used anywhere, and none are committed.
 
@@ -96,9 +104,16 @@ src/
   ui/        reusable interactive pieces: drills, quiz, HUDs, stylesheets
   site/      the site itself — router, chapter pages, plan, settings
   data/      chapters, quiz decks (JSON), the training programme, parts, copy
-  backend/   Supabase client, auth, progress sync
+  store/     progress in localStorage
   proto/     throwaway prototypes from earlier phases
 ```
+
+There was a Supabase backend until 2026-08-14 — magic-link sign-in, row-level security, and a
+best-of merge so two devices could not take a star back off her. It was built as an exercise, it
+was only ever exercised by its own test, and a free-tier project pauses after a week of quiet, so
+what it would eventually have offered Jodi is a sign-in that fails for no visible reason. It was
+removed rather than switched off. The merge rule survives in `src/store/progress.ts`, because it
+is still what makes replaying a drill safe.
 
 ## The written record
 

@@ -1,23 +1,17 @@
 /**
- * Settings, and the sign-in that lives inside it. (2a1)
+ * Settings. (2a1; the sign-in removed 2026-08-14.)
  *
- * Signing in is deliberately *not* a gate in front of the course. She can work through every
- * chapter without an account and everything is remembered on the machine she is sitting at;
- * signing in only buys her the same progress on a second device. Putting an email form between
- * a present and the person it is for is the single most likely place this gets abandoned.
+ * This page reads as "extras" — a name, a mute, a way back to the door, and the one genuinely
+ * destructive control, which asks first.
  *
- * So this page reads as "extras", the sync state is stated in plain words rather than as a
- * status icon, and the one genuinely destructive control asks first.
+ * There used to be an account in here: an email box, a magic link, and a line of plain words
+ * saying whether her progress had reached the server. It bought exactly one thing, the same
+ * progress on a second device, and it was never used by anyone but its own test. It has been
+ * taken out rather than left switched off, because a sign-in form that silently fails is worse
+ * than no sign-in form — and a paused free-tier project is what it would have become.
  */
 
-import {
-  getAuthState,
-  sendMagicLink,
-  signOut,
-  isConfigured,
-  type AuthState,
-} from '../backend/auth';
-import type { ProgressStore, SyncState } from '../backend/progress';
+import type { ProgressStore } from '../store/progress';
 import type { Sfx } from '../ui/sfx';
 import { CHAPTERS } from '../data/chapters';
 import { forgetCombo } from '../data/parts';
@@ -33,15 +27,6 @@ export interface SettingsDeps {
   sfx: Sfx;
   onChangeUser: () => void;
 }
-
-const SYNC_WORDS: Record<SyncState['status'], string> = {
-  'local-only': 'Saved on this computer. (No account is set up for this site.)',
-  'signed-out': 'Saved on this computer. Sign in to see the same progress on another device.',
-  offline: 'No internet right now — still saving everything here, and it will catch up later.',
-  syncing: 'Saving…',
-  synced: 'Saved here and to your account.',
-  error: 'Saved here. Could not reach the account just now — it will try again.',
-};
 
 export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted {
   const { player, progress, sfx, onChangeUser } = deps;
@@ -104,7 +89,7 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
       'section',
       { class: 'card stack' },
       el('h2', null, 'What should we call you?'),
-      el('p', null, 'This is the name the chapters use. It changes the writing, not your account.'),
+      el('p', null, 'This is the name the chapters use. Change it whenever you like.'),
       el(
         'div',
         { style: { display: 'flex', gap: '0.6rem', flexWrap: 'wrap' } },
@@ -141,88 +126,31 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
     ),
   );
 
-  // --- account --------------------------------------------------------------
+  // --- progress -------------------------------------------------------------
 
-  const accountBody = el('div', { class: 'stack' });
-  const syncLine = el('p', { class: 'sync' }, '');
-
-  const unSync = progress.onSyncChange((state) => {
-    syncLine.dataset['status'] = state.status;
-    syncLine.textContent = SYNC_WORDS[state.status];
-  });
-
-  function paintAccount(auth: AuthState): void {
-    if (!isConfigured()) {
-      accountBody.replaceChildren(
-        el(
-          'p',
-          null,
-          'Accounts are switched off in this build. Everything is saved on this computer, which is plenty.',
-        ),
-      );
-      return;
-    }
-
-    if (auth.status === 'signed-in') {
-      const out = el('button', { class: 'btn', type: 'button' }, 'Sign out');
-      out.addEventListener('click', () => {
-        void signOut().then(() => {
-          void progress.setUser(null);
-          void getAuthState().then(paintAccount);
-        });
-      });
-      accountBody.replaceChildren(
-        el('p', null, rich(`Signed in as **${auth.email ?? 'your account'}**.`)),
-        el(
-          'p',
-          null,
-          'Your progress follows you to any computer you sign in on. Signing out leaves everything on this one exactly as it is.',
-        ),
-        out,
-      );
-      return;
-    }
-
-    const email = el('input', {
-      type: 'email',
-      placeholder: 'you@example.com',
-      style: {
-        font: 'inherit',
-        padding: '0.6em 0.8em',
-        borderRadius: '12px',
-        border: '2px solid var(--rule)',
-        minWidth: '16rem',
-      },
-    });
-    email.setAttribute('aria-label', 'Your email address');
-
-    const send = el('button', { class: 'btn', type: 'button' }, 'Send me a link');
-    const outcome = el('p', { class: 'eyebrow', style: { margin: '0.6rem 0 0' } }, '');
-
-    send.addEventListener('click', () => {
-      send.disabled = true;
-      outcome.textContent = 'Sending…';
-      void sendMagicLink(email.value).then((result) => {
-        send.disabled = false;
-        outcome.textContent = result.message;
-      });
-    });
-
-    accountBody.replaceChildren(
+  /**
+   * Said plainly, and said here, because the next card down is the button that erases it.
+   *
+   * "This computer" is the whole truth now and worth stating rather than implying: there is no
+   * copy anywhere else, so a new laptop starts at Chapter 0. That is a real limit, and a sentence
+   * about it beats her discovering it.
+   */
+  page.append(
+    el(
+      'section',
+      { class: 'card stack' },
+      el('h2', null, 'Your progress'),
       el(
         'p',
         null,
-        'There is no password. Put your email in, click the link it sends you, and that is it — you stay signed in.',
+        'Everything you do here is saved on this computer as you go — which chapters you have finished, the stars from the drills, and the boxes you tick in the plan. There is no account and nothing to sign in to.',
       ),
-      el('div', { style: { display: 'flex', gap: '0.6rem', flexWrap: 'wrap' } }, email, send),
-      outcome,
-    );
-  }
-
-  void getAuthState().then(paintAccount);
-
-  page.append(
-    el('section', { class: 'card stack' }, el('h2', null, 'Your progress'), accountBody, syncLine),
+      el(
+        'p',
+        { class: 'eyebrow' },
+        'It stays put until you clear it below. It does not follow you to a different computer.',
+      ),
+    ),
   );
 
   // --- who's training -------------------------------------------------------
@@ -402,7 +330,6 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
   return {
     dispose() {
       unMute();
-      unSync();
       // Leaving settings while the visit is open has to take the visit with it — it owns timers, a
       // speech queue and an audio context, it is parented to `body` rather than to this page, and
       // `app.ts` only ever calls this one method. The scroll lock goes with it or the site is left

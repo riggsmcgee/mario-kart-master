@@ -17,18 +17,75 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 | | |
 |---|---|
-| Current phase | Phase 4, complete — every box in the plan is checked |
+| Current phase | **Closed, 2026-08-14.** Phase 4 complete; every box in the plan checked |
 | Current step | none. **4f3 (send her the link)** is all that is left, and it leaves the repo |
 | Last gate passed | all of them, 2026-08-13, by Riggs's blanket approval — each carrying what actually backs it |
 | Next gate | none |
-| Repo state | **Live at https://riggsmcgee.github.io/mario-kart-master/.** Every build step done; every gate cleared. Session 23 is the pre-send sanity pass |
-| Deferred | nothing — 1a5 landed 2026-08-12 |
-| Needs an answer | **Q9** accelerate slot (cosmetic now); ~~Q5~~ ~~Q7~~ ~~Q6~~ ~~Q8~~ answered |
-| Blocked on Riggs | **sending her the link**, and nothing else. The nine mp3s are not outstanding — 3c was cut on 2026-08-13 and replaced by one intro clip, which is recorded and committed. `kayla.mp4` was dropped, not deferred |
+| Repo state | **Live at https://riggsmcgee.github.io/mario-kart-master/.** Session 24 removed the Supabase backend; the site is static all the way down |
+| Deferred | nothing |
+| Needs an answer | **Q9** accelerate slot (cosmetic, and now moot) |
+| Blocked on Riggs | **sending her the link**, and nothing else |
 
 ---
 
 ## Log
+
+### 2026-08-14 — Session 24 (Opus 5) — the last one
+
+**Steps touched:** none. Riggs is closing the project down ("I'm closing down this project. Anything
+I need to do to clean things up before moving on to the next thing?"). This entry is the close-out.
+
+**The backend is gone.** Riggs: *"pull that link system so it doesn't cause confusion later.
+Practice setting it up was plenty."* Removed `src/backend/` entirely — the client, the magic-link
+auth, the generated database types — along with `supabase/` (README and the 1f1 migration), the
+`auth` prototype and its registry entry, `.env.local`, `.env.example`, the deploy workflow's secret
+injection, and both npm packages. Seventeen packages left the lockfile and `supabase-js` is no
+longer in the bundle.
+
+**Why it was the right call and not just tidying.** The free tier pauses a project after a week of
+quiet. The site was about to be handed over and then left alone, so the first thing Jodi would ever
+have met from that half is a sign-in that fails for no stated reason — on a site whose entire
+promise is that nothing here can be broken. Switching it off would have left the same trap one
+config change away. It is removed.
+
+`progress.ts` moved to `src/store/progress.ts` with the sync half amputated: no `setUser`, no
+pull/push, no dirty sets, no online/offline/visibility listeners, no `SyncState`. `backend/` was the
+wrong name for a folder holding nothing but localStorage, and a folder named for a thing it no
+longer contains is exactly the confusion Riggs asked to be rid of.
+
+**`mergeChapter` stayed.** It was written so two devices could reconcile without a stale one taking
+a star back off her. There is one device now, but `setChapter` still merges every write onto what is
+already there, so a chapter cannot lose stars by being replayed badly — and the course explicitly
+invites her to replay drills. The only surviving piece of 1f, and it earns its place.
+
+**Copy that outlived its feature.** Settings lost the email box and the sync line and now says
+plainly that progress lives on this computer and will not follow her elsewhere — a real limit, and
+better stated than discovered. The name card was still saying "It changes the writing, not your
+account", which was a reference to an account that no longer existed. Found by looking at the
+screenshot, not by grepping, which is the fourth time this project that has been the difference.
+
+**Two throwaway drivers were promoted instead of deleted.** `.regress.mjs` and `.contrast.mjs` were
+gitignored root scratch files, one folder-delete away from gone. They are now `scripts/regress.mjs`
+and `scripts/contrast.mjs` with `check:regress` and `check:contrast` scripts. The regression suite
+is the only thing in the project that checks *behaviour* rather than rendering, and every defect it
+covers passed a typecheck and a lint on the day it was wrong. The contrast one carries two hard-won
+corrections — parsing `color(srgb …)`, and multiplying inherited opacity — without which it reported
+a comfortable 12:1 pairing as 1.01:1. The rest of the root drivers were left to go with the folder;
+`.check-reset.mjs` and `.check-exit.mjs` are both covered by sections 4 and 6 of the regression
+suite.
+
+**Verified, all green:** typecheck · lint · prettier · build · `shoot` 22/22 routes · `check:regress`
+0 failures across all seven sections · `check:contrast` 764 text nodes, 0 failures, smallest type
+≥11px · `check:videos` 6/6 usable.
+
+**Left for Riggs, outside the repo:** delete the Supabase project (ref `rmttesrgrblxzniaqkud`) and
+the two repository secrets, which the workflow no longer reads.
+
+**Still open, and it is the only thing:** the link has not been sent. The course exists, works, is
+live, and has never been in front of the person it was built for. Nothing in this repo can fix that
+one.
+
+---
 
 ### 2026-08-13 — Session 23 (Opus 5)
 

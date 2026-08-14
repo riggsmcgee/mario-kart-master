@@ -9,7 +9,7 @@
  * reason the site exists.
  */
 
-import type { PlayerRole } from '../backend/schema';
+import type { PlayerRole } from '../store/progress';
 import type { Player } from './types';
 
 export const RIVAL = 'Kayla';

@@ -4,15 +4,9 @@
 # course worth looking at. Vite's `base` has been Pages-correct since 1a1, so this is the one
 # file that was missing.
 #
-# The Supabase values come from repository secrets and are baked into the bundle at build time,
-# because Vite inlines `import.meta.env.*` — there is no server here to read them at runtime.
-# That is safe for these two specifically: the anon key identifies the project, not a person,
-# and every table has row-level security scoped to `auth.uid()`. The service key must never
-# appear in this file, in a secret used here, or anywhere else in the repo.
-#
-# If the secrets are absent the build still succeeds and the site runs local-only: progress is
-# kept in localStorage and simply does not follow her to a second device. That is a deliberate
-# property of `getSupabase()` returning null rather than throwing.
+# This build takes no secrets and reaches nothing at runtime. It used to inject two Supabase
+# values for the sign-in; that was removed on 2026-08-14 and the repository secrets that fed it
+# can be deleted. The site is now static all the way down, and progress lives in localStorage.
 
 name: Deploy to GitHub Pages
 
@@ -52,9 +46,6 @@ jobs:
       - run: npm run lint
 
       - run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - uses: actions/configure-pages@v5
 

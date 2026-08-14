@@ -24,7 +24,7 @@
  * refresh, and costs nothing to get right at this size.
  */
 
-import type { ProgressStore } from '../backend/progress';
+import type { ProgressStore } from '../store/progress';
 import { WEEKS, nextSession, shortTrack, type Session } from '../data/regimen';
 import { el, rich } from '../site/dom';
 import type { Mounted } from '../site/types';

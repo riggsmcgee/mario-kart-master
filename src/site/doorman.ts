@@ -21,8 +21,7 @@
  * than hiding it. See `kayla/admission.ts`.
  */
 
-import type { PlayerRole } from '../backend/schema';
-import type { ProgressStore } from '../backend/progress';
+import type { PlayerRole, ProgressStore } from '../store/progress';
 import type { Sfx } from '../ui/sfx';
 import { turboJodi } from '../ui/mascot';
 import { el, rich } from './dom';

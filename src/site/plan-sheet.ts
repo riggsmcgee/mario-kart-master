@@ -31,7 +31,7 @@ import {
 import type { PlanItem } from '../data/plan';
 import { WEEKS } from '../data/regimen';
 import { CUP, TRACKS } from '../data/tracks';
-import type { ProgressStore } from '../backend/progress';
+import type { ProgressStore } from '../store/progress';
 import { PIN_KIND_LABEL } from '../ui/track-map';
 import { el, rich } from './dom';
 
