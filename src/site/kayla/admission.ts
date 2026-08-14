@@ -4,7 +4,7 @@
  * Riggs, 2026-08-13: *"If she makes it all the way to the website, then you can let her have access
  * to it just like everyone else."*
  *
- * For ten minutes this experience has promised, repeatedly and in writing, that nothing about Kayla
+ * For five minutes this experience has promised, repeatedly and in writing, that nothing about Kayla
  * is ever recorded. That promise is load-bearing — it is in the sign-off card, it is why
  * `progress.ts` refuses to push the `kayla` role to the server, and it is the reason the whole thing
  * can be nosy without being creepy. Admitting her breaks it, and the ending does not hide that. It
@@ -30,7 +30,7 @@ export function isAdmitted(): boolean {
   try {
     return localStorage.getItem(KEY) === 'yes';
   } catch {
-    // Private browsing. She gets the ten minutes again, which is not the worst outcome available.
+    // Private browsing. She gets the five minutes again, which is not the worst outcome available.
     return false;
   }
 }

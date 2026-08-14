@@ -27,7 +27,7 @@
  * That is the whole emotional turn of the genre — adversary to something else — done as an object
  * changing hands rather than as a paragraph about feelings.
  *
- * **And the exit gets the last word**, because it has been live for ten minutes and nobody clicked
+ * **And the exit gets the last word**, because it has been live for the whole of it and nobody clicked
  * it, which turns out to be the nicest thing anyone can say about her.
  */
 
@@ -84,25 +84,30 @@ export const chapterk: Beat = {
         el('p', { class: 'eyebrow' }, 'Nothing further'),
         el('h2', null, 'That is everything'),
         el('p', null, 'Nine chapters. All of them read. None of them yours.'),
-        el('p', { class: 'k-fine' }, 'The button in the corner will put you back.'),
       ),
     );
 
-    await narrator.say(
-      'Well. That is the lot.',
-      'You have been thorough. I will give you that, and then I will stop giving you things.',
-      'Off you go.',
-    );
-
-    await stage.wait(1200);
-
-    // It cannot leave it. Nobody in this story can leave anything.
-    await narrator.say('…');
-    await stage.wait(400);
-    await narrator.say('There are ten.');
-
     // --- the tenth -----------------------------------------------------------
 
+    /**
+     * **The tile is built and wired before the goodbye is spoken.**
+     *
+     * Riggs, on the third pass: *"this box should appear sooner. Too much dead time."* He is right,
+     * and the dead time was self-inflicted: the fake ending used to say three lines, wait 1.2s, say
+     * an ellipsis, wait again, and only then produce the tile — about twenty seconds of a page with
+     * one dismissal on it and nothing to do.
+     *
+     * The fix is not to shorten the goodbye. It is the rule every other beat in this folder already
+     * follows and this one had quietly broken: **wire it first, say it second.** The tile appears two
+     * seconds in, while the narrator is still telling her there is nothing else, and the gag improves
+     * — a thing insisting it has finished *with the tenth chapter already visible behind it* is
+     * funnier than the same thing announcing the twist itself. She can click it on the word "off".
+     *
+     * The card also lost its last line, *"the button in the corner will put you back"* — Riggs: *"I
+     * don't understand why this is here."* Nor do I. It was written when this was a false ending that
+     * had to look like a real one, and by the time the exit is worth mentioning she has ignored it
+     * for five minutes. The sign-off says the true version of it a minute later.
+     */
     const opened = deferred();
     const tenth = el(
       'button',
@@ -111,7 +116,20 @@ export const chapterk: Beat = {
       el('p', { class: 'k-tile-hook' }, 'Not listed'),
     );
     tenth.addEventListener('click', () => opened.resolve(), { once: true });
-    scene.append(tenth);
+
+    void narrator
+      .say(
+        'Well. That is the lot.',
+        'You have been thorough. I will give you that, and then I will stop giving you things.',
+        'Off you go.',
+      )
+      .then(() => {
+        if (stage.gone) return;
+        // Only if she has not already found it, which she very often has by now.
+        void narrator.cut('…', 'There are ten.');
+      });
+
+    stage.after(2000, () => scene.append(tenth));
 
     narrator.nudge(
       'There were always ten. Nine is what it says on the box.',
@@ -155,10 +173,27 @@ export const chapterk: Beat = {
     );
     scene.append(sheet);
 
+    /**
+     * **It reassures her, and the reassurance is the joke.** (Riggs, third pass: *"I don't like that
+     * it says Jodi will never beat Kayla. I think we should more have the angle of Kayla has nothing
+     * to worry about, so we jokingly lull her into a false sense of security."*)
+     *
+     * He is right on both counts and the second one fixes the first. The old line — *she still
+     * probably will not beat you* — was the site placing a bet against Jodi in the one document that
+     * exists because somebody believed in her, and it read as consolation, which is the most
+     * patronising register available to anybody.
+     *
+     * So it does the opposite. It hands over a complete list of everything her mum now knows and
+     * tells her, repeatedly and without being asked, that there is nothing in it to worry about. The
+     * comedy is that nobody says *there is nothing to worry about* unless there is, the dossier is
+     * sitting right there contradicting every word of it, and Kayla is fifteen and not stupid. It is
+     * a warning she has to decode as a warning, which makes it land as one — and it never once has to
+     * say who is going to win, because the honest answer is that nobody knows and that is the point.
+     */
     await narrator.say(
       'That is everything she has been taught. Every chapter, in order.',
       'She does not know you have seen it.',
-      'She still probably will not beat you. That was never really the point of it.',
+      'There is nothing in there to worry about, obviously. It is a list. Lists are not fast.',
     );
 
     // --- the one ask ---------------------------------------------------------
@@ -191,6 +226,8 @@ export const chapterk: Beat = {
 
     await narrator.say(
       'That is the whole of it. That is the only thing this website has ever wanted from you.',
+      // The lull, said once more and slightly too quickly, which is how anybody says it.
+      'And you have nothing to worry about. I would not give it another thought.',
     );
 
     // One line for the fourth button at the door, which nobody has ever pressed. It costs nothing
@@ -270,14 +307,14 @@ export const chapterk: Beat = {
      * ending that spends the ration four times lands none of them. What is left is one confession,
      * one use of her name, and silence.
      *
-     * The confession is the right last note because it hands the ten minutes back to her: the site
+     * The confession is the right last note because it hands the whole thing back to her: the site
      * did not let her in, and it did not defeat her either. She simply never took the way out that
      * was in front of her the entire time.
      */
-    await narrator.say(
-      'One more thing, and then I will stop talking.',
-      'Nothing on this page was ever locked. Not one thing. I said it was.',
-    );
+    // One line, not two. The cut line was *"one more thing, and then I will stop talking"* — a
+    // sentence whose entire content is that another sentence is coming. Announcing a confession
+    // costs four seconds and takes the surprise off the front of it.
+    await narrator.say('Nothing on this page was ever locked. Not one thing. I said it was.');
 
     const out = el(
       'div',

@@ -349,6 +349,62 @@ body.k-over-open {
   padding: 0.55em 1.1em;
 }
 
+/**
+ * The one time it asks her not to go.
+ *
+ * Above everything including the narrator strip, because it is the only moment in the piece where
+ * something is more important than what the voice is saying. The scrim is deliberately light: this
+ * is a joke about a confirmation dialogue, not an impersonation of one, and a heavy modal veil is the
+ * visual grammar of software that means it.
+ */
+.k-leaving {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(20, 23, 30, 0.42);
+  animation: k-leaving-in 0.18s ease;
+}
+
+@keyframes k-leaving-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.k-leaving-card {
+  max-width: 30rem;
+  text-align: center;
+  align-items: center;
+}
+
+/**
+ * **Stay first, leave second — and both of them look like buttons.**
+ *
+ * Reading order is the only place this is allowed to lean. The first build used the site's `btn-quiet`
+ * for "Leave anyway", which renders as a small underlined link: beside the orange pill it read as a
+ * footnote, which is the precise shape of the pattern this is meant to be joking about rather than
+ * performing. It is a full-size button now, plainly worded, focused when the panel opens, and it
+ * works on the first press. The gag is that the site is *asking*; a site that were actually
+ * preventing her would not be funny for a second.
+ */
+.k-leaving-buttons {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.4rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-leaving {
+    animation: none;
+  }
+}
+
 /* --- the pocket ----------------------------------------------------------- */
 
 /**
@@ -552,7 +608,7 @@ body:has(.carrying) .k-pocket {
  * work — it never quite settles. A slow rock, forever, until she touches it.
  *
  * Motion is what the eye catches when the reader has stopped reading, and this is the one moment in
- * ten minutes where everything depends on being noticed.
+ * the whole piece where everything depends on being noticed.
  */
 /**
  * **It stops being a character and becomes an object.**

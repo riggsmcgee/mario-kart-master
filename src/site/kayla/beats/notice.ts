@@ -70,24 +70,38 @@ export const notice: Beat = {
     // surgery afterwards, so it is obvious in the source which character this beat is about.
     const stop = el('span', { class: 'k-stop', attrs: { id: 'k-stop' } }, '.');
 
+    /**
+     * **The notice is four words long, and that is the third rewrite of it.**
+     *
+     * The first two versions were inherited from the lockout this replaced, and they were arguing:
+     * *this site was built for somebody else, and you already know all of it — that is rather the
+     * problem*, then a paragraph of small print explaining that no chapters existed. Riggs crossed
+     * the lot out. He was right, and it took a third pass to see why, because the sentences are
+     * perfectly good on their own.
+     *
+     * They belong to a **different premise**. That copy is a site explaining why she is not welcome,
+     * which is the gatekeeping version he had already asked to be rid of — every one of those
+     * sentences is a reason, and a reason concedes there is something to have reasons about. The
+     * premise now is a site pretending there is nothing here at all, and a thing with nothing to hide
+     * does not produce three sentences about it. It says there is nothing here, and then it says go
+     * away, and the *gap* between how little it says and how hard it is working is the joke.
+     *
+     * It also makes the page look like what it claims to be. Four words on an empty screen reads as
+     * a dead end; a paragraph reads as a page, and a page is exactly what she has been told does not
+     * exist here.
+     *
+     * The heading stays, because it is the one line that is about *her* rather than about the site,
+     * and it is what makes a notice feel like it noticed.
+     */
     const card = el(
       'div',
       { class: 'k-notice' },
       el('p', { class: 'eyebrow' }, 'Nothing to see here'),
       el('h1', null, 'Why are you here, Kayla?'),
-      el(
-        'p',
-        { class: 'hero-lede' },
-        rich(
-          'This site was built for someone else, and you already know all of it. That is rather the problem.',
-        ),
-      ),
-      el(
-        'p',
-        { class: 'k-fine' },
-        'There are no chapters on this page. There is no page behind this page. Nothing you do here is saved',
-        stop,
-      ),
+      el('p', { class: 'hero-lede' }, rich('There is nothing here.')),
+      // The full stop that comes off is the one at the end of "Go away" — the last character of the
+      // rudest thing the site says, which is a better thing to lose than a clause about saving.
+      el('p', { class: 'k-fine' }, 'Seriously. Go away', stop),
     );
 
     scene.append(card);

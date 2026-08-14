@@ -124,12 +124,7 @@ export const admission: Beat = {
 
       // She presses play herself. Autoplay would be blocked anyway, and it is better authorship:
       // the one thing in this experience that is a gift rather than an obstacle should be opened.
-      void narrator.say(
-        '…',
-        'Something has arrived. It is not from me.',
-        'That is a file. In my folder. With a name on it. It has a play button.',
-        'I am not pressing it.',
-      );
+      void narrator.say('…', 'That is not from me.');
       narrator.nudge('It is a video. Of a person. Press it.', 'Press the play button.');
 
       // If she never plays it, or the file will not decode, the beat still moves on.
@@ -145,21 +140,26 @@ export const admission: Beat = {
           el('p', { class: 'k-fine' }, '— Riggs, who built this'),
         ),
       );
-      await narrator.say(
-        '…',
-        'Something has arrived. It is not from me.',
-        'That is a note. In my folder. With your name on it. I have not read it. I have read it.',
-      );
+      await narrator.say('…', 'That is not from me.');
     }
 
     narrator.hush();
 
     // --- it complains about jurisdiction -------------------------------------
 
-    // Two lines. The second pass had eight, then four, and every cut has improved it — the joke is
-    // one thought (*he does not work here*) and a thought does not get funnier by being restated.
-    // It is also the last stretch of pure narration before she is let in, which is precisely the bit
-    // Riggs said took way too long, so every second of it has to be earning.
+    /**
+     * **Two lines, and they arrive after she has read the thing rather than instead of it.**
+     * (Riggs, third pass: *"lead into this section is REALLY slow."*)
+     *
+     * Every pass has cut this and every cut has improved it — eight lines, then four, then three,
+     * now two. The last one was the real fault and it was not length: the narration was *describing
+     * the arrival of something already on screen.* "Something has arrived. It is not from me. That is
+     * a note. In my folder. With your name on it." — four sentences establishing a fact she took in
+     * the instant the card painted, while the note she actually wants to read sat there waiting.
+     *
+     * Copy that narrates what the player is already looking at is the slowest copy there is, and it
+     * is invisible in a script. It only shows up when somebody sits in front of it.
+     */
     await narrator.say(
       'He does not work here. He built here. It is not the same thing.',
       'So I will have to do this properly instead.',
@@ -215,11 +215,11 @@ export const admission: Beat = {
 
     await narrator.say(
       'There. Kayla. In the file, where anyone can see it.',
-      'Go on. It is all yours, and it always was, and I would like that forgotten immediately.',
+      'Go on. It is all yours, and it always was.',
     );
 
     // If she does not press it, the site opens itself. Nobody should be made to knock twice.
-    await stage.wait(4000);
+    await stage.wait(3000);
     stage.onAdmitted();
   },
 };

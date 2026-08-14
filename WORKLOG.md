@@ -117,6 +117,87 @@ run would have silently tested the fallback. All eight beats, the pointer caught
 binned, the phrase played back, the pointer handed back and refused, admitted, and out into chapter 1.
 Zero console errors.
 
+**Then he asked the right question: "does the clear progress button also reset the game for Kayla?
+Because the game for her doesn't seem to be pulling up."** No, it did not, and that is exactly why —
+he had played the ending, so `mkm.kayla.admitted.v1` was set on his machine and the doorman was
+correctly waving him straight past her own door. Three keys go into `localStorage` and the reset knew
+about one of them. `forgetAdmission` was **written for that button**, in the same pass that created
+the flag, exported with a comment saying *"for the settings page's clear progress"* — and never
+called. A helper written for a caller that never arrives is indistinguishable from a helper that
+works, because nothing fails. The doorman's own "somebody answered this" flag was in the same state.
+All three are cleared now, and the site is handed back the way it shipped: at the door, asking who is
+training.
+
+**And a way in for everyone else** — his second ask. A card at the bottom of settings opens Kayla's
+half over the whole window. Three decisions in it. It lives in settings because that is the one
+screen she has no reason to open and everybody else does, so it can exist without spending her
+discovery. It is `preview: true`, meaning it plays identically and then writes **nothing** — without
+that, Jodi showing the ending to Bill would set the admission flag on the family laptop and Kayla
+would be waved past the whole thing a week later, which is the same bug arriving from the other
+direction. And it is an overlay rather than a route: a URL would put it one address bar away from
+being stumbled on, and the stage is a full-viewport column with a fixed strip and a fixed exit that
+would otherwise float over the site's own header. The prototype bench had already solved that with a
+fixed `#host`; that rule is now shared rather than copied, and the bench has been marked `preview`
+too — jumping to beat 8 to check one line of copy used to set the flag for real.
+
+**Fourth pass, same day, from a second play: "the skeletons of jokes we tried to make, but are gone,
+are still there."** The most valuable kind of note and the hardest to give yourself, because dead
+copy does not fail — it just sits there reading fine. Four of them:
+
+- **The notice.** Its two paragraphs were inherited from the lockout this replaced: *this site was
+  built for someone else, and you already know all of it — that is rather the problem*, plus small
+  print explaining that no chapters existed. Riggs crossed the lot out and gave the replacement:
+  **"There is nothing here."** and **"Seriously. Go away."** The old copy belongs to a different
+  premise — every sentence in it is a *reason*, and a reason concedes there is something to have
+  reasons about. Four words on an empty page also make the page look like the dead end it claims to
+  be, where a paragraph looks like a page. The doorman's fallback notice was carrying the same dead
+  sentence and now matches.
+- **Seven of the hole's nine reactions pointed at words that no longer exist.** `locked`, `saved`,
+  `notice`, `else`, `problem`, `chapter`, `every` — all gone with the paragraphs, and nothing breaks
+  when that happens, which is the danger: the beat just goes quiet and looks out of ideas. Rewritten
+  against the sixteen words that are actually on the page now.
+- **"The button in the corner will put you back"** on the false ending. Riggs: *"I don't understand
+  why this is here."* Nor do I — it was written when the false ending had to look like a real one,
+  and by then she has ignored the exit for five minutes. The sign-off says the true version a minute
+  later.
+- **The narrator's own skip line** still claimed its delivery was "a register", which was a joke
+  about typing slowly, from before it spoke out loud.
+
+**"This box should appear sooner. Too much dead time."** The tenth chapter tile used to arrive after
+three lines, a 1.2s wait, an ellipsis and another wait — twenty seconds of a page with one dismissal
+on it. The fix was not a shorter goodbye; it was the rule every other beat here already follows and
+this one had quietly broken: **wire it first, say it second.** The tile now appears at 2.7s, while the
+narrator is still insisting there is nothing else, which is funnier than it announcing its own twist.
+
+**"Lead into this section is REALLY slow."** Beat 8's narration was *describing the arrival of
+something already on screen* — "Something has arrived. It is not from me. That is a note. In my
+folder. With your name on it." Four sentences establishing a fact she absorbed the instant the card
+painted, while the note she wanted to read sat there waiting. Copy that narrates what the player is
+already looking at is the slowest copy there is and it is invisible in a script; it only shows up
+when somebody sits in front of it. Two lines now. The form arrives at 10s rather than 25s.
+
+**"I don't like that it says Jodi will never beat Kayla."** He is right, and his own fix is better
+than the line it replaces: *"more the angle of Kayla has nothing to worry about, so we jokingly lull
+her into a false sense of security."* The old line placed a bet against Jodi in the one document that
+exists because somebody believed in her, and it read as consolation — the most patronising register
+available. So it does the opposite: it hands over a complete list of everything her mum now knows and
+tells her, repeatedly and unprompted, that there is nothing in it to worry about. Nobody says that
+unless there is, the dossier is right there contradicting every word, and Kayla is fifteen and not
+stupid. It never has to say who wins, which is as well, because nobody knows. Planted in beat 3
+("which is nothing for you to worry about") so beat 7 is a callback rather than a claim.
+
+**And the exit asks once.** Riggs: *"when you click Change user from Kayla's game view, it should
+give a warning that she is about to leave a super cool experience, and give an option to not do it."*
+The best joke available to that button, because it inverts the premise in one click: the site has
+spent five minutes asking her to go, and the moment she does, it panics. Three rules keep it a joke
+rather than the thing it parodies — *Leave anyway* is a full-size button that works on the first
+press and takes focus on open; it asks **once per sitting**, so the second press goes straight
+through; and Escape closes it, so the panel can never be what traps her. The first build had *Leave
+anyway* as `btn-quiet`, which renders as a small underlined link beside an orange pill — a footnote,
+which is exactly the pattern being sent up. Caught in a screenshot, not in the code.
+
+End to end: **3m17s**, from 3m35s, and the two stretches he named are the two that shrank.
+
 **Left open.** `public/media/kayla.mp4` is still Riggs's to record; the ending plays complete without
 it. Nobody has yet watched a person do this.
 

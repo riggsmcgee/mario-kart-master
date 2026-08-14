@@ -16,7 +16,7 @@
  * not merely satisfy a puzzle condition — it gives the thing its voice back, which is the first
  * generous act in the piece and immediately costs it the secret it was keeping.
  *
- * That shape matters beyond being neat. The whole ten minutes has been her taking things off this
+ * That shape matters beyond being neat. The whole piece has been her taking things off this
  * website, and the one move that makes progress is her giving something back. The ending needs that
  * to have happened once already.
  *

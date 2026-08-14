@@ -83,7 +83,7 @@ export function renderDoorman(mount: HTMLElement, deps: DoormanDeps): Mounted {
 
   const options = el('div', { class: 'doorman-options' });
 
-  /** Kayla's ten minutes, once it has loaded. Held so that leaving the page tears it down. */
+  /** Kayla's half of the site, once it has loaded. Held so that leaving the page tears it down. */
   let kayla: Mounted | null = null;
 
   function choose(role: PlayerRole, name?: string): void {
@@ -156,12 +156,13 @@ export function renderDoorman(mount: HTMLElement, deps: DoormanDeps): Mounted {
         root.replaceChildren(
           el('p', { class: 'eyebrow' }, 'Nothing to see here'),
           el('h1', null, `Why are you here, ${RIVAL}?`),
+          // The same four words `beats/notice.ts` opens with, for the same reason: a site with
+          // nothing to hide does not write paragraphs about it. If the chunk never arrives she gets
+          // the notice rather than an apology, and the notice is still in character.
           el(
             'p',
             { class: 'hero-lede', style: { marginInline: 'auto' } },
-            rich(
-              'This site was built for someone else, and you already know all of it. That is rather the problem.',
-            ),
+            rich('There is nothing here. Seriously. Go away.'),
           ),
           back,
         );
@@ -238,7 +239,7 @@ export function renderDoorman(mount: HTMLElement, deps: DoormanDeps): Mounted {
         ),
       );
       button.addEventListener('click', () => {
-        // Once she has been admitted her own name is just a name. No notice, no ten minutes,
+        // Once she has been admitted her own name is just a name. No notice, no experience,
         // no ceremony — the reward for getting through it is that it never happens again.
         if (option.role === 'kayla' && !isAdmitted()) lockOut();
         else if (option.role === 'kayla') choose('kayla');

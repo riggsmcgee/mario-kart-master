@@ -21,7 +21,7 @@
  *     the button back. A second cursor appearing on a web page, unannounced, is the single most
  *     alarming thing this whole experience does, and it costs about forty lines.
  *  3. *She catches the pointer mid-flight and drags it away.* That is the solve, and it is the one
- *     moment in ten minutes that asks for hands rather than thinking.
+ *     moment in the whole piece that asks for hands rather than thinking.
  *
  * **Which is the point of it.** This entire website exists because Kayla wins on reaction speed and
  * her mum cannot out-react her. Every chapter of Jodi's course is an argument for preparation over
@@ -302,9 +302,13 @@ export const mute: Beat = {
       'Of course you did. That is the whole problem with you.',
     );
 
+    // The first plant of the lull that pays off in beat 7. It lets slip that there is a *she*, that
+    // she is being taught something, and that it is the opposite of what Kayla just did — and then
+    // hears itself and reaches for the reassurance, which is the tell.
     await narrator.say(
-      'She cannot do that, you know. Your mother. Not at that speed.',
+      'She could not have done that, you know. Your mother. Not at that speed.',
       'She is upstairs learning the other way round.',
+      'Which is nothing for you to worry about.',
       '…I have no voice and I am still saying too much.',
     );
   },

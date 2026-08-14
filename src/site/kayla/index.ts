@@ -10,7 +10,7 @@
  *
  * **What it is now.** The notice is still the first thing she sees and it still says exactly what it
  * said. The difference is that the notice can be taken apart, and taking it apart is the game — a
- * ten-minute run of beats in which the website insists there is nothing here while she steals its
+ * five-minute run of beats in which the website insists there is nothing here while she steals its
  * punctuation, fills in its progress bar by hand, silences it, and gets in anyway. The genre is
  * lifted wholesale from a game she loves and this file is not shy about it.
  *
@@ -25,7 +25,7 @@
  *    scores a point off her, and the one place it could — she is better at this game than her mum —
  *    is the place it is warmest.
  *  - *The exit is always visible.* `stage.ts` draws "Change user" itself so that no beat is capable
- *    of removing it. She can leave at any second of the ten minutes.
+ *    of removing it. She can leave at any second of it.
  *  - *Almost nothing is stored.* No progress, no role on the server, no row anywhere recording that
  *    she was here — `progress.ts` already refuses to push the `kayla` role. The single exception is
  *    the local flag written at the very end, when she has been through all of it and said yes three

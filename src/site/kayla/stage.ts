@@ -22,7 +22,7 @@
  *
  * **Nothing is ever saved.** Not a beat number, not a flag, nothing — the original lockout's promise
  * that no row anywhere records that Kayla was here is kept exactly. Closing the tab means starting
- * again, which for a ten-minute toy is the right trade and is also the honest one.
+ * again, which for a five-minute toy is the right trade and is also the honest one.
  */
 
 import { el } from '../dom';
@@ -186,7 +186,98 @@ export function runStage(mount: HTMLElement, deps: StageDeps): Mounted {
    * allowed to be rude about her clicking it; the button is not allowed to be coy about working.
    */
   const exit = el('button', { class: 'btn k-exit', type: 'button' }, 'Change user');
-  exit.addEventListener('click', () => deps.onLeave());
+
+  /**
+   * **It asks once.** (Riggs, third pass: *"when you click Change user from Kayla's game view, it
+   * should give a warning that she is about to leave a super cool experience, and give an option to
+   * not do it."*)
+   *
+   * The best joke available to this button, because it inverts the entire premise in one click. The
+   * site has spent five minutes insisting there is nothing here and asking her to go — and the moment
+   * she does, it panics. Everything it has been claiming falls over at once, and it falls over
+   * because she took its advice.
+   *
+   * **Three rules make it a joke rather than the thing it is parodying**, and they are not
+   * negotiable — the original lockout's design note is emphatic that a joke you cannot leave stops
+   * being a joke, and a confirmation dialogue is exactly how that promise gets broken by accident.
+   *
+   *  1. **Leave anyway is right there, plainly worded, and works.** It is not hidden, not greyed, not
+   *     smaller, and not phrased as an admission of anything. It is also what keyboard focus lands
+   *     on, because she has already said what she wants and the dialogue should not make her say it
+   *     twice.
+   *  2. **It asks once per sitting.** The second press goes straight through with no panel and no
+   *     comment. A confirmation that appears every time is not a gag, it is an obstacle wearing one,
+   *     and by the second press she has read it.
+   *  3. **Escape closes it**, which means the panel itself can never be the thing that traps her.
+   *
+   * Under `preview` it behaves identically. Somebody being shown this should be shown this.
+   */
+  let warned = false;
+  let leaving: HTMLElement | null = null;
+
+  function closeWarning(): void {
+    leaving?.remove();
+    leaving = null;
+    document.removeEventListener('keydown', onWarningKey);
+    exit.focus();
+  }
+
+  function onWarningKey(event: KeyboardEvent): void {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    closeWarning();
+  }
+
+  function warn(): void {
+    warned = true;
+
+    const stay = el('button', { class: 'btn btn-go k-leaving-stay', type: 'button' }, 'Stay');
+    // A full `btn`, not `btn-quiet`. The quiet variant renders as a small underlined link on this
+    // site, and next to the orange pill it read as a footnote — which is the precise shape of the
+    // pattern this is supposed to be joking about rather than performing.
+    const go = el('button', { class: 'btn k-leaving-go', type: 'button' }, 'Leave anyway');
+    const title = el('h2', { attrs: { id: 'k-leaving-title' } }, 'You are leaving.');
+
+    stay.addEventListener('click', () => {
+      closeWarning();
+      narrator.mood(null);
+      void narrator.cut('Good.', 'Nothing has changed. There is still nothing here.');
+    });
+    go.addEventListener('click', () => deps.onLeave());
+
+    leaving = el(
+      'div',
+      {
+        class: 'k-leaving',
+        attrs: { role: 'alertdialog', 'aria-labelledby': 'k-leaving-title' },
+      },
+      el(
+        'div',
+        { class: 'k-panel k-leaving-card' },
+        el('p', { class: 'k-stencil' }, 'Please read this carefully'),
+        title,
+        el('p', { class: 'k-lede' }, 'That is fine. That is what I asked you to do.'),
+        el('p', null, 'It is only that there is quite a lot more of it.'),
+        el('div', { class: 'k-leaving-buttons' }, stay, go),
+      ),
+    );
+    root.append(leaving);
+    document.addEventListener('keydown', onWarningKey);
+    // The action she asked for takes focus. She pressed a button that says "Change user"; making her
+    // hunt for the one that honours it would be the exact pattern this is a joke about.
+    go.focus();
+
+    narrator.mood('rattled');
+    void narrator.cut('Wait.', 'Wait wait wait.');
+  }
+
+  exit.addEventListener('click', () => {
+    if (warned || gone) {
+      deps.onLeave();
+      return;
+    }
+    warn();
+  });
 
   const stage: Stage = {
     scene,
@@ -275,6 +366,9 @@ export function runStage(mount: HTMLElement, deps: StageDeps): Mounted {
   return {
     dispose() {
       gone = true;
+      // The warning's Escape handler is on the document, so it outlives the node it belongs to
+      // unless it is taken off by hand.
+      document.removeEventListener('keydown', onWarningKey);
       for (const id of timers) clearTimeout(id);
       timers.clear();
       for (const disposer of disposers) {

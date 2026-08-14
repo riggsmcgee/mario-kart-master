@@ -291,7 +291,7 @@ export class Narrator {
     this.finishCurrent?.();
     if (this.skips === 7 && !this.remarked) {
       this.remarked = true;
-      void this.say('You are getting ahead of me.', 'I have been told my delivery is a register.');
+      void this.say('You are getting ahead of me.', 'I do have a delivery. It is considered.');
     }
   };
 

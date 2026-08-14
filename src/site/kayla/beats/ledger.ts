@@ -12,7 +12,7 @@
  *
  * **And then the beat turns, which is what it is really for.** Nine padlocks spring, she opens a
  * chapter, and what is inside is not a reward. It is a sentence written to somebody else. She opens
- * another one and it is the same. This is the hinge of the ten minutes: up to here she has been
+ * another one and it is the same. This is the hinge of the whole thing: up to here she has been
  * breaking into a website, and this is the moment she finds out what is inside it, which is her mum
  * being taught something, patiently, one chapter at a time, by somebody who wanted her to have a
  * chance.

@@ -355,7 +355,7 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
         'p',
         null,
         rich(
-          `There is a second version of this site behind ${RIVAL}'s name at the door. It is about ten minutes long, it is not a course, and it insists throughout that it does not exist.`,
+          `There is a second version of this site behind ${RIVAL}'s name at the door. It takes about five minutes, it is not a course, and it insists throughout that it does not exist.`,
         ),
       ),
       el(

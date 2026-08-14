@@ -42,17 +42,27 @@ function reducedMotion(): boolean {
   );
 }
 
-/** Words with something to say about being eaten. Matched bare: lowercase, letters and digits only. */
+/**
+ * Words with something to say about being eaten. Matched bare: lowercase, letters and digits only.
+ *
+ * **This list is tied to the notice's copy and has to be rewritten whenever that is.** It was, on the
+ * third pass: the notice lost its two inherited paragraphs, and with them went `locked`, `saved`,
+ * `notice`, `else`, `problem`, `chapter` and `every` — seven of the nine entries, every one of them
+ * still sitting here pointing at words that no longer exist on the page. Nothing breaks when that
+ * happens, which is the danger: the beat simply goes quiet and looks like it has run out of ideas.
+ *
+ * There are sixteen words on the notice now and she eats five, so a third of them are reachable in a
+ * given run. Every word that is left is worth a line.
+ */
 const REACTIONS: Record<string, string> = {
   kayla: 'You have eaten your own name. I am not sure what I am supposed to do with that.',
-  locked: 'That word was doing a job.',
+  away: 'That was the important one. That was the entire instruction.',
+  go: 'You have taken "go". I cannot ask you to leave now. Not properly.',
+  seriously: 'I was being serious.',
   nothing: 'Now there is nothing where "nothing" was, which I think is worse.',
-  saved: 'Nothing you do here is — no. It has gone. Nothing you do here is.',
-  notice: 'Without that word this is not a notice. It is just a paragraph with opinions.',
-  else: 'Built for someone. Marvellous.',
-  problem: 'You have removed the problem. The problem remains.',
-  chapter: 'There were nine of those.',
-  every: 'You are eating the qualifiers first. That is a choice.',
+  here: 'There is less here than there was, and there was nothing here to begin with.',
+  why: 'Do not eat the question. The question was the part I was comfortable with.',
+  see: 'Nothing to — no. It has gone.',
 };
 
 export const hole: Beat = {
