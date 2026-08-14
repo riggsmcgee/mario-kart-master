@@ -76,7 +76,7 @@ const ROUTES = [
 
   ['testbed', '/testbed/', 'The Testing Ground'],
 
-  // Kayla's ten minutes (4e4). Shot at its prototype harness rather than through the doorman,
+  // Kayla's five minutes (4e4). Shot at its prototype harness rather than through the doorman,
   // because the real route into it is a click on her own name and this file drives URLs. What it
   // is checking is the thing this file exists for: that the chunk loads and the module does not
   // throw on line one. The beats themselves are exercised by playing them.
@@ -93,7 +93,10 @@ const ROUTES = [
  * on purpose. Matching the request URL is what the rule always meant.
  */
 const ALLOWED_MISSING = [
-  /\/media\/intro\.mp4$/i, // Riggs's one intro clip, until the file lands — see `intro-video.ts`
+  // `intro.mp4` used to be listed here "until the file lands". It landed on 2026-08-13, and leaving
+  // the allowance in place meant the one check that would notice a missing, renamed or unpublished
+  // intro video was passing on purpose. An exemption written for an absence has to be deleted when
+  // the absence ends, or it quietly becomes a blind spot over the most visible asset on the site.
   /favicon/i,
   // Google's font CDN, which is not ours and drops the odd request. `theme.css` names a full
   // fallback stack for all three faces, so a miss costs the look and nothing else. A genuinely

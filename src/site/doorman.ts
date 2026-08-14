@@ -204,7 +204,12 @@ export function renderDoorman(mount: HTMLElement, deps: DoormanDeps): Mounted {
       el(
         'p',
         { class: 'hero-lede', style: { marginInline: 'auto' } },
-        'The whole course will use it. You also get the full kart-parts browser at the end, which Jodi does not.',
+        // It used to promise "the full kart-parts browser at the end, which Jodi does not [get]".
+        // There is no such browser: `buildOrder` in ch7.ts hands "other" the same three builds as
+        // Jodi, and the only role with a fourth is Bill. A door that promises a feature nobody
+        // built is worse than a door that promises nothing, and this one is read by whichever
+        // cousin is standing at the laptop.
+        'The whole course will use it.',
       ),
       el(
         'div',

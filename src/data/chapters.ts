@@ -138,7 +138,12 @@ export const CHAPTERS: ChapterMeta[] = [
     id: 'ch0',
     number: 0,
     skill: 'The goal',
-    title: 'So you want to beat {rival} at Mario Kart?',
+    // The home page's hero is "So you want to beat {rival} at Mario Kart?", and this was the same
+    // sentence — so pressing "Start here" landed her on a page with the identical headline, which
+    // reads as the click not having worked. It is also the label inside the resume button, where
+    // it rendered as "Carry on: So you want to beat Kayla at Mario Kart?", question mark and all.
+    // The pitch belongs to the front door; the chapter says what is in it.
+    title: 'The short list',
     hook: '{rival} has played hundreds of hours of this. She knows about eight things you do not — and all eight can be written down.',
     video: {
       id: 'CpeyjM8dyuk',
@@ -204,7 +209,11 @@ export const CHAPTERS: ChapterMeta[] = [
     id: 'ch4',
     number: 4,
     skill: 'Boost pads',
-    title: 'The fast way round is not the tight way round',
+    // The title is also the label on Chapter 3's exit button, so it has to name the subject: two
+    // chapters running both opened "The fast way round…", which made "Next: The fast way round a
+    // corner" and "Next: The fast way round is not the tight way round" read as the same promise.
+    // And the hook was the title again, character for character, printed directly underneath it.
+    title: 'Boost pads are worth a detour',
     hook: 'The fast way round is not the tight way round.',
     drill: {
       title: 'Find the boost pads',
@@ -216,7 +225,7 @@ export const CHAPTERS: ChapterMeta[] = [
     id: 'ch5',
     number: 5,
     skill: 'Lines and coins',
-    title: 'The fast way round a corner',
+    title: 'The line through a corner',
     hook: 'Wide going in. Tight through the middle. Wide coming out.',
     // No video. (Riggs, 2026-08-13: "Just remove the video from Ch 5. It's too technical and just
     // says the same thing.") It was five minutes on what coins are worth, and the chapter already
@@ -271,7 +280,7 @@ export const CHAPTERS: ChapterMeta[] = [
     number: 8,
     skill: 'The plan',
     title: 'The {rival} Plan',
-    hook: 'Forty sessions. One a day, weekdays off at the weekend, one job each.',
+    hook: 'Forty sessions, one job each. One a day, weekends off.',
     // No `drill`, and so no practice page. The after half of the benchmark used to live at
     // `#/chapter/ch8/try`; on 2026-08-13 Riggs moved it to the front of the chapter itself —
     // "have the quiz be the first thing in the chapter, the actual plan comes after the quiz is

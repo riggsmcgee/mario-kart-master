@@ -461,7 +461,10 @@ const SPARK_ROWS: readonly SparkRow[] = [
     // tight drift harder to hold, which is a different statement. What *is* checkable is where
     // Bayesic puts it: "Advanced Drifting Tech", from 7:45, well past the point this chapter tells
     // her to stop watching. So the row now says the thing we actually know.
-    line: 'Two and a half seconds of unbroken drift, which is longer than any corner in your cup. This is competitive-player territory — the video files it under advanced tech, after the point where we tell you to stop watching. Ignore it entirely.',
+    // The other three rows print a boost *length* in the seconds column, so this line has to say
+    // out loud that its number is a holding time instead — otherwise the table quietly claims a
+    // purple boost lasts as long as the drift that earns it.
+    line: 'That number is how long you would have to hold the drift, not what you get for it — and it is longer than any corner in your cup. This is competitive-player territory — the video files it under advanced tech, past where we tell you to stop. Ignore it.',
     off: true,
   },
 ];

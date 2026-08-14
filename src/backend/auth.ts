@@ -125,14 +125,52 @@ export async function setDisplayName(userId: string, displayName: string): Promi
 }
 
 /**
- * Strip the auth tokens the magic link leaves in the URL fragment.
+ * Take the tokens out of the URL fragment the magic link came back on, and sign her in with them.
  *
- * The client has already consumed them by this point. Leaving them in the address bar means
- * they end up in history and in anything Jodi copies and pastes.
+ * **This used to be `cleanAuthFragmentFromUrl`, and it was quietly throwing the sign-in away.**
+ * Its doc comment claimed "the client has already consumed them by this point", which was never
+ * true: `getSupabase()` builds the client lazily, `app.ts` called this *first* thing at boot, and
+ * the first thing to ask for a client was `getAuthState()` on the line after. So the fragment was
+ * stripped, then the client was constructed, then its `detectSessionInUrl` looked at an address
+ * bar with nothing in it and found no session. Every magic link would have landed signed-out.
+ *
+ * Nobody caught it because nobody could: gate 1f4 records that a real link has never arrived in a
+ * real inbox, and the failure is silent — the site works perfectly well signed out, which is the
+ * whole design. It only costs the one thing sign-in buys, which is her progress on a second
+ * device.
+ *
+ * **Why not simply move the stripping later.** Because this is a hash-routed site, and the router
+ * reads `window.location.hash` during boot. Leaving `#access_token=…` in place until an async
+ * session check resolves means the router parses it as a wrong turn and paints "There is no
+ * chapter here" over the top of her arrival. So the fragment still has to go *synchronously*, and
+ * the tokens have to be handed to the client by hand instead of left in the URL for it to find.
+ * `setSession` is the documented way to do exactly that.
+ *
+ * The stripping matters for its own sake too: a fragment left in the address bar ends up in
+ * history and in anything Jodi copies and pastes, and it is a live credential.
+ *
+ * PKCE links (`?code=…` in the query string) are untouched by any of this — nothing here rewrites
+ * the query, so `detectSessionInUrl` still handles that flow the ordinary way.
  */
-export function cleanAuthFragmentFromUrl(): void {
-  if (!window.location.hash.includes('access_token')) return;
+export async function consumeAuthFragment(): Promise<boolean> {
+  const hash = window.location.hash;
+  if (!hash.includes('access_token')) return false;
+
+  const params = new URLSearchParams(hash.replace(/^#\/?/, ''));
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+
+  // Out of the address bar before anything else looks at it, whatever happens next.
   history.replaceState(null, '', window.location.pathname + window.location.search);
+
+  const supabase = getSupabase();
+  if (!supabase || !accessToken || !refreshToken) return false;
+
+  const { error } = await supabase.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+  return !error;
 }
 
 export { isConfigured };

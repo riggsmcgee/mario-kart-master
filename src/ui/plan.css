@@ -1121,6 +1121,16 @@
     break-inside: avoid;
   }
 
+  /* What the rung means, and where to go when it will not come. Indented under the title so the
+   * five rungs still scan as five rungs rather than as fifteen lines. */
+  .sheet-rung-note {
+    display: block;
+    margin-left: 1.1rem;
+    color: #555;
+    font-size: 7pt;
+    line-height: 1.3;
+  }
+
   .sheet-ladder {
     counter-reset: rung;
   }
@@ -1185,6 +1195,17 @@
      * with the job. Mid-grey survives a domestic inkjet; anything lighter does not. */
     color: #555;
     font-size: 6.5pt;
+  }
+
+  /* The one thing to think about while doing it. Same grey as the track line, and it wraps —
+   * a focus is a short sentence rather than a label, and forty of them is what turns the sheet
+   * from a checklist into something she can actually work from. */
+  .sheet-grid-focus {
+    display: block;
+    margin-top: 0.6mm;
+    color: #555;
+    font-size: 6.5pt;
+    line-height: 1.25;
   }
 
   /* --- the cup guide, on paper ---------------------------------------------

@@ -79,9 +79,29 @@ export const hole: Beat = {
     // two lines rather than one.
     const stop: HTMLElement = found;
 
-    // Everything left in the notice becomes a thing that can fall. The full stop is already an
-    // element and is skipped by `wordify` on its own merits — it has no text node parent left.
-    const words = wordify(card).filter((word) => word !== stop);
+    /**
+     * Everything left in the notice becomes a thing that can fall.
+     *
+     * **Except the hole itself, and the filter has to say so twice.** The comment here used to
+     * claim the full stop was "skipped by `wordify` on its own merits", which was wrong in the one
+     * way that is hard to see: `wordify` walks *text nodes*, and `#k-stop` still contains one — the
+     * "." — so it wrapped that in a brand-new `span.k-word` **inside** the hole. That span is not
+     * `stop`, so it sailed through a `!== stop` filter, and since it sits at the exact centre of
+     * the hole's own bounding box it was inside the mouth from the first pointer move.
+     *
+     * The hole therefore ate itself before it ate anything on the page: one of the five words of
+     * appetite spent on a character she could not see, with no reaction line, on the very first
+     * flick. Measured at seventeen candidate words against the sixteen that are actually written.
+     *
+     * Filtered by `contains` rather than `!==`, because the offender is a descendant and not the
+     * node itself — and then unwrapped, so the DOM says what the code means. Leaving an inert span
+     * inside the hole is how this bug gets reintroduced by the next person who writes a selector.
+     */
+    const words = wordify(card).filter((word) => {
+      if (!stop.contains(word)) return true;
+      word.replaceWith(...word.childNodes);
+      return false;
+    });
 
     // It sinks in. The dot is a hole now, and the page has a depth it did not have a moment ago.
     stop.classList.add('k-hole');

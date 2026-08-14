@@ -117,7 +117,7 @@ export function renderPlanPage(mount: HTMLElement, deps: PlanPageDeps): Mounted 
         el(
           'p',
           null,
-          'Three pages: the forty boxes, the fundamentals, and all four tracks. Choose “Save as PDF” to keep it on your phone.',
+          'Four pages or so: the forty boxes with what to think about in each, the fundamentals, all four tracks, the ladder and the race-day card. Choose “Save as PDF” to keep it on your phone.',
         ),
       ),
     ),

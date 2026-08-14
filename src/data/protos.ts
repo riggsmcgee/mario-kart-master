@@ -106,8 +106,8 @@ export const PROTOS: Proto[] = [
     step: '4e4',
     gate: '4e3',
     blurb:
-      "Kayla's lockout as ten minutes of play: the website insists there is nothing here while " +
-      'she takes it apart. Beat-by-beat jumps, because the last one is nine minutes from a cold start.',
+      "Kayla's lockout as five minutes of play: the website insists there is nothing here while " +
+      'she takes it apart. Beat-by-beat jumps, because the last one is the far end of a full run.',
     status: 'built',
   },
 ];

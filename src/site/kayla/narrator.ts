@@ -331,6 +331,11 @@ export class Narrator {
   }
 
   private pump(): void {
+    // Nothing types after teardown. `dispose()` deliberately settles the line in flight so no beat
+    // is left awaiting a promise that will never resolve — and settling schedules the next pump,
+    // which would otherwise wake up a few hundred milliseconds later and write into a strip that
+    // has been removed from the document.
+    if (this.dead) return;
     const next = this.queue.shift();
     if (!next) {
       this.speaking = false;
@@ -557,11 +562,12 @@ export class Narrator {
 
   dispose(): void {
     this.dead = true;
-    if (this.timer) clearTimeout(this.timer);
-    if (this.nudgeTimer) clearTimeout(this.nudgeTimer);
     for (const pending of this.queue) pending.resolve();
     this.queue = [];
+    // Settle the line in flight *before* the timers go, because settling schedules one more.
     this.finishCurrent?.();
+    if (this.timer) clearTimeout(this.timer);
+    if (this.nudgeTimer) clearTimeout(this.nudgeTimer);
     this.offMute();
     this.speech.dispose();
     this.root.removeEventListener('pointerdown', this.skip);

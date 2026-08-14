@@ -146,7 +146,7 @@ export const CHARACTERS: readonly Character[] = [
   character('baby-rosalina', 'Baby Rosalina', 'feather'),
   character('lemmy', 'Lemmy', 'feather', 'A tiny menace. Identical to the babies where it counts.'),
 
-  character('toadette', 'Toadette', 'light', 'Nippy, cheerful, and identical to Toad on paper.'),
+  character('toadette', 'Toadette', 'light', 'Nippy, cheerful, and identical to Wendy on paper.'),
   character('toad', 'Toad', 'light'),
   character('koopa-troopa', 'Koopa Troopa', 'light'),
   character('shy-guy', 'Shy Guy', 'light'),
@@ -195,21 +195,45 @@ export const CHARACTERS: readonly Character[] = [
 /**
  * Every driver who is mechanically the same as this one.
  *
- * The single most useful fact about the character select screen, and one nobody tells you: within
- * a weight class the drivers are **identical**. Peach, Daisy, Birdo and Yoshi are one kart with
- * four costumes. So "which character should I be" has a real answer — whichever you like the look
- * of — and Chapter 7 can say so, which matters here for a specific reason: Jodi drives Pink Gold
- * Peach because {rival} told her heavier is better, and the fix is not "drive a boy character",
- * it is "the one you actually want is right there and it costs you nothing".
+ * The single most useful fact about the character select screen, and one nobody tells you: **some
+ * drivers are the same kart with a different face.** Peach, Daisy, Birdo and Yoshi are one kart
+ * with four costumes. So "which character should I be" has a real answer — whichever of *those* you
+ * like the look of — and Chapter 7 can say so, which matters here for a specific reason: Jodi
+ * drives Pink Gold Peach because {rival} told her heavier is better, and the fix is not "drive a
+ * boy character", it is "the one you actually want is right there and it costs you nothing".
+ *
+ * **It is not "within a weight class", and this file used to say it was.** Deluxe splits each
+ * weight class into two or three stat groups, so the old version offered Toadette a swap to Toad,
+ * Koopa Troopa and Shy Guy under a sentence promising the swap changed nothing — and Toadette
+ * shares her numbers with Wendy and Isabelle alone. Toadette is the driver on this site's own
+ * light build, which made it the single most likely wrong swap to be acted on. Checked against the
+ * Super Mario Wiki's per-character pages rather than reasoned from the weight classes.
+ *
+ * The shared *bars* stay as they are — the file header is explicit that they are a declared
+ * approximation. This table is a different thing: a claim of exact sameness, which is the one claim
+ * an approximation cannot make, and the one Chapter 7 puts on screen in bold.
  *
  * Excludes the driver asked about, so the result reads as "…or any of these instead".
  */
+const TWINS: readonly (readonly string[])[] = [
+  ['baby-peach'],
+  ['baby-rosalina', 'lemmy'],
+  ['toad', 'shy-guy'],
+  ['toadette', 'wendy', 'isabelle'],
+  ['koopa-troopa'],
+  ['peach', 'daisy', 'birdo', 'yoshi'],
+  ['mario', 'ludwig'],
+  ['luigi', 'iggy'],
+  ['rosalina', 'king-boo'],
+  ['waluigi', 'donkey-kong'],
+  ['metal-mario', 'pink-gold-peach'],
+  ['wario'],
+  ['bowser'],
+];
+
 export function sameClassAs(id: string): readonly Character[] {
-  const driver = CHARACTERS.find((item) => item.id === id);
-  if (!driver) return [];
-  return CHARACTERS.filter(
-    (item) => item.weightClass === driver.weightClass && item.id !== driver.id,
-  );
+  const group = TWINS.find((names) => names.includes(id)) ?? [];
+  return CHARACTERS.filter((item) => group.includes(item.id) && item.id !== id);
 }
 
 export const BODIES: readonly Part[] = [
@@ -245,7 +269,7 @@ export const BODIES: readonly Part[] = [
     'body',
     'mr-scooty',
     'Mr. Scooty',
-    [1.25, 5, 1, 5, 3.5],
+    [1.25, 5, 1, 5, 2.5],
     'A scooter. Yes, really. It is very good.',
   ),
   part(
@@ -304,14 +328,14 @@ export const TYRES: readonly Part[] = [
     'tyres',
     'roller',
     'Roller',
-    [1.25, 5, 1, 5, 3.5],
+    [1.25, 5, 1, 5, 2.5],
     'The small indoor-looking ones. They carry every build on this site.',
   ),
   part(
     'tyres',
     'azure-roller',
     'Azure Roller',
-    [1.25, 5, 1, 5, 3.5],
+    [1.75, 4.5, 1, 4.5, 2.25],
     'Roller, in blue. Identical in every way that matters.',
   ),
   part(
@@ -319,7 +343,7 @@ export const TYRES: readonly Part[] = [
     'button',
     'Button',
     [1.25, 5, 1, 5, 3.5],
-    'Roller wearing a different hat. Same numbers exactly.',
+    'Nearly a Roller — a touch more top speed, a touch less pick-up. Close cousins, not twins.',
   ),
   part(
     'tyres',
@@ -535,6 +559,22 @@ export function saveCombo(choice: ComboChoice): void {
   } catch {
     // Private browsing, or a full quota. She has still made the choice and the chapter still
     // finishes; only Chapter 8's reminder is lost, and Chapter 8 handles not knowing.
+  }
+}
+
+/**
+ * Forget the saved build. For the settings page's "clear progress on this computer".
+ *
+ * It lives here rather than in `settings.ts` for the same reason `forgetDoorman` and
+ * `forgetAdmission` do: the file that owns the key owns the erasing of it, so adding a fifth key
+ * later means writing the forgetter next to the setter rather than remembering a page across the
+ * repo that has to be edited too. That is precisely the thing the reset has now got wrong twice.
+ */
+export function forgetCombo(): void {
+  try {
+    localStorage.removeItem(COMBO_STORAGE_KEY);
+  } catch {
+    // Nothing to forget.
   }
 }
 

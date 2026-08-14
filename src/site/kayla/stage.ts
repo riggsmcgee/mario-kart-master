@@ -161,8 +161,17 @@ export function runStage(mount: HTMLElement, deps: StageDeps): Mounted {
       pocketItems.append(slot);
       held.set(label, node);
       // The lid tips. One class, removed when the animation is done, so it can tip again later.
+      //
+      // Registered in `timers` like everything else. `stage.after` is not available this far up the
+      // file, and a bare `setTimeout` is exactly the hole this stage exists to close: leaving in
+      // the middle of the drop left a callback in flight that woke up 600ms later and set a class
+      // on a node that had been removed from the document.
       pocketRoot.classList.add('k-pocket-took');
-      setTimeout(() => pocketRoot.classList.remove('k-pocket-took'), 600);
+      const lid = setTimeout(() => {
+        timers.delete(lid);
+        pocketRoot.classList.remove('k-pocket-took');
+      }, 600);
+      timers.add(lid);
     },
     has(label) {
       return held.has(label);
@@ -218,13 +227,25 @@ export function runStage(mount: HTMLElement, deps: StageDeps): Mounted {
   function closeWarning(): void {
     leaving?.remove();
     leaving = null;
-    document.removeEventListener('keydown', onWarningKey);
+    document.removeEventListener('keydown', onWarningKey, true);
+    scene.removeAttribute('inert');
+    pocketRoot.removeAttribute('inert');
     exit.focus();
   }
 
+  /**
+   * Capture phase, and it stops the event dead.
+   *
+   * The narrator also listens on `document` for "any key skips the current line", and it
+   * registered first, so in the bubble phase it saw Escape before this did and threw away whatever
+   * was being said — the panel closed *and* the sentence she was in the middle of vanished. Taking
+   * the key in the capture phase and calling `stopPropagation` means Escape belongs to the dialogue
+   * while the dialogue is open, and to nothing else the rest of the time.
+   */
   function onWarningKey(event: KeyboardEvent): void {
     if (event.key !== 'Escape') return;
     event.preventDefault();
+    event.stopPropagation();
     closeWarning();
   }
 
@@ -237,6 +258,15 @@ export function runStage(mount: HTMLElement, deps: StageDeps): Mounted {
     // pattern this is supposed to be joking about rather than performing.
     const go = el('button', { class: 'btn k-leaving-go', type: 'button' }, 'Leave anyway');
     const title = el('h2', { attrs: { id: 'k-leaving-title' } }, 'You are leaving.');
+    // Described as well as labelled: the label is four words of alarm and the description is the
+    // joke, so a screen reader that only announced the heading would get the panic and miss the
+    // point of it.
+    const body = el(
+      'div',
+      { attrs: { id: 'k-leaving-body' } },
+      el('p', { class: 'k-lede' }, 'That is fine. That is what I asked you to do.'),
+      el('p', null, 'It is only that there is quite a lot more of it.'),
+    );
 
     stay.addEventListener('click', () => {
       closeWarning();
@@ -249,20 +279,30 @@ export function runStage(mount: HTMLElement, deps: StageDeps): Mounted {
       'div',
       {
         class: 'k-leaving',
-        attrs: { role: 'alertdialog', 'aria-labelledby': 'k-leaving-title' },
+        attrs: {
+          role: 'alertdialog',
+          'aria-modal': 'true',
+          'aria-labelledby': 'k-leaving-title',
+          'aria-describedby': 'k-leaving-body',
+        },
       },
       el(
         'div',
         { class: 'k-panel k-leaving-card' },
         el('p', { class: 'k-stencil' }, 'Please read this carefully'),
         title,
-        el('p', { class: 'k-lede' }, 'That is fine. That is what I asked you to do.'),
-        el('p', null, 'It is only that there is quite a lot more of it.'),
+        body,
         el('div', { class: 'k-leaving-buttons' }, stay, go),
       ),
     );
     root.append(leaving);
-    document.addEventListener('keydown', onWarningKey);
+    // The scrim already stops the mouse reaching the scene behind it; `inert` makes that true for
+    // the keyboard as well, so Tab cannot wander off into a page she is in the middle of leaving.
+    // The exit button itself is deliberately left out of this — it is outside `scene`, it stays
+    // reachable, and pressing it again is the second press that goes straight through.
+    scene.setAttribute('inert', '');
+    pocketRoot.setAttribute('inert', '');
+    document.addEventListener('keydown', onWarningKey, true);
     // The action she asked for takes focus. She pressed a button that says "Change user"; making her
     // hunt for the one that honours it would be the exact pattern this is a joke about.
     go.focus();
@@ -288,9 +328,19 @@ export function runStage(mount: HTMLElement, deps: StageDeps): Mounted {
     exit,
     preview: deps.preview === true,
     onAdmitted: () => {
-      // Fired at most once — the last beat offers a button and also opens the site on a timer, and
-      // she may well press the button on the way.
-      if (admitted) return;
+      /**
+       * Fired at most once — the last beat offers a button and also opens the site on a timer, and
+       * she may well press the button on the way.
+       *
+       * **And never after teardown.** `gone` belongs in this guard for the same reason it is in
+       * `after`, `wait` and `reveal`: `dispose()` deliberately unblocks every awaiting beat so
+       * nothing is left hanging, which means beat 8's `await narrator.say(...)` resolves, the
+       * `stage.wait(3000)` after it returns instantly, and the next line admits her — three
+       * seconds after she pressed **Leave anyway** and went back to the door. Being thrown into a
+       * site you have just left is a bad enough moment on its own; doing it to the one person the
+       * whole piece has promised an exit to is worse.
+       */
+      if (admitted || gone) return;
       admitted = true;
       deps.onAdmitted();
     },
@@ -367,8 +417,9 @@ export function runStage(mount: HTMLElement, deps: StageDeps): Mounted {
     dispose() {
       gone = true;
       // The warning's Escape handler is on the document, so it outlives the node it belongs to
-      // unless it is taken off by hand.
-      document.removeEventListener('keydown', onWarningKey);
+      // unless it is taken off by hand. This is also the path that cleans up after "Leave anyway",
+      // which does not close the panel — it leaves, and leaving disposes the stage.
+      document.removeEventListener('keydown', onWarningKey, true);
       for (const id of timers) clearTimeout(id);
       timers.clear();
       for (const disposer of disposers) {

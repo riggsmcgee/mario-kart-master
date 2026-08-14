@@ -243,15 +243,15 @@ export const TRACKS: MushroomTrack[] = [
         kind: 'hazard',
         at: 0.37,
         side: 'in',
-        label: 'Warp pipes\nthey never move',
-        note: 'Pipes stand in the road on the way out of the first big turn. Same spot, every lap, every race, forever. Steer a kart-width around them and then stop thinking about them — they are furniture, not hazards.',
+        label: 'Warp pipes\nyour cue for the lanes',
+        note: 'Green pipes stand in the dirt on the inside of the first big turn. They are off the road, so you will never touch one — they are a landmark, not a hazard. Use them as your cue that the three lanes are about to appear.',
       },
       {
         kind: 'pad',
         at: 0.46,
         side: 'in',
         label: 'Three lanes\ntake the outer one',
-        note: 'The road paints itself into three lanes. The outer one carries the dash panels **and** the coins, so the long way round is the fast way round. This is Chapter 4 made real, on the first track of your cup.',
+        note: 'The road paints itself into three lanes. The outer one carries the boost pads **and** the coins, so the long way round is the fast way round. This is Chapter 4 made real, on the first track of your cup.',
       },
       {
         kind: 'trick',
@@ -265,7 +265,7 @@ export const TRACKS: MushroomTrack[] = [
         at: 0.93,
         side: 'out',
         label: 'Three more pads\nand a ramp',
-        note: 'The outer path down the finish straight has three more panels and a ramp on it. It is the last thing that happens before the lap ticks over, so you start the next lap already moving.',
+        note: 'The outer path down the finish straight has three more boost pads and a ramp on it. It is the last thing that happens before the lap ticks over, so you start the next lap already moving.',
       },
     ],
     deep: {
@@ -273,11 +273,11 @@ export const TRACKS: MushroomTrack[] = [
         {
           title: 'The three lanes, after the first big right',
           take: 'Outer. The wide one. The one that feels wrong.',
-          why: 'The dash panels and the coins are both painted out there. The inside line is shorter and slower, which is the strangest true thing in this whole course. {rival} will be hugging the inside, because the inside looks correct. Let her.',
+          why: 'The boost pads and the coins are both painted out there. The inside line is shorter and slower, which is the strangest true thing in this whole course. {rival} will be hugging the inside, because the inside looks correct. Let her.',
         },
         {
           title: 'The run to the line',
-          take: 'Outer again — three panels and a ramp.',
+          take: 'Outer again — three boost pads and a ramp.',
           why: 'A boost at the end of a lap is worth more than the same boost in the middle of one, because you are still carrying it when the next lap starts. Nothing else on this track compounds like that.',
         },
       ],
@@ -308,11 +308,11 @@ export const TRACKS: MushroomTrack[] = [
         },
         {
           section: 'The finish straight',
-          drive: 'Outer. Three panels, a ramp, and the line. Then do it all again.',
+          drive: 'Outer. Three boost pads, a ramp, and the line. Then do it all again.',
         },
       ],
       hazards: [
-        'Warp pipes before the lane split. Fixed position, every single lap.',
+        'Green pipes in the dirt on the inside of the first big turn. They never move, and they are off the road — a landmark, not a hazard.',
         'That is the entire list. This is the easiest track in the game and it is the first race of your cup — which is a very good way for a cup to start.',
       ],
       timeTrial: [
@@ -326,7 +326,7 @@ export const TRACKS: MushroomTrack[] = [
     },
     notForYou: [
       'Mushroom cuts across turns one, two and three.',
-      'The glide cut on the final turn.',
+      'The mushroom cut across the sand at the final turn.',
     ],
     video: {
       id: 'TRywiShGKb4',
@@ -348,15 +348,15 @@ export const TRACKS: MushroomTrack[] = [
         kind: 'trick',
         at: 0.24,
         side: 'in',
-        label: 'Seesaw ramps\ntrick off each one',
-        note: 'The tilting ramps in the water section are the best value on the track. One trick each, three boosts a lap, and a missed one costs you nothing at all.',
+        label: 'Ramp into the water\ntrick as you drop',
+        note: 'The trick ramps are the best value on the track. Three of them in a lap, one press each, and a missed one costs you nothing at all. This is the first: the ramp that drops you into the water.',
       },
       {
         kind: 'pad',
         at: 0.47,
         side: 'out',
-        label: 'Coaster car\nbump it on purpose',
-        note: 'The little car running on the rail gives you a nudge of speed when you touch it. It is the one moving thing in this cup you are actively trying to hit — and it runs the same route every lap, so it is a timing you learn once.',
+        label: 'The submarines\nbump one on purpose',
+        note: 'In the upside-down loop, little submarines run along the rail beside you, and their wheels give you a nudge of speed when you touch them. They are the one moving thing in this cup you are actively trying to hit. They drift along as the race goes on, so they sit somewhere different each lap: take the one in front of you, and never chase one.',
       },
       {
         kind: 'coins',
@@ -369,20 +369,20 @@ export const TRACKS: MushroomTrack[] = [
         kind: 'trick',
         at: 0.87,
         side: 'out',
-        label: 'Carousel edge\none more trick',
-        note: 'Coming off the carousel there is another lip to trick off. Same button, same moment, same free speed.',
+        label: 'Glide ramp\none more trick',
+        note: 'Coming off the teacups there is a glide ramp. Same button, same moment, same free speed — and then a short glide down to the line.',
       },
     ],
     deep: {
       choices: [
         {
-          title: 'The rail car',
+          title: 'The submarines',
           take: 'Drive into it. Yes, really.',
-          why: 'Everything else in Mario Kart that moves is trying to ruin your race. This one hands you a small turbo, on a fixed rail, on the same timing every lap. It is the rarest thing in the game: a moving object that rewards knowing rather than reacting.',
+          why: 'Everything else in Mario Kart that moves is trying to ruin your race. These hand you a small turbo instead, and they cannot hurt you if you get it wrong. They sit somewhere different every lap, so there is no timing to learn: if one is beside you, lean into it, and if it is not, drive on.',
         },
         {
           title: 'The water section',
-          take: 'Middle of the road, trick off every seesaw.',
+          take: 'Middle of the road, trick off all three ramps.',
           why: 'There is no clever line here and nothing to dodge. Three tricks a lap is roughly a kart length, free, forever — and a missed trick is just a normal jump, so trying costs you nothing.',
         },
       ],
@@ -394,42 +394,44 @@ export const TRACKS: MushroomTrack[] = [
         },
         {
           section: 'Down into the water',
-          drive: 'Nothing clever. Off the walls, hands still, let the track take you down.',
+          drive:
+            'The road drops you into the water on a ramp. Nothing clever to do but hold your line — then trick as the nose lifts, not as you land. Early feels wrong and lands right.',
         },
         {
-          section: 'The seesaw ramps',
+          section: 'The loop and the submarines',
           drive:
             'One trick per ramp. Press as the nose lifts, not as you land — early feels wrong and lands right.',
         },
         {
-          section: 'The rail car',
-          drive: 'Aim at it. If you miss it, shrug; it comes round again next lap.',
+          section: 'The ramp out of the loop',
+          drive:
+            'A right turn out of the loop leads straight onto trick ramp number two. Same press, same free speed.',
         },
         {
-          section: 'The carousel and home',
+          section: 'The teacups and home',
           drive:
             'Trick off the edge on the way out, then the run home is wide and forgiving. Tidy up your coins.',
         },
       ],
       hazards: [
-        'None worth the word. Nothing on this track chases you, drops on you, or arranges itself differently from one race to the next.',
+        'None worth the word. Nothing on this track chases you or drops on you. The only thing that moves is the submarines, and they are trying to help.',
         'Which makes this the track to go to when you have had a bad race and want to enjoy yourself for four minutes.',
       ],
       timeTrial: [
         'Ghost track number two. Two ghosts is plenty — more than two and it becomes homework.',
         'Job one: ten coins by the end of lap one, without swerving for any of them.',
-        'Job two: a trick off every seesaw, every lap. Count them out loud if it helps.',
+        'Job two: a trick off all three ramps, every lap. Into the water, out of the loop, and the glide ramp before the line. Count them out loud if it helps.',
         'Then save it and beat it. Beating your own ghost by a tenth is worth more to you than beating a stranger on the internet by a minute.',
       ],
       versus:
-        'She may take the carousel cut with a mushroom and gain half a kart length. You will take three tricks and a rail bump for more than that — and you will take them every lap, whether or not you got a mushroom.',
+        'She may take the teacup cut with a mushroom and gain half a kart length. You will take three tricks and a spin off a submarine for more than that — and you will take them every lap, whether or not you got a mushroom.',
     },
-    notForYou: ['The mushroom cut through the middle of the carousel.'],
+    notForYou: ['The mushroom cut straight across the teacup ride.'],
     video: {
       id: '6G1HY_7W3xg',
       title: 'Mario Kart 8 — The Fastest Path: Water Park',
       channel: 'IGN Guides',
-      note: 'Wii U footage again, same track. **Watch for:** the seesaw ramps and the car on the rail. **Ignore:** the cut through the carousel — that is a mushroom-and-off-road move and it is not on your menu.',
+      note: 'Wii U footage again, same track. **Watch for:** the ramp down into the water, the submarines in the upside-down loop, and the glide ramp at the end. **Ignore:** the cut straight across the teacups — that is a mushroom move and it is not on your menu.',
     },
   },
 
@@ -446,7 +448,7 @@ export const TRACKS: MushroomTrack[] = [
         at: 0.29,
         side: 'in',
         label: 'Blue or pink?\ntake the quiet one',
-        note: 'The course splits into two painted paths. Pink is a whisker faster. Blue usually has fewer karts on it — and a path with nobody on it has nobody firing shells down it either.',
+        note: 'The course splits into two paths that spiral around each other, one blue and one pink. They are anti-gravity, so you will find yourself sideways — that is meant to happen. Pink is a whisker faster. If you can see where her kart went, go the other way: a path with nobody on it has nobody firing shells down it either.',
       },
       {
         kind: 'line',
@@ -460,7 +462,7 @@ export const TRACKS: MushroomTrack[] = [
         at: 0.72,
         side: 'out',
         label: 'Frosting and\npiranha plants',
-        note: 'Frosting looks like part of the track and is not: it is off-road, and it slows you to a crawl. The plants sit in fixed spots and snap on a rhythm; they cannot come and find you.',
+        note: 'Frosting looks like part of the track and is not: it is off-road, and it slows you to a crawl. The plants sit in fixed spots in their pipes and snap at whatever comes close — they cannot come and find you, so give them a kart-width and they are decoration.',
       },
       {
         kind: 'coins',
@@ -508,7 +510,7 @@ export const TRACKS: MushroomTrack[] = [
         },
       ],
       hazards: [
-        'Piranha plants: fixed spots, fixed rhythm. They snap in place and they cannot chase you — give them a kart-width and they are decoration.',
+        'Piranha plants: fixed spots, in their pipes. They snap at whatever comes close and they cannot chase you — give them a kart-width and they are decoration.',
         'Frosting: off-road, everywhere, and it does not look like it. If the surface changes colour under you, you are losing time.',
         'Nothing else. Nothing on this track is different this race than it was last race.',
       ],
@@ -556,14 +558,14 @@ export const TRACKS: MushroomTrack[] = [
         at: 0.67,
         side: 'out',
         label: 'Take the glider,\nland on the coins',
-        note: 'When the glider is available, take it — it beats both wall routes. Trick off the lip, hold still in the air, and land on the side platforms, which have coins on them.',
+        note: 'The glide ramp is not there on lap one — a rolling boulder knocks it into place, so it turns up from lap two. From then on take it every time: it beats both wall routes. Trick off the lip, hold still in the air, and land where the coins are.',
       },
       {
         kind: 'trick',
         at: 0.88,
         side: 'out',
-        label: 'Tilted platform\nat the final turn',
-        note: 'A tilted slab beside the road at the last turn. Drive up it and press the trick button. Guides treat this one as near-mandatory, and it is the easiest free speed on the track.',
+        label: 'Two ramps\nbefore the line',
+        note: 'The last thing before the line is a ramp into a short glide, and you land on another ramp coming out of it. Both sit right on the road, so you cannot miss them. Press the trick button at each lip and you cross the line already moving.',
       },
     ],
     deep: {
@@ -576,12 +578,12 @@ export const TRACKS: MushroomTrack[] = [
         {
           title: 'Second section: the glider',
           take: 'Always the glider, whenever it is there.',
-          why: 'It beats both of the wall routes, and it puts you down on the side platforms where the coins are. It is the only place in the cup where the fastest option and the easiest option are the same option.',
+          why: 'It beats both of the wall routes, and it puts you down where the coins are. One thing to know: a boulder has to knock the ramp into place, so lap one goes through the water and the glider appears from lap two. From then on it is the only place in the cup where the fastest option and the easiest option are the same option.',
         },
         {
           title: 'Final turn: the tilted platform',
-          take: 'Up it, and press the trick button.',
-          why: 'A boost this close to the line carries into the next lap. Guides call it near-mandatory, which is a strong phrase for something that costs you one button press and cannot go wrong.',
+          take: 'Trick off the glide ramp, then off the ramp you land on.',
+          why: 'A boost this close to the line carries into the next lap. It costs you one button press at each lip, both ramps are right on the road, and it cannot go wrong.',
         },
       ],
       line: [
@@ -618,7 +620,10 @@ export const TRACKS: MushroomTrack[] = [
       versus:
         'Fourth race of the cup, so this is usually where it is decided. She has spent three races reacting; you have spent three races knowing. On this track, that gap is at its widest — take the empty path, take the glider, and stay boring.',
     },
-    notForYou: ['The gap jump at the cave exit.', 'The off-road ramp just past the finish line.'],
+    notForYou: [
+      'The fallen pillar that cuts the turn before the last glide ramp.',
+      'The off-road ramp just past the finish line.',
+    ],
     video: {
       id: 'mY4KhGWlG9A',
       title: 'Mario Kart 8 — The Fastest Path: Thwomp Ruins',

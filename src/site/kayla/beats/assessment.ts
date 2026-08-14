@@ -167,6 +167,22 @@ export const assessment: Beat = {
     function choose(option: Option): void {
       narrator.poke();
 
+      /**
+       * The answer is taken once.
+       *
+       * Nothing replaces these buttons until `paint()` runs, which is 900ms away on a rejection
+       * and 1100ms away on an acceptance — and the listener closes over the same `option` the
+       * whole time. So a double-click, which is what a fifteen-year-old does to a button, counted
+       * twice: two accepted answers, `index` advancing two questions, and at three quick clicks
+       * the form declaring "3 from 3, comprehensively wrong" about a question it never showed her.
+       * The one it skips is the kart question, which is the only one with her own advice in it and
+       * the reason the beat exists.
+       *
+       * `paint()` builds fresh, enabled buttons, so disabling here covers both branches and
+       * nothing has to be re-enabled anywhere.
+       */
+      for (const button of options.querySelectorAll('button')) button.disabled = true;
+
       if (option.pass === undefined) {
         const lines = REJECTIONS[Math.min(refused, REJECTIONS.length - 1)] ?? [
           'Assessment failed.',

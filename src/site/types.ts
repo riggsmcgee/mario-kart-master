@@ -63,7 +63,10 @@ export interface ChapterContent {
    */
   concept(ctx: ChapterContext): Node;
 
-  /** The interactive moment. Absent on concept-only chapters — Chapter 6 is the drift. */
+  /**
+   * The interactive moment. Optional, though every teaching chapter currently has one — Chapter 6
+   * gained a drill on 2026-08-12. Chapter 8 replaces the whole template instead; see `custom`.
+   */
   interactive?: ((mount: HTMLElement, ctx: ChapterContext) => Mounted) | undefined;
 
   /**

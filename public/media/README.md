@@ -1,6 +1,8 @@
 # public/media
 
-One clip of Riggs to camera: `intro.mp4`.
+One clip of Riggs to camera: `intro.mp4`. It is **delivered and committed** — the section below
+records how it was encoded and why. The second clip that was once planned here, `kayla.mp4`, was
+dropped rather than deferred, and nothing in the code looks for it.
 
 Keep it **H.264 in an MP4** (`libx264` + AAC). That is the one combination Safari and Chrome both
 play without argument — a `.mov` straight off a phone is usually HEVC, which Chrome on Windows will

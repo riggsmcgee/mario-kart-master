@@ -13,7 +13,15 @@
     <meta name="robots" content="noindex, nofollow" />
   </head>
   <body>
-    <!-- Keyboard is her only input device, so the skip link is not a formality. -->
+    <!--
+      Keyboard is her only input device, so the skip link is not a formality. It is also the very
+      first thing in the tab order, which is why the `onclick` matters more than it looks: this is a
+      hash-routed app, so following `href="#main"` for real sets the hash to `#main`, which
+      `parseHash` reads as a wrong turn and replaces the whole page with "There is no chapter here".
+      The one control on the site aimed squarely at a keyboard user was the one control that broke
+      it. So the click is cancelled and focus is moved by hand; `href` stays for the affordance and
+      for anyone whose scripting is off, where landing on `#main` at least does no harm.
+    -->
     <a
       href="#main"
       style="
@@ -26,6 +34,14 @@
       "
       onfocus="this.style.left = '1rem'"
       onblur="this.style.left = '-9999px'"
+      onclick="
+        event.preventDefault();
+        var m = document.getElementById('main');
+        if (m) {
+          m.focus();
+          m.scrollIntoView();
+        }
+      "
       >Skip to the chapter</a
     >
     <div id="app"></div>

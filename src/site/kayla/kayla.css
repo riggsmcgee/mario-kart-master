@@ -83,6 +83,18 @@ body.k-over-open {
   --k-surface: var(--card);
   --k-quiet: var(--ink-soft);
 
+  /**
+   * Yes and no, as tokens rather than as two site colours used directly.
+   *
+   * The assessment's ACCEPTED/REJECTED line was `--turf-ink` and `--kerb`, which are measured
+   * against *white* — and that beat runs on the `deep` layer, where they land on `#2f3542` at
+   * 2.30:1 and 3.13:1. Both under AA, on the one word in the beat that tells her whether the form
+   * took her answer. The lesson 3e1 already wrote down applies again: contrast is a property of a
+   * pairing, and a token that passes on paper says nothing about a token on a dark panel.
+   */
+  --k-yes: var(--turf-ink);
+  --k-no: var(--kerb-ink);
+
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
@@ -132,10 +144,32 @@ body.k-over-open {
   --k-rule: #3b4354;
   --k-surface: #2f3542;
   --k-quiet: #a7b1c4;
+  /* Lifted for the dark panel: 7.4:1 and 6.0:1 on `--k-surface`, against 2.30 and 3.13 before. */
+  --k-yes: #7fd489;
+  --k-no: #ff9a91;
   background-image:
     linear-gradient(var(--k-rule) 1px, transparent 1px),
     linear-gradient(90deg, var(--k-rule) 1px, transparent 1px);
   background-size: 34px 34px;
+}
+
+/**
+ * The focus ring, per layer.
+ *
+ * `theme.css` sets one globally in `--track` (`#2b3040`), which is a dark ink chosen against paper
+ * and measures **1.07:1** on the deep layer — a ring nobody can see, on the always-live exit
+ * button and on the leave dialogue's auto-focused button. And `.grabbable:focus-visible` uses
+ * `--boost`, which is 2.17:1 on the light layers, under the 3:1 WCAG asks of an indicator.
+ *
+ * So each layer names its own. This is the same finding 3e1 recorded for the video poster — a
+ * focus ring at 1:1 is invisible to everyone except the person who needs it.
+ */
+.k-stage[data-layer='deep'] :focus-visible {
+  outline-color: var(--k-ink);
+}
+
+.k-stage:not([data-layer='deep']) :focus-visible {
+  outline-color: #b25400;
 }
 
 .k-stage[data-layer='warm'] {
@@ -247,9 +281,18 @@ body.k-over-open {
   min-width: 0;
 }
 
+/**
+ * The line she has just read, kept on screen while the next one types.
+ *
+ * **0.62, not 0.42.** The two-line stack exists so that a line she missed is still readable for a
+ * few seconds — that is the whole reason it was added — and at 0.42 it measured **3.58:1** against
+ * the strip, under AA, which made the catch-up line the least legible text in the piece. At 0.62 it
+ * is 5.8:1 and still obviously secondary to the live line's 12.4:1, so the hierarchy survives and
+ * the thing it is there for actually works.
+ */
 .nar-prev {
   margin: 0;
-  opacity: 0.42;
+  opacity: 0.62;
   min-height: 1.45em;
 }
 
@@ -379,6 +422,22 @@ body.k-over-open {
   max-width: 30rem;
   text-align: center;
   align-items: center;
+  /**
+   * An ink edge, because on the `deep` layer everything here is within 1.6:1 of everything else —
+   * the card is 1.28:1 against the scrimmed ground and the ordinary `--k-rule` border is 1.59:1,
+   * so the panel had no boundary a person could point at. `--k-ink` inverts with the layer, so
+   * this is a deliberate dark edge on paper and a light one in the corridor.
+   */
+  border-color: var(--k-ink);
+}
+
+/**
+ * The described half of the dialogue, wrapped only so `aria-describedby` has something to name.
+ * `display: contents` keeps the two paragraphs as direct children of the panel's flex column, so
+ * the wrapper costs nothing in layout.
+ */
+#k-leaving-body {
+  display: contents;
 }
 
 /**
@@ -984,11 +1043,11 @@ body:has(.carrying) .k-pocket {
   font-size: 1rem;
   letter-spacing: 0.14em;
   min-height: 1.4em;
-  color: var(--turf-ink);
+  color: var(--k-yes);
 }
 
 .k-rejected {
-  color: var(--kerb);
+  color: var(--k-no);
 }
 
 /* --- beat 6: the ledger --------------------------------------------------- */
@@ -1269,8 +1328,9 @@ body:has(.carrying) .k-pocket {
   opacity: 0.4;
 }
 
+/* 5.9:1 on white, still unmistakably the orange family. `--boost` itself is 2.36:1 as text. */
 .k-filed {
-  color: var(--boost);
+  color: #9c4d00;
   margin-top: 0.2rem;
 }
 
@@ -1315,9 +1375,17 @@ body:has(.carrying) .k-pocket {
    * moving surfaces — a 12px character tipping a few degrees is neither, and it is the only thing
    * standing between a reduced-motion player and never finding the first interaction at all. The
    * halo behind it goes solid instead of pulsing, so there are still two signals rather than one.
+   *
+   * **`!important`, and the whole shorthand, because this rule did nothing at all.** `theme.css`
+   * sets `*, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count:
+   * 1 !important; }` inside the same media query, and `!important` beats specificity — so the stop
+   * ran one 0.001ms cycle and stopped, and the exception documented above had never once happened.
+   * Restating duration, delay and iteration count in one `!important` shorthand is the only thing
+   * that outranks it. Worth noting as a shape: an override written against a `*` selector is not
+   * wrong-looking, it is just silently outvoted.
    */
   .k-stop-fallen {
-    animation-duration: 4s;
+    animation: k-rock 4s ease-in-out 1.2s infinite !important;
   }
 
   .k-stage,

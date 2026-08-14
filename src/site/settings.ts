@@ -20,6 +20,7 @@ import {
 import type { ProgressStore, SyncState } from '../backend/progress';
 import type { Sfx } from '../ui/sfx';
 import { CHAPTERS } from '../data/chapters';
+import { forgetCombo } from '../data/parts';
 import { el, rich } from './dom';
 import { forgetDoorman } from './doorman';
 import { fill, RIVAL } from './player';
@@ -260,15 +261,29 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
      * indistinguishable from a helper that works, because nothing fails.
      *
      * The general rule this now follows: a reset that knows about one storage key is a reset that
-     * will be wrong the first time a second one is added. All three are cleared here, together, and
-     * the site is handed back in the state it shipped in — at the door, asking who is training.
+     * will be wrong the first time a second one is added. All **four** are cleared here, together,
+     * and the site is handed back in the state it shipped in — at the door, asking who is training.
+     *
+     * **And a fourth key was already the thing this comment warned about.** `mkm.combo.v1` — the
+     * kart build Chapter 7 saves — was added after the paragraph above was written, and was not
+     * added here, so a cleared machine handed the next person the previous person's kart on the
+     * race-day card and on the printed sheet. Exactly the failure the rule predicts, two days after
+     * the rule was written down. `forgetCombo()` lives beside `saveCombo()` in `parts.ts` so the
+     * next one at least has somewhere obvious to go.
+     *
+     * **Reopening the door is part of clearing, not a nicety.** `go({ name: 'home' })` only sets
+     * the hash; `startApp` decides whether to ask "who's training?" once, at boot, and nothing
+     * reboots on a hash change. So the promise in this comment — *handed back at the door* — was
+     * only kept if she happened to reload afterwards, and until she did, the site carried on
+     * addressing her by the name it had just erased. It asks now, immediately.
      */
     progress.clearLocal();
     forgetDoorman();
+    forgetCombo();
     void import('./kayla/admission').then(({ forgetAdmission }) => forgetAdmission());
     reset.textContent = 'Cleared.';
     armed = false;
-    go({ name: 'home' });
+    onChangeUser();
   });
 
   page.append(
@@ -290,7 +305,7 @@ export function renderSettings(mount: HTMLElement, deps: SettingsDeps): Mounted 
    * be nice."*
    *
    * **Why it lives here and not on the front page.** The experience is built to be *found* — Kayla
-   * clicks her own name at the doorman out of nosiness and gets ten minutes of a website insisting
+   * clicks her own name at the doorman out of nosiness and gets five minutes of a website insisting
    * there is nothing to see. Advertising it anywhere she will pass spends that discovery for her. The
    * settings page is the one screen in the site she has no reason to open and everybody else does,
    * which makes it the only place this button is safe.

@@ -184,7 +184,12 @@ function chapterShell(meta: ChapterMeta, deps: ChapterPageDeps) {
           ? el(
               'span',
               { class: 'ms', style: { color: 'var(--ink-soft)' } },
-              `best: ${row.bestScore} ${meta.stars.unit.replace(/ out of \d+/, '')}`,
+              // No space before a unit that starts with a symbol. Chapter 5's unit is
+              // "% of the lap on the line", which was rendering as "best: 62 % of the lap".
+              (() => {
+                const unit = meta.stars.unit.replace(/ out of \d+/, '');
+                return `best: ${row.bestScore}${/^[%°]/.test(unit) ? '' : ' '}${unit}`;
+              })(),
             )
           : null,
       ),

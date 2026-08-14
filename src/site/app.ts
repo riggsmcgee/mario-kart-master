@@ -12,7 +12,7 @@
  * to a chapter, so the lockout cannot be walked around by typing a URL.
  */
 
-import { getAuthState, onAuthChange, cleanAuthFragmentFromUrl } from '../backend/auth';
+import { getAuthState, onAuthChange, consumeAuthFragment } from '../backend/auth';
 import { getProgressStore } from '../backend/progress';
 import { CHAPTERS, getChapter } from '../data/chapters';
 import { getSfx } from '../ui/sfx';
@@ -25,7 +25,7 @@ import { el } from './dom';
 import { renderHome } from './home';
 import { isAdmitted } from './kayla/admission';
 import { playerFor, fill } from './player';
-import { Router, go, hrefFor, type Route } from './router';
+import { Router, go, hrefFor, parseHash, type Route } from './router';
 import { renderSettings } from './settings';
 import type { Mounted, Player } from './types';
 
@@ -78,7 +78,9 @@ export function startApp(root: HTMLElement): void {
     ),
   );
 
-  const main = el('main', { attrs: { id: 'main' } });
+  // `tabindex="-1"` so the skip link has something it can actually move focus to. Without it,
+  // `main.focus()` is a no-op and the link silently does nothing at all.
+  const main = el('main', { attrs: { id: 'main', tabindex: '-1' } });
 
   // Padding lives in `site.css`, not here. It used to be an inline style, which quietly outranks
   // every stylesheet rule — so the practice pages' attempt to shrink the footer for their
@@ -116,8 +118,8 @@ export function startApp(root: HTMLElement): void {
   /**
    * Kayla sees the course and cannot open any of it. Enforced here, not per page.
    *
-   * **Unless she got through it.** (4e4.) The ten minutes behind her own name ends with three
-   * confirmations and a promise, and this is where the promise is kept: one local flag, set by
+   * **Unless she got through it.** (4e4.) The five minutes behind her own name ends with one
+   * confirmation and a promise, and this is where the promise is kept: one local flag, set by
    * `kayla/admission.ts`, and the lock is off for good on that machine. Her role never changes and
    * never reaches the server — the flag is the whole mechanism, deliberately.
    */
@@ -219,9 +221,17 @@ export function startApp(root: HTMLElement): void {
 
         loading();
         const content = await loadChapter(meta.id);
-        // She may have navigated on while the chunk was in the air. Only paint if this is still
-        // the route she is looking at.
-        if (window.location.hash !== hrefFor(route)) return;
+        /**
+         * She may have navigated on while the chunk was in the air. Only paint if this is still
+         * the route she is looking at.
+         *
+         * Compared as *routes* rather than as raw strings, because more than one hash resolves to
+         * the same page: `parseHash` strips trailing slashes, so `#/chapter/ch3/` parses to the
+         * chapter route perfectly well and then failed this guard against the canonical
+         * `#/chapter/ch3` — leaving the page on "Loading…" forever with no error anywhere. A
+         * staleness check that also rejects the URL it is currently on is not a staleness check.
+         */
+        if (hrefFor(parseHash(window.location.hash)) !== hrefFor(route)) return;
 
         if (!content) {
           swap(notBuilt(fill(meta.title, player)));
@@ -267,13 +277,20 @@ export function startApp(root: HTMLElement): void {
 
   // --- boot -----------------------------------------------------------------
 
-  cleanAuthFragmentFromUrl();
-
-  // The session decides who we sync as. Everything renders immediately regardless — the course
-  // never waits on the network to draw itself.
-  void getAuthState().then((auth) => {
-    void progress.setUser(auth.userId);
-  });
+  /**
+   * If she has just come back from the email link, take the tokens out of the fragment and sign
+   * her in with them — synchronously enough that the router never sees `#access_token=…`, which it
+   * would read as a wrong turn.
+   *
+   * The session decides who we sync as. Everything renders immediately regardless: the course
+   * never waits on the network to draw itself, so this resolves into an already-painted page and
+   * `onAuthChange` below repaints the header when it does.
+   */
+  void consumeAuthFragment().then(() =>
+    getAuthState().then((auth) => {
+      void progress.setUser(auth.userId);
+    }),
+  );
 
   onAuthChange((auth) => {
     void progress.setUser(auth.userId);

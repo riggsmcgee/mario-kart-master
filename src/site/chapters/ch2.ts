@@ -80,7 +80,7 @@ function scoreline(blocked: number): string {
     return 'Good. Look at what the misses had in common: an empty pair of hands, or a banana you were not holding out. There is no third way to be hit.';
   }
   if (blocked > 0) {
-    return 'That is the lesson arriving the honest way. A shell that is locked on does not miss, so the only thing that saves you is the thing already sitting behind your bumper.';
+    return 'That is the lesson arriving the honest way. A shell that is locked on nearly always finds you, so the only thing that saves you is the thing already sitting behind your bumper.';
   }
   return 'Every one of those got through, and every one of them was preventable by holding a button you were not using for anything else. That is the whole chapter, and it does not get harder than that.';
 }
@@ -100,7 +100,7 @@ const content: ChapterContent = {
           'Here is the whole chapter, {name}, and you may stop reading after this sentence: **hold on to everything, and never fire it forwards.**',
         ),
         t(
-          'Hold the item button and whatever you picked up sits out behind your back bumper, in the way. Anything coming up the road hits it instead of you. It costs you nothing to carry — no speed, no steering. So carry it, all race.',
+          'Hold the item button and anything you can throw — a banana, a green shell, a red shell — sits out behind your back bumper, in the way. Anything coming up the road hits it instead of you. It costs you nothing to carry — no speed, no steering. So carry it, all race.',
         ),
         t(
           'When something *is* coming for you, the game tells you — a little picture appears and a siren starts. That is not a signal to start swerving. It is a reminder to hold the button.',
@@ -148,7 +148,7 @@ const content: ChapterContent = {
           itemRule(
             'Bob-omb',
             'throw it backwards, straight away.',
-            'The one thing you must never hold. It is counting down the whole time it is in your hands, and when it goes off it does not care whose it was. Backwards is also where everyone chasing you is, and the bang is wide enough that you cannot really miss.',
+            'The one thing you must never hold. Anything that touches it back there sets it off — a shell aimed at you, a kart on your bumper — and you are well inside the blast when it does. Backwards is also where everyone chasing you is, and the bang is wide enough that you cannot really miss.',
           ),
           itemRule(
             'Triple bananas or triple shells',

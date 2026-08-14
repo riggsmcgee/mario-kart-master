@@ -45,8 +45,11 @@ const DOSSIER: Array<[string, string]> = [
     'She starts before the lights. Second flash, not the first. She gets it maybe half the time and half is plenty.',
   ],
   [
+    // Chapter 2's rule has one exception and the dossier has to carry it, or the first thing Kayla
+    // does with this page is disprove it. Jodi holds everything behind her *except* red shells,
+    // which steer themselves and are therefore the only thing she is told to fire.
     'Chapter 2',
-    'She has stopped throwing her shells. She holds them behind her now, as a shield. You will notice this.',
+    'She holds her bananas and green shells behind her now, as a shield. Reds she still fires, because reds aim themselves. You will notice this.',
   ],
   ['Chapter 3', 'She hops at the top of every ramp. All of them. Every lap.'],
   [
@@ -109,13 +112,32 @@ export const chapterk: Beat = {
      * for five minutes. The sign-off says the true version of it a minute later.
      */
     const opened = deferred();
+    /**
+     * **Whether she has already found it**, which by two seconds in she very often has.
+     *
+     * The line below said so and did not check it, and the cost was not a stray line — it was the
+     * *dossier's* narration. `cut()` throws away everything queued behind it, so "…There are ten"
+     * arriving a moment after she opened Chapter K silenced the three sentences that explain what
+     * she is looking at, on the page the whole piece exists to reach.
+     *
+     * It is not an edge case either: the tile lands at 2s and the goodbye runs several seconds
+     * past that, so *clicking it promptly* — the attentive path — was the one that lost the copy.
+     */
+    let found = false;
     const tenth = el(
       'button',
       { class: 'k-tile k-tile-open k-tenth', type: 'button', attrs: { 'aria-label': 'Chapter K' } },
       el('span', { class: 'k-tile-no' }, 'K'),
       el('p', { class: 'k-tile-hook' }, 'Not listed'),
     );
-    tenth.addEventListener('click', () => opened.resolve(), { once: true });
+    tenth.addEventListener(
+      'click',
+      () => {
+        found = true;
+        opened.resolve();
+      },
+      { once: true },
+    );
 
     void narrator
       .say(
@@ -124,8 +146,7 @@ export const chapterk: Beat = {
         'Off you go.',
       )
       .then(() => {
-        if (stage.gone) return;
-        // Only if she has not already found it, which she very often has by now.
+        if (stage.gone || found) return;
         void narrator.cut('…', 'There are ten.');
       });
 
@@ -190,8 +211,19 @@ export const chapterk: Beat = {
      * a warning she has to decode as a warning, which makes it land as one — and it never once has to
      * say who is going to win, because the honest answer is that nobody knows and that is the point.
      */
-    await narrator.say(
-      'That is everything she has been taught. Every chapter, in order.',
+    /**
+     * `cut` rather than `say`, and two lines rather than three.
+     *
+     * `cut` because the fake ending's goodbye may still be mid-sentence when the sheet paints —
+     * she can open the tenth chapter on the word "off" — and a narrator still saying *off you go*
+     * over the dossier is the piece talking across its own best page.
+     *
+     * Two lines because the third was the first: *"that is everything she has been taught, every
+     * chapter, in order"* is the heading and the list, read back to her while she is reading them.
+     * The project has a name for that — copy that narrates what the player is already looking at —
+     * and it is invisible in a script every single time.
+     */
+    await narrator.cut(
       'She does not know you have seen it.',
       'There is nothing in there to worry about, obviously. It is a list. Lists are not fast.',
     );
@@ -233,7 +265,9 @@ export const chapterk: Beat = {
     // One line for the fourth button at the door, which nobody has ever pressed. It costs nothing
     // and it is the only moment the family exists outside the two people this is about.
     await narrator.say(
-      'There is a fourth name on that door, incidentally. Bill. He has never once clicked it.',
+      // Second, not fourth: the door reads Jodi, Bill, Kayla, Someone else, and he is right under
+      // her mum. "Fourth" was counting the options as written down somewhere other than the screen.
+      "There is a second name on that door, incidentally. Bill. Right under your mum's. He has never once clicked it.",
     );
 
     // --- the pointer ---------------------------------------------------------

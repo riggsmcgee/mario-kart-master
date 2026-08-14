@@ -3,9 +3,15 @@
 A small teaching website that makes someone better at Mario Kart 8 Deluxe — built as a present,
 for one specific person, who is a beginner and does not want to become a hobbyist.
 
-It is nine short chapters and a training programme. Every chapter is a page of plain explanation
-followed by a page where you do the thing: a browser drill, a quiz, or both. Nothing is timed,
-nothing is marked, and no chapter can be failed.
+It is nine short chapters and a training programme. Chapters 0 to 7 are a page of plain explanation
+followed by a page where you do the thing: a browser drill, a quiz, or both. Chapter 8 is the
+programme itself. Nothing is timed, nothing is marked, and no chapter can be failed.
+
+There is also a second, hidden half. The doorman asks who is training, and behind the rival's own
+name is a five-minute thing to play in the style of *There Is No Game* — the site insisting there is
+nothing here while she takes it apart, ending in a dossier of everything her mum has been taught.
+See [`src/site/kayla/`](src/site/kayla/). Everyone else can look at it from the bottom of Settings,
+which plays it identically and writes nothing.
 
 ## The argument
 
@@ -58,6 +64,7 @@ npm run dev          # http://localhost:5173
 | `npm run lint` | ESLint |
 | `npm run format` | Prettier, write |
 | `npm run shoot` | **Render check** — drives Chromium over every route, fails on any console error |
+| `npm run check:videos` | Asks YouTube's oEmbed endpoint whether all six embedded videos still exist and are still embeddable. No key, no quota, no account |
 
 `npm run shoot` is the one worth knowing about. Twice in this project "it builds and lints" turned
 out not to mean "it renders", so this loads all 22 routes in a real browser, asserts a known string
@@ -110,8 +117,18 @@ usually because getting it wrong once cost a session.
 
 ## Status
 
-The course exists end to end and works, and nothing is outstanding. Riggs's intro clip landed on
-2026-08-13 at `public/media/intro.mp4`; it replaced the nine per-chapter voiceover scripts, on the
-grounds that one video explaining the site beats nine re-explaining the chapters, and only one of
-them was ever going to get recorded. The block is absent from the page rather than broken if the
-file is ever missing — see [`src/ui/intro-video.ts`](src/ui/intro-video.ts).
+The course exists end to end and works. Two things are open, and neither of them is code:
+
+- **The link has not been sent.** The site is live at
+  <https://riggsmcgee.github.io/mario-kart-master/>, and the last step in the plan is the one that
+  leaves the repo.
+- **Nothing has ever run on macOS**, which is the only platform the person this was built for has.
+  There is no Safari pass and no frame-rate measurement; what exists instead is a feature-floor
+  audit putting the minimum at **Safari 15.4** (March 2022), with everything above the floor
+  degrading gracefully.
+
+Riggs's intro clip landed on 2026-08-13 at `public/media/intro.mp4`; it replaced the nine
+per-chapter voiceover scripts, on the grounds that one video explaining the site beats nine
+re-explaining the chapters, and only one of them was ever going to get recorded. The block is absent
+from the page rather than broken if the file is ever missing — see
+[`src/ui/intro-video.ts`](src/ui/intro-video.ts).

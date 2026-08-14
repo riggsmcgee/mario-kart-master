@@ -17,18 +17,142 @@ Running log of work done on this project by Claude Code sessions. Companion to [
 
 | | |
 |---|---|
-| Current phase | Phase 4, most of the way through — the whole course exists end to end |
-| Current step | **3c2** recording (in progress, elsewhere) — everything else is done |
-| Last gate passed | Riggs playtested the assembled site (2026-08-12) and sent a list; Session 10 is the response to it |
-| Next gate | none — all gates cleared 2026-08-13 |
-| Repo state | **Live at https://riggsmcgee.github.io/mario-kart-master/.** Every build step done; every gate cleared; only the nine mp3s outstanding |
+| Current phase | Phase 4, complete — every box in the plan is checked |
+| Current step | none. **4f3 (send her the link)** is all that is left, and it leaves the repo |
+| Last gate passed | all of them, 2026-08-13, by Riggs's blanket approval — each carrying what actually backs it |
+| Next gate | none |
+| Repo state | **Live at https://riggsmcgee.github.io/mario-kart-master/.** Every build step done; every gate cleared. Session 23 is the pre-send sanity pass |
 | Deferred | nothing — 1a5 landed 2026-08-12 |
 | Needs an answer | **Q9** accelerate slot (cosmetic now); ~~Q5~~ ~~Q7~~ ~~Q6~~ ~~Q8~~ answered |
-| Blocked on Riggs | nine mp3s. Pages and the Supabase secrets landed 2026-08-13; **the site is live** |
+| Blocked on Riggs | **sending her the link**, and nothing else. The nine mp3s are not outstanding — 3c was cut on 2026-08-13 and replaced by one intro clip, which is recorded and committed. `kayla.mp4` was dropped, not deferred |
 
 ---
 
 ## Log
+
+### 2026-08-13 — Session 23 (Opus 5)
+
+**Steps touched:** none — a pre-send sanity pass over the whole project, at Riggs's ask ("do a final
+sanity check on everything… this is hopefully the final revision"). No new features. What follows is
+what was wrong.
+
+**The headline is that the course was teaching something that is not true.** Chapter 1 said an early
+press on the start line costs nothing — *"no penalty, no spin, so there is no reason not to try it
+every single race"* — while the drill's own verdict card had been saying the opposite ("Early just
+burns the tyres") since it was built. Nintendo's beginner guide settles it: *"if you press down too
+early, your Rocket Start will fail, and you'll end up falling behind."* The wiki calls it a burnout;
+the kart backfires and stalls. So the site's very first instruction was one that would have had Jodi
+stalling on the line, repeatedly, with the page telling her that could not be happening. It now says
+lean late rather than early, and the benchmark deck agrees with it: the window opens once the 2 has
+dropped into place and closes as it fades.
+
+That was one of **82 factual errors**, found by fact-checking every Mario Kart claim in the coaching
+content against the Super Mario Wiki and Nintendo's own guides. The worst cluster is **Water Park**,
+where the guide was describing a track that does not exist: "seesaw ramps in the water section", a
+"carousel edge" to trick off, and "the little car on the rail" that "runs the same route every lap".
+There are no seesaws and no carousel. There is a ramp that drops you into the water, a trick ramp out
+of the anti-gravity loop, a bend around the **Aqua Cups** teacup ride, and a **glide ramp** before the
+line — and the moving things are the Sub Coaster's **submarines**, whose wheels are Spin Boost Pillars
+and which *drift along the track as the race goes on*, so the one thing the old copy promised ("a
+timing you learn once") was the one thing it could not deliver. The advice survives, reframed as
+take-it-if-it-is-there, because a missed one costs nothing.
+
+Three more that would have been found standing in front of a menu:
+
+- **"Mushroom Cup · 100cc · Hard" is not a setting.** Grand Prix has no difficulty choice in Deluxe;
+  the Easy/Normal/Hard control lives in VS Race, and Grand Prix computers are always the hard ones
+  whatever engine class you pick. Ten sessions on the fridge sheet named a control that is not on the
+  screen.
+- **Time Trials do not run at 100cc.** The plan schedules eighteen of them and never said they come at
+  150cc, which is faster than everything else she is training for.
+- **Toadette does not drive like Toad.** `sameClassAs` returned everyone in a weight class, under a
+  sentence in bold promising the swap changed nothing — and Deluxe splits each class into two or three
+  stat groups. Toadette shares her numbers with Wendy and Isabelle alone, and she is the driver on this
+  site's own light build, which made it the most likely wrong swap to be acted on. There is a checked
+  `TWINS` table now, verified per character rather than reasoned from the weight class.
+
+**Six code defects, all found by driving the site rather than reading it.**
+
+- **The race-day card named the wrong kart.** `readCombo` in `plan.ts` looked for `id`/`name`;
+  `saveCombo` in `parts.ts` writes `archetype`/`title`. So the heading fell through to the default and
+  Chapter 8 printed **The Comfy Speedster** above Toadette on a Biddybuggy — for every build except the
+  one it happens to name, and always for Bill, whose headline is The Steady One. The parts underneath
+  resolved correctly the whole time, which is why nobody saw it.
+- **The skip link broke the page.** `href="#main"` on a hash-routed site sets the hash to `#main`, which
+  `parseHash` reads as a wrong turn — so the first thing in the tab order, the one control on the site
+  aimed squarely at a keyboard user, replaced the page with "There is no chapter here".
+- **`#/chapter/ch3/` sat on "Loading…" forever.** The stale-navigation guard compared the raw hash
+  against the canonical href, and `parseHash` strips trailing slashes, so a valid URL failed a check
+  meant to catch a *different* URL. A staleness test that rejects the page it is currently on is not a
+  staleness test.
+- **Clear progress missed a fourth key and never reopened the door.** `mkm.combo.v1` survived, so a
+  cleared machine handed the next person the previous person's kart — the exact failure the comment
+  above that button predicted, two days after it was written. And `go({name:'home'})` only sets a hash:
+  `startApp` decides whether to ask "who's training?" once, at boot, so the promise of handing the
+  machine back *at the door* was only kept if she happened to reload afterwards.
+- **Magic-link sign-in could never have worked.** `cleanAuthFragmentFromUrl` ran first thing at boot and
+  stripped the tokens; `getSupabase()` builds the client lazily on the line after, so
+  `detectSessionInUrl` looked at an empty address bar every time. Its own comment claimed "the client
+  has already consumed them by this point", which was never true. It cannot simply be moved later — the
+  router would read `#access_token=…` as a wrong turn — so the tokens are parsed out and handed to
+  `setSession` by hand. Gate 1f4 records that a real link has never been through a real inbox, which is
+  exactly why this survived.
+- **Three.js was leaking a WebGL context per visit.** `renderer.dispose()` frees the render lists and
+  not one geometry, material or texture, and never releases the context. Browsers cap contexts at around
+  sixteen; four drills revisited over an hour is inside the range where the fifth visit renders black,
+  nowhere near the code that caused it.
+
+**And seven in Kayla's half**, the least-tested code in the repo. The hole ate itself — `wordify` wraps
+text nodes, `#k-stop` contains one, so a `k-word` span was created *inside* the hole and sat at the exact
+centre of its own hit box: one of five words of appetite spent on an invisible character, on the first
+flick. Leaving during the final narration admitted her anyway, because teardown deliberately resolves
+every awaiting beat and `onAdmitted` had no `gone` guard — three seconds after pressing **Leave anyway**
+she was thrown into the site she had just left. The fake ending's "…there are ten" fired over Chapter K
+and `cut()` discarded the dossier's narration with it, on the page the whole piece exists to reach, and
+*clicking the tile promptly* was the path that lost the copy. A double-click on the assessment advanced
+two questions and could skip the kart question entirely. The vents kept grading after the phrase was
+solved and cut a flat "No." across the closing praise. Escape on the new leave dialogue also destroyed
+the narrator's line, because the narrator's document listener was registered first. And two timers
+outlived `dispose()`.
+
+**The measurement pass found the readability work had drifted.** 765 text nodes across all twenty routes
+plus Kayla's three layers, which 3e1 never saw: the assessment's ACCEPTED/REJECTED ran at **2.30:1 and
+3.13:1** on the dark panel (tokens chosen against white), the global focus ring is `--track` and measures
+**1.07:1** down there — on the always-live exit button — and Chapter 6's purple spark row was dimmed with
+a container opacity that pushed three separate tokens under AA at once. Kayla's own catch-up line, the
+whole point of the two-line stack, was the least legible text in the piece at 3.58:1. All zero now. And
+the documented reduced-motion exception that keeps the fallen full stop rocking — *"the only thing
+standing between a reduced-motion player and never finding the first interaction"* — had never once
+worked: `theme.css` sets `animation-duration: 0.001ms !important` on `*`, and `!important` beats
+specificity.
+
+**Copy.** Chapter 0's h1 was the home page's h1, word for word, so pressing "Start here" looked like
+nothing had happened; the resume button rendered as *"Carry on: So you want to beat Kayla at Mario
+Kart?"*. Chapter 4's hook was its own title, character for character, and Chapters 4 and 5 both opened
+"The fast way round". The doorman promised "Someone else" a kart-parts browser at the end that does not
+exist. Chapter K's dossier said Jodi had stopped throwing her shells, which contradicts Chapter 2's one
+exception, and called Bill "the fourth name on that door" when he is the second. The small print's clause
+gag argued with the numbers the browser printed beside it — the numbering skips for real now. Chapter 0
+promised "each one is two pages" on a course whose last chapter has one, and counted twelve minutes of
+video on a page that now opens with three more.
+
+**Docs.** `build-plan.md` had one unchecked box — 3c2, recording the nine voiceovers — and the file's own
+instruction 1 sends every session to the earliest unchecked step. Those scripts were deleted on
+2026-08-13 and replaced by one intro clip that is recorded and committed, so every session since has been
+pointed at work that no longer exists. WORKLOG's status table said the same thing three ways.
+`shoot.mjs` still whitelisted a missing `intro.mp4` "until the file lands" — it landed, so the one check
+that would notice a broken intro video was passing on purpose.
+
+**Verified.** Format, typecheck, lint and production build clean; **22/22 routes** render with zero
+console errors; **6/6 videos** still embeddable; contrast **0 failures** across 765 text nodes with
+nothing under 11px; the whole of Kayla's half played end to end through the real door with a stubbed
+local voice — all eight beats, **zero problems** — plus a regression suite covering every fix above: the
+skip link, three non-canonical URLs, the race-day build name, all four storage keys and the door
+reopening, the leave dialogue's focus/inert/Escape/second-press behaviour, and a double-click on the
+assessment advancing exactly one question.
+
+**Left open, and unchanged.** Nothing has ever run on macOS, which is the only platform Jodi has. And
+the link has not been sent.
 
 ### 2026-08-13 — Session 22 (Opus 5)
 
@@ -1497,28 +1621,28 @@ none of which touch the deferred items.
 Numbered for easy answering ("Q5: yes, Q7: skip it"). Answered ones move to the Decision log in
 `build-plan.md` and get struck here.
 
-These four are gaps or contradictions in the plan itself, raised in Session 1. None of them block
-1a2–1a4, so work continues; Q6 wants an answer before 1b5.
+Only **Q9** is still live, and it is cosmetic — the binding has been settled by use for months.
+Everything else was answered and is struck below; the answers are in 's Decision log.
 
-5. **The IP rule contradicts the content.** Design principle 5 says "No Nintendo assets, names, or
+5. ~~**The IP rule contradicts the content.**~~ — **answered 2026-08-12:** names yes, artwork no. Design principle 5 says "No Nintendo assets, names, or
    characters," but 2b8 recommends "Yoshi + Teddy Buggy + Roller," 4c names four tracks, and 4e2
    wants a checked-in JSON of every kart part. A kart recommender can't work without naming parts.
    Proposed rewording: no Nintendo *artwork, audio, logos, or fonts*; names used as plain factual
    references are fine. Needs Riggs's call so a later session doesn't "fix" it the wrong way.
-6. **No track authoring format in Phase 1, but Phase 2 assumes one.** 1b5 builds one test track.
+6. ~~**No track authoring format in Phase 1, but Phase 2 assumes one.**~~ — **answered 2026-08-07:** a plain typed array positioned by `t` and `offset`. 1b5 builds one test track.
    2b4 (ramps), 2b5 (pads + decoys) and 2b6 (racing line + coins) each need their own layout, and
    2b6 needs a fading ideal-line path. If tracks are hardcoded, every Phase 2 chapter becomes engine
    work — which breaks the Lego rule exactly where it matters. Proposal: a data-driven track format
    (JSON: segments, pads, ramps, decoys, coin lines, ideal-line polyline) as part of 1b5 or a new
    1b7, so Phase 2 chapters are content, not code.
-7. **Scoring is stored but never defined.** 1f3 syncs `stars` and `best_score`; 2b6 says "1 to 3
+7. ~~**Scoring is stored but never defined.**~~ — **answered 2026-08-12:** one star for finishing, two and three at per-chapter thresholds in `chapters.ts`. 1f3 syncs `stars` and `best_score`; 2b6 says "1 to 3
    stars"; no step says what earns a star in any drill. Suggest defining it in the 1g1 gate write-up,
    once the drills have real feel to measure.
 9. **The `accelerate` slot.** The plan's action map is steer/hop/item/uiConfirm, but Ch1's
    start-boost drill needs a hold-the-accelerator input, so 1a2 added a fifth slot. It defaults to
    Space, shared with `hop`, on the reasoning that the countdown drill and the driving drills are
    never on screen together. Confirm or rebind at gate 1g1.
-8. **GitHub Pages deep links (parked with 1a5).** Static Pages has no SPA fallback, so a refresh on
+8. ~~**GitHub Pages deep links (parked with 1a5).**~~ — **answered 2026-08-12:** hash routing. The Promotions-folder warning below is still worth remembering at launch. Static Pages has no SPA fallback, so a refresh on
    a chapter URL 404s unless we use hash routing or the `404.html` copy trick. Cheap now, annoying
    to retrofit at 2a1. Also for whenever 1f lands: Supabase's redirect allowlist needs both
    `localhost` and the Pages URL, and magic-link mail has a habit of landing in Promotions — a

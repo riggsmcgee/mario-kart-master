@@ -27,7 +27,7 @@
       {
         "id": "on-three",
         "label": "Straight away, on 3",
-        "response": "Too early, and the kart bogs down and spins its wheels — you actually come off the line slower. There is a window, and it opens as the 2 fades."
+        "response": "Too early, and the kart bogs down and spins its wheels — you actually come off the line slower. There is a window, and it does not open until the 2 has finished dropping into place."
       }
     ],
     "takeaway": "Hold as the 2 vanishes. Free speed, every single race."
@@ -123,7 +123,7 @@
       {
         "id": "hold",
         "label": "Hold it behind you like a banana",
-        "response": "Everything else, yes. Not this one — it is counting down the whole time it is in your hands, and when it goes off back there you are well within range."
+        "response": "Everything else, yes. Not this one — anything that touches it back there sets it off, and when it goes off you are well inside the bang."
       },
       {
         "id": "forward",

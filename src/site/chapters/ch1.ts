@@ -104,7 +104,7 @@ const content: ChapterContent = {
       ]),
 
       proseFor(ctx, [
-        'Get it wrong and nothing happens. You start normally — the start you were getting anyway. No penalty, no spin. So there is no reason not to try it every single race.',
+        'Miss it late and nothing happens. You start normally — the start you were getting anyway, no harm done. Miss it early, before the 2 has dropped into place, and the kart bogs down and spins its wheels while everybody else drives off. So lean late rather than early, and try it every single race.',
         'Which is why it is first. It happens before the race exists, so there is nothing to react to and nothing for {rival} to be quicker at. It is purely a thing you know and she does not.',
       ]),
 

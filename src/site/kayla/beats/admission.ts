@@ -176,7 +176,12 @@ export const admission: Beat = {
     );
 
     // If she does not press it, the site opens itself. Nobody should be made to knock twice.
+    //
+    // Belt and braces with the `gone` guard inside `stage.onAdmitted`: teardown resolves both of
+    // the awaits above on purpose, so without a check here this is what runs three lines after she
+    // presses "Leave anyway".
     await stage.wait(3000);
+    if (stage.gone) return;
     stage.onAdmitted();
   },
 };
@@ -216,19 +221,36 @@ async function confirm(stage: Stage): Promise<void> {
     ),
     el('h2', null, 'Are you sure?'),
     el('p', { class: 'k-lede' }, 'This gives you the whole site. Permanently. Like anybody else.'),
+    /**
+     * **The missing clause has to actually be missing.**
+     *
+     * This is an auto-numbered `<ol>`, and the two lines about a removed clause were sitting at
+     * positions 4 and 5 — so the page said *"4. Clause 3 has been removed"* directly beneath a
+     * visible clause 3, and *"5. There is no clause 4"* directly beneath a visible clause 4. The
+     * joke was arguing with the numbers printed next to it, which reads as a mistake rather than
+     * as a gag, on the one list in the piece whose whole premise is that it rewards being read.
+     *
+     * So the numbering skips for real: an explicit `value` of 5 on the line after clause 3, and
+     * every item after it follows on. The visible run is 1, 2, 3, 5, 6, 7, 8 — four is genuinely
+     * gone, and the line standing where it should be is the one pointing at the hole.
+     */
     el(
       'ol',
       { class: 'k-print' },
       ...[
-        'You may say no. I would like it noted that you may say no.',
-        'The site is provided as it is: finished, mostly, in places.',
-        'The bin and its contents are yours. They were always yours. You took them.',
-        'Clause 3 has been removed at the request of nobody.',
-        'There is no clause 4.',
-        'The pointer stays with you. I am not asking again.',
-        'Bill has not read this. Bill has never read anything. Bill has a whole page.',
-        'By continuing you agree that there was never anything to agree to.',
-      ].map((line) => el('li', null, rich(line))),
+        { line: 'You may say no. I would like it noted that you may say no.' },
+        { line: 'The site is provided as it is: finished, mostly, in places.' },
+        { line: 'The bin and its contents are yours. They were always yours. You took them.' },
+        {
+          line: 'There is no clause 4. There was. It has been removed at the request of nobody.',
+          value: 5,
+        },
+        { line: 'The pointer stays with you. I am not asking again.' },
+        { line: 'Bill has not read this. Bill has never read anything. Bill has a whole page.' },
+        { line: 'By continuing you agree that there was never anything to agree to.' },
+      ].map(({ line, value }) =>
+        el('li', value ? { attrs: { value: String(value) } } : null, rich(line)),
+      ),
     ),
     el('div', { class: 'k-confirm-buttons' }, yes, no),
   );

@@ -1,5 +1,5 @@
 /**
- * Chapter 7: pick your weapon. (2b8)
+ * Chapter 7: pick your kart. (2b8)
  *
  * The last chapter of the classroom, and the only one whose output leaves the browser as a
  * *decision* rather than as a skill. Everything before this taught her something to practise; this
@@ -58,13 +58,13 @@ const COPY: Record<ArchetypeId, BuildCopy> = {
     title: 'The Zippy One',
     tagline: 'For the impatient.',
     tags: ['Fastest pick-up', 'Tiny', 'Gets shoved'],
-    why: 'The fastest recovery on this page — get hit, and you are back at full speed almost before the shell has finished gloating. The price is that you are light, and light karts get shoved about. If {rival} enjoys bumping into people, she will enjoy it more against this one. Toad, Koopa, Shy Guy and Wendy all drive identically, so take whichever one makes you laugh.',
+    why: 'The fastest recovery on this page — get hit, and you are back at full speed almost before the shell has finished gloating. The price is that you are light, and light karts get shoved about. If {rival} enjoys bumping into people, she will enjoy it more against this one. Wendy and Isabelle drive identically to Toadette, so take whichever one makes you laugh.',
   },
   steady: {
     title: 'The Steady One',
     tagline: 'Hard to push around.',
     tags: ['Holds its ground', 'Unbothered', 'Slower to recover'],
-    why: 'Heavier, so the bumping happens to other people. A little slower to wind back up after a hit — you are trading "recover faster" for "get knocked about less", which is a perfectly respectable trade, and the closest thing here to the kart you are already on. Still on Rollers, so it never feels like steering a bus. Waluigi, Donkey Kong and King Boo are the same build with a different face.',
+    why: 'Heavier, so the bumping happens to other people. A little slower to wind back up after a hit — you are trading "recover faster" for "get knocked about less", which is a perfectly respectable trade, and the closest thing here to the kart you are already on. Still on Rollers, so it never feels like steering a bus. King Boo and Link are the same build with a different face.',
   },
   muscle: {
     title: 'The Muscle',
@@ -136,7 +136,7 @@ function buildCard(id: ArchetypeId, headline: boolean, t: (text: string) => stri
 /**
  * The drivers she could have instead, as a row of buttons. (Riggs, 2026-08-12.)
  *
- * The chapter already tells her that a weight class is one kart with several costumes; this is
+ * The chapter already tells her that some drivers are one kart with several costumes; this is
  * that fact made usable. Swapping between them changes nothing about the build — which is exactly
  * why it can be offered freely, with no confirmation and no consequence, at any point including
  * long after she has chosen.
@@ -203,10 +203,13 @@ function setupPanel(
   const steps = [
     'On the Switch, start a race — Grand Prix, VS, anything at all — and stop when it asks who you are.',
     `Driver: **${driver.name}**.`,
-    `Next screen is the kart itself: **${combo.body.name}**.`,
+    `Next screen is the kart itself: **${combo.body.name}**. If it is not on the list, it has not unlocked yet — pick anything small and light for now.`,
     `Then the wheels: **${combo.tyres.name}**. This is the one that matters most.`,
     `Then the glider: **${combo.glider.name}**. Gliders change the least of anything here, so swap it for one you like the look of if you want.`,
     'That is it. The game remembers, so every race from now on starts with the right kart underneath you.',
+    // Kart parts unlock as coins are collected, so the list she is looking at may be shorter than
+    // the one this page names. Said once, at the end, rather than hedged into every step.
+    'If a kart or glider is missing, it is not gone — new parts arrive as you collect coins in races, so keep playing and yours will turn up. The Rollers are there from the very start, and they are the part doing the work.',
   ];
 
   return el(
@@ -261,7 +264,9 @@ function weightCard(t: (text: string) => string): HTMLElement {
       [
         '{rival} is not making it up. Heavy characters really do have a higher top speed, and they really do win the bumping.',
         'It is just the answer to a different question — one about driving clean laps and rarely getting hit. **You are going to get hit.** And Pink Gold Peach is one of the slowest in the game to wind back up afterwards, so every shell costs you more than it costs whoever threw it.',
-        'Keep the weight if you enjoy shoving people. But swap those tyres for **Rollers**, because that one change buys back most of what you are missing.',
+        // Named and described in the same breath. The page explains what a Roller is two cards later,
+        // which is one card too late for the only instruction on it.
+        'Keep the weight if you enjoy shoving people. But swap those tyres for **Rollers** — the small fat wheels that look like they came off a shopping trolley — because that one change buys back most of what you are missing.',
       ].map(t),
     ),
   );
@@ -269,7 +274,9 @@ function weightCard(t: (text: string) => string): HTMLElement {
 
 /**
  * The character-select fact nobody is told, and the reason this chapter can hand her a feminine
- * pick without hedging: within a weight class the drivers are mechanically identical.
+ * pick without hedging: some drivers really are the same kart with a different face. Peach, Daisy,
+ * Birdo and Yoshi are one such group — see `TWINS` in `parts.ts`, which is checked per character
+ * rather than assumed from the weight class.
  */
 function driverCard(t: (text: string) => string): HTMLElement {
   const alts = sameClassAs('peach');
@@ -325,7 +332,7 @@ const content: ChapterContent = {
 
       prose(
         [
-          'One part does more work than the rest, and it is the part nobody ever changes: **the tyres**. The small Roller wheels — they look like something off a shopping trolley — add pick-up and turning to whatever they are bolted onto. Every setup below is wearing them. If you change one single thing after reading this page, change the tyres.',
+          'One part does more work than the rest, and it is the part nobody ever changes: **the tyres**. Rollers add pick-up and turning to whatever they are bolted onto, and every setup below is wearing them. If you change one single thing after reading this page, change the tyres.',
           `Below are ${count} complete setups. They are all good. Pick the one whose description sounds like **you**, rather than the one you think is objectively best, because the gap between them is genuinely smaller than the gap between remembering your start boost and forgetting it.`,
           ctx.player.role === 'bill'
             ? 'Your list is shuffled, by the way: the sturdy one leads, on the theory that you would rather be immovable than nippy. The rule underneath has not changed a bit.'
@@ -368,8 +375,8 @@ const content: ChapterContent = {
 
     /**
      * Swapping the face. Deliberately silent and consequence-free: it does not stamp the chapter,
-     * does not make a sound, and cannot be got wrong, because within a weight class every driver
-     * is the same kart.
+     * does not make a sound, and cannot be got wrong, because every driver on offer here shares its
+     * numbers exactly with the one she is on.
      */
     const pickDriver = (next: Character): void => {
       if (!current) return;
@@ -385,12 +392,21 @@ const content: ChapterContent = {
         built.label.textContent = picked ? 'This one is yours' : 'Choose this one';
       }
 
-      // Changing build resets the driver to that build's own, unless she is already driving
-      // somebody from the same weight class — in which case her choice of face survives the
-      // change of kart, which is what anybody would expect it to do.
+      // Changing build resets the driver to that build's own, unless she is already driving one of
+      // that build's twins — in which case her choice of face survives the change of kart, which is
+      // what anybody would expect it to do.
+      //
+      // Twins, not weight class. Two of the four builds are cruisers with *different* twin groups
+      // (Rosalina with King Boo, Waluigi with Donkey Kong), so the old weight-class test would keep
+      // King Boo on a Waluigi build — and then draw a row of alternatives that did not contain the
+      // driver she was looking at.
       const combo = ARCHETYPES[id];
+      const twins = sameClassAs(combo.character.id);
+      const held = driver;
       const keepsDriver =
-        driver !== null && driver.weightClass === combo.character.weightClass ? driver : null;
+        held !== null && (held.id === combo.character.id || twins.some((t2) => t2.id === held.id))
+          ? held
+          : null;
 
       current = id;
       driver = keepsDriver ?? combo.character;

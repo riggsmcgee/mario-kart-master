@@ -201,10 +201,20 @@
   color: var(--ink-soft);
 }
 
-/* The purple row is the one she cannot have. Dimmed and struck through, so it reads as
-   information rather than as an instruction. */
-.spark-row[data-off='true'] {
-  opacity: 0.72;
+/* The purple row is the one she cannot have. Struck through, so it reads as information rather
+   than as an instruction.
+ *
+ * It used to be dimmed to 0.72 as well, and that was doing the damage: `--ink-faint`, `--ink-soft`
+ * and `--kerb-ink` are all sized to clear 4.5:1 at full strength, and a blanket opacity on the row
+ * pushed all three under — measured at 3.03, 3.23 and 3.50 against a 4.5 requirement. The strike
+ * and the "ignore it" copy already say what the dimming was there to say, and they say it without
+ * being the only row on the page a reader has to squint at. Same finding as 3e1's: an opacity
+ * applied to a container is a contrast change to every token inside it. */
+.spark-row[data-off='true'] .spark-name,
+.spark-row[data-off='true'] .spark-seconds,
+.spark-row[data-off='true'] .spark-of,
+.spark-row[data-off='true'] .spark-body {
+  opacity: 0.92;
 }
 
 .spark-row[data-off='true'] .spark-name,

@@ -122,7 +122,7 @@
       {
         "id": "hold",
         "label": "Hold it behind you like a banana",
-        "response": "Everything else, yes. Not this one. It is counting down the whole time it is in your hands, and when it goes off back there you are well within range."
+        "response": "Everything else, yes. Not this one. Anything that touches it back there sets it off — a shell aimed at you, a kart on your bumper — and when it goes off you are well inside the bang."
       },
       {
         "id": "forward",

@@ -1278,8 +1278,36 @@ export function createKartScene(
     render() {
       renderer.render(scene, camera);
     },
+    /**
+     * **Give the GPU everything back, not just the renderer's own caches.**
+     *
+     * `renderer.dispose()` alone releases the render lists and the program cache. It does not free a
+     * single geometry or material, and it does not release the WebGL context — so every visit to a
+     * 3D chapter left a full scene's worth of buffers and one live context behind, and browsers cap
+     * contexts at around sixteen before they start killing the oldest. Four drills, revisited over
+     * an hour, is well inside the range where that matters, and the failure mode is the worst kind:
+     * a drill that renders black on the fifth visit and nowhere near the code that caused it.
+     *
+     * `scene.traverse` is the documented way to do this — Three.js does not track what it made, so
+     * walking the graph is the only way to find it. `forceContextLoss()` last, because it is the
+     * only thing that actually hands the context back rather than waiting for garbage collection.
+     */
     dispose() {
+      scene.traverse((node) => {
+        const mesh = node as Partial<THREE.Mesh>;
+        mesh.geometry?.dispose();
+        const material = mesh.material;
+        for (const one of Array.isArray(material) ? material : material ? [material] : []) {
+          // Textures are owned by the material that references them and are not walked separately.
+          for (const value of Object.values(one)) {
+            if (value instanceof THREE.Texture) value.dispose();
+          }
+          one.dispose();
+        }
+      });
+      scene.clear();
       renderer.dispose();
+      renderer.forceContextLoss();
     },
   };
 }

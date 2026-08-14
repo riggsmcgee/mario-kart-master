@@ -13,8 +13,8 @@ installErrorBanner();
  *
  * The real thing has no URL — it is only reachable by clicking Kayla at the doorman, on purpose,
  * because being found is half of what it is. That makes it almost impossible to work on: the last
- * beat is nine minutes from a cold start, and a one-word change to its copy would mean playing the
- * whole thing again to see it.
+ * beat is the far end of a five-minute run, and a one-word change to its copy would mean playing
+ * the whole thing again to see it.
  *
  * So this is the only place any beat can be opened directly.
  *

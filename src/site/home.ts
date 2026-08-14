@@ -49,7 +49,10 @@ export function renderHome(mount: HTMLElement, deps: HomeDeps): Mounted {
   const cta = el(
     'button',
     { class: 'btn btn-go', type: 'button' },
-    started ? `Carry on: ${t(resume.title)}` : "Start here — let's go",
+    // `Chapter N · skill` rather than the chapter title: Chapter 0's title is a question, and
+    // "Carry on: So you want to beat Kayla at Mario Kart?" is a button with a question mark in
+    // the middle of it.
+    started ? `Carry on: Chapter ${resume.number} · ${t(resume.skill)}` : "Start here — let's go",
   );
   cta.addEventListener('click', () => go({ name: 'chapter', id: resume.id }));
   cta.disabled = locked;

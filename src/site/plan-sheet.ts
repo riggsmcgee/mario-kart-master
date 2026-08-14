@@ -54,10 +54,15 @@ export function createPlanSheet(options: PlanSheetOptions): PlanSheet {
   const choice = readCombo();
   const ticks = new Map<string, HTMLElement>();
 
+  /** A box and a label, without the `<li>` around them, so a rung can add lines underneath. */
+  function tickAnd(id: string, text: string): Node[] {
+    const tick = el('span', { class: 'sheet-tick' }, progress.isChecked(id) ? '☑' : '☐');
+    ticks.set(id, tick);
+    return [tick, document.createTextNode(' '), rich(t(text))];
+  }
+
   function sheetLine(item: PlanItem): HTMLLIElement {
-    const tick = el('span', { class: 'sheet-tick' }, progress.isChecked(item.id) ? '☑' : '☐');
-    ticks.set(item.id, tick);
-    return el('li', null, tick, ' ', rich(t(item.text)));
+    return el('li', null, ...tickAnd(item.id, item.text));
   }
 
   const root = el(
@@ -86,6 +91,13 @@ export function createPlanSheet(options: PlanSheetOptions): PlanSheet {
       'section',
       { class: 'sheet-block sheet-block-grid' },
       el('h2', null, `The programme — ${RHYTHM.sessions}, ${RHYTHM.length}`),
+      // How to use the grid, which the screen says above it and the paper did not say at all —
+      // and the paper is the copy that gets read in week five by somebody who has forgotten.
+      el(
+        'ul',
+        { class: 'sheet-rules' },
+        ...RHYTHM.lines.map((line) => el('li', null, rich(t(line)))),
+      ),
       el(
         'table',
         { class: 'sheet-grid' },
@@ -113,6 +125,11 @@ export function createPlanSheet(options: PlanSheetOptions): PlanSheet {
                   // Volume and track, because on paper there is no panel to open — the cell has
                   // to carry enough that she could work tonight off the fridge alone.
                   el('span', { class: 'sheet-grid-track' }, `${item.reps} · ${item.track}`),
+                  // And the focus, which *is* the session. The label names the drill and the
+                  // reps say how much; without this line the fridge copy of a session says
+                  // "Starts · Five races · Stadium" and never says what to think about while
+                  // doing them, which is the only part she cannot reconstruct from memory.
+                  el('span', { class: 'sheet-grid-focus' }, rich(t(item.focus))),
                 ),
               ),
             ),
@@ -217,9 +234,23 @@ export function createPlanSheet(options: PlanSheetOptions): PlanSheet {
       el(
         'ol',
         { class: 'sheet-ladder' },
-        // The ladder's rungs are milestones rather than plan items, but on paper a rung is
-        // just another thing with a box next to it.
-        ...MILESTONES.map((milestone) => sheetLine({ id: milestone.id, text: milestone.title })),
+        /**
+         * The ladder's rungs are milestones rather than plan items, but on paper a rung is just
+         * another thing with a box next to it.
+         *
+         * It used to be the title alone, which on the fridge is five bare phrases — "take one race
+         * off Kayla" with nothing saying what that means or where to go when it will not come. The
+         * blurb and the revisit are both one line each and both are the reason the rung is there.
+         */
+        ...MILESTONES.map((milestone) =>
+          el(
+            'li',
+            null,
+            ...tickAnd(milestone.id, milestone.title),
+            el('span', { class: 'sheet-rung-note' }, rich(t(milestone.blurb))),
+            el('span', { class: 'sheet-rung-note' }, rich(t(`**Stuck?** ${milestone.revisitWhy}`))),
+          ),
+        ),
       ),
     ),
     el(

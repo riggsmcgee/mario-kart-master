@@ -116,6 +116,8 @@ export const voicebox: Beat = {
     let cursor = 0;
     let squeaked = false;
     let noticed = false;
+    /** The phrase has been played. The vents still make noise; they stop being marked. */
+    let done = false;
 
     function light(index: number, ms = 260): void {
       const button = buttons[index];
@@ -155,10 +157,20 @@ export const voicebox: Beat = {
 
       // --- against the phrase ------------------------------------------------
 
+      // Once it is played, it is played. The vents stay pressable on purpose — she has just been
+      // given an instrument and taking it away the second it works would be mean, and the note has
+      // already sounded above — but the *phrase matcher* is finished, and it used to keep grading:
+      // one more press after the sixth fell through to the wrong-note branch and cut a flat "No."
+      // across the beat's closing praise.
+      if (done) return;
+
       if (PHRASE[cursor] === index) {
         slots[cursor]?.classList.add('k-slot-done');
         cursor += 1;
-        if (cursor >= PHRASE.length) solved.resolve();
+        if (cursor >= PHRASE.length) {
+          done = true;
+          solved.resolve();
+        }
         return;
       }
 

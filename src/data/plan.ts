@@ -79,6 +79,7 @@ export const RHYTHM = {
     'One box a day, five days a week, weekends off. Forty boxes, so about two months — but there are no dates anywhere on this page and there never will be. Do two in an evening if it is going well. Miss a fortnight and nothing has gone wrong; the next box is still simply the next box.',
     'Short and often beats long and rare. This is your hands learning a thing, and hands learn overnight — twenty minutes on four evenings will beat two hours on a Sunday, every time.',
     'A session is the one job in the box, then a couple of races for fun. Never the other way round: once the fun races start, the practising is finished for the night, and that is completely fine.',
+    'Time Trials only come at 150cc or 200cc — take 150cc. It is quicker than the 100cc you are training for, which is fine and is the point: the races feel slow and roomy afterwards.',
     '**This website is not the training.** The Switch is the training. Come back here to find out what tonight is, and in week three for the track deep dives.',
   ],
 };
@@ -141,9 +142,9 @@ export const FUNDAMENTALS: Fundamental[] = [
 // --- owning the cup ---------------------------------------------------------
 
 export const CUP_TRAINING = {
-  headline: 'Mushroom Cup. 100cc. Hard computers.',
+  headline: 'Mushroom Cup. 100cc. Grand Prix.',
   lines: [
-    'The computers are the sparring partner, and Hard is the right setting: Normal lets you win while driving badly, which teaches you that driving badly works.',
+    'The computers are the sparring partner, and 100cc is the right speed to spar at. Grand Prix has no easy or hard setting to choose — the engine class does that job, and the quicker the karts, the quicker the computers. Do not drop to 50cc: 50cc lets you win while driving badly, which teaches you that driving badly works.',
     'Run the whole cup, all four races, in order. Not single races — the cup, because the cup is what you are going to play against her, and a cup is won by the person who has no disaster rather than the person with one brilliant race.',
     'Two stages. Do not skip stage one; "routine" is the entire word that matters in both of them.',
   ],
@@ -154,7 +155,7 @@ export const CUP_TRAINING = {
       items: [
         {
           id: 'plan.cup.first-top3',
-          text: 'Finish the Mushroom Cup in the top three against Hard computers, once.',
+          text: 'Finish the Mushroom Cup in the top three at 100cc, once.',
         },
         {
           id: 'plan.cup.routine-top3',
@@ -167,7 +168,7 @@ export const CUP_TRAINING = {
       title: 'Stage two — own it',
       goal: 'Win it. Then win it again.',
       items: [
-        { id: 'plan.cup.first-win', text: 'Win the Mushroom Cup against Hard computers, once.' },
+        { id: 'plan.cup.first-win', text: 'Win the Mushroom Cup at 100cc, once.' },
         {
           id: 'plan.cup.routine-win',
           text: 'Win it twice in a row.',
@@ -198,7 +199,7 @@ export const MILESTONES: Milestone[] = [
   },
   {
     id: 'plan.milestone.top3',
-    title: 'Top three against Hard computers',
+    title: 'Top three in the cup at 100cc',
     blurb:
       'The full Mushroom Cup, four races, finishing top three overall. This is the rung where the track knowledge starts paying and you stop thinking about the controller.',
     revisit: 'ch4',
@@ -332,11 +333,35 @@ export function readCombo(): ComboChoice {
 
   if (typeof value === 'object' && value !== null) {
     const source = value as Record<string, unknown>;
-    const hint = text(source['id']) ?? text(source['name']) ?? text(source['label']) ?? '';
+    /**
+     * **`archetype` and `title` come first, because those are the keys Chapter 7 actually writes.**
+     *
+     * The charitable read below was written blind — this file deliberately does not import
+     * `parts.ts` — and it guessed wrong. `saveCombo` (parts.ts) stores
+     * `{ archetype, title, character, body, tyres, glider }`, and the only two keys this function
+     * looked at for the *name* were `id` and `name`. So `hint` was always the empty string,
+     * `archetypeFor('')` always returned undefined, and the name always fell through to the
+     * headline pick — while `character`, `body`, `tyres` and `glider` all resolved correctly.
+     *
+     * The result was a card that printed **The Comfy Speedster** above Toadette on a Biddybuggy,
+     * for every build except the one it happens to name, on the one page she takes to the sofa.
+     * Worse for Bill, whose headline is The Steady One and who was told he was on Peach's kart.
+     *
+     * The lesson is the one this project keeps relearning: a reader that cannot fail is not
+     * charitable, it is silent. It still accepts every shape it did before — the extra keys are
+     * added in front rather than in place of the old ones.
+     */
+    const hint =
+      text(source['archetype']) ??
+      text(source['id']) ??
+      text(source['title']) ??
+      text(source['name']) ??
+      text(source['label']) ??
+      '';
     const base = archetypeFor(hint) ?? HEADLINE_COMBO;
 
     const combo: Combo = {
-      name: text(source['name']) ?? text(source['label']) ?? base.name,
+      name: text(source['title']) ?? text(source['name']) ?? text(source['label']) ?? base.name,
       character: text(source['character']) ?? text(source['driver']) ?? base.character,
       kart: text(source['kart']) ?? text(source['body']) ?? text(source['vehicle']) ?? base.kart,
       tyres: text(source['tyres']) ?? text(source['tires']) ?? text(source['wheels']) ?? base.tyres,

@@ -121,7 +121,7 @@
       {
         "id": "follow",
         "label": "Follow her — she wins, so she must know the way",
-        "response": "She wins because she reacts faster than you, not because she has studied anything. Copying her line means agreeing to race her at the one thing she is genuinely better at. Do not race her. Race the road."
+        "response": "She is not driving that line because she looked it up — she is driving the line that looks shortest, like everybody does. Copying it means giving up the two pads you already know about, which is the one advantage you have here. Do not race her. Race the road."
       },
       {
         "id": "split",

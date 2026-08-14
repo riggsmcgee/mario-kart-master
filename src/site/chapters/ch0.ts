@@ -73,8 +73,10 @@ function skillsCard(ctx: ChapterContext): HTMLElement {
     el(
       'p',
       { style: { color: 'var(--ink-soft)', marginBottom: '0' } },
+      // Scoped to the skills, because the list is built from the data and the data ends with
+      // Chapter 8 — which is your training programme, not something {rival} picked up over years.
       ctx.t(
-        'Every one of those is something to know rather than something to be good at. {rival} collected them one at a time, over years, without anybody handing her a list.',
+        'The first seven are things to know rather than things to be good at, and {rival} collected them one at a time, over years, without anybody handing her a list. The last one is what you do with them.',
       ),
     ),
   );
@@ -105,7 +107,12 @@ const content: ChapterContent = {
 
       proseFor(ctx, [
         'Free speed on the start line, before anybody has moved. Free speed on top of every ramp. Free speed painted on the road in boost pads, usually in a lane nobody drives in. Items that do more for you held than thrown. None of it is difficult, and all of it is invisible until somebody points at it.',
-        `About an hour, and twelve minutes of that is a video. ${SKILLS.length} short chapters in order, and each one is two pages: the idea, and then a page where you get to try it, so it lands in your hands instead of just your head.`,
+        // Two corrections in one sentence. "Twelve minutes of that is a video" counted the big
+        // tutorial and not the three minutes of me sitting directly above this paragraph. And
+        // "each one is two pages" is not true of the last one — Chapter 8 is the programme, it has
+        // no practice page, and promising her one is the sort of small wrongness that makes a
+        // reader stop trusting the rest.
+        `About an hour, and a quarter of that is video. ${SKILLS.length} short chapters in order. The teaching ones are two pages each — the idea, then a page where you get to try it, so it lands in your hands instead of just your head — and the last one is the plan you keep.`,
         'Most of the work is not in here, and that is on purpose. A keyboard cannot teach your thumbs. The last chapter is a training programme for the Switch — forty short sessions with one job each — and *that* is the real course. This website is the bit that tells you what to point yourself at.',
         'Nothing here can be failed. There are stars, because everything is nicer with stars, but nothing locks, nothing is marked, and you can stop halfway through and come back. It remembers where you were.',
         'One condition. When it works — and it is going to work — I want to hear exactly how {rival} took it. That is the whole fee.',

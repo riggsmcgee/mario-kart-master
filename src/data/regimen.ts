@@ -46,6 +46,14 @@ export const CANYON = 'Sweet Sweet Canyon';
 export const RUINS = 'Thwomp Ruins';
 /** Cup sessions, which are all four in order. */
 export const ALL_FOUR = 'All four tracks';
+/**
+ * The session that deliberately does not name a track.
+ *
+ * Week 7 day 4 is "whichever of the four has gone worst this week", and it was pinned to Mario Kart
+ * Stadium — so the grid cell and the printed fridge sheet both named a track its own copy tells her
+ * to ignore. On paper, out of context, in week seven, the cell is all she has.
+ */
+export const ANY_TRACK = 'Your pick';
 
 /**
  * Short forms, for the grid cells.
@@ -61,14 +69,26 @@ const SHORT: Record<string, string> = {
   [CANYON]: 'Canyon',
   [RUINS]: 'Ruins',
   [ALL_FOUR]: 'The cup',
+  [ANY_TRACK]: 'Your pick',
 };
 
 export function shortTrack(name: string): string {
   return SHORT[name] ?? name;
 }
 
-/** What she sets the machine to before she starts. Kept short — it goes in the session box. */
-export type Mode = 'Time Trial' | 'VS · 100cc · Hard' | 'Mushroom Cup · 100cc · Hard' | 'Anything';
+/**
+ * What she sets the machine to before she starts. Kept short — it goes in the session box.
+ *
+ * **Grand Prix has no difficulty setting, so the cup sessions must not name one.** They used to say
+ * "Mushroom Cup · 100cc · Hard", which is not a thing she can select: in Mario Kart 8 Deluxe the
+ * Easy/Normal/Hard choice exists in VS Race only, and Grand Prix computers are always the hard ones
+ * whatever engine class you pick. Printing an unfindable setting on the fridge sheet is the worst
+ * kind of wrong — she stands in front of a menu looking for something that is not there and
+ * concludes the plan was written by somebody who has not played the game.
+ *
+ * `VS · 100cc · Hard` keeps its Hard, because that one is real and does have to be set.
+ */
+export type Mode = 'Time Trial' | 'VS · 100cc · Hard' | 'Mushroom Cup · 100cc' | 'Anything';
 
 export interface Session {
   /** Stable, semantic, append-only. See the file header before you touch one. */
@@ -169,7 +189,7 @@ export const WEEKS: Week[] = [
         'Time Trial',
         'Three runs',
         'A trick off every single ramp and bump.',
-        'Same track. This time press the trick button at the top of everything that lifts the wheels — the big ramp, the little rises, the anti-gravity section. Watch for the flip. No flip, no boost.',
+        'Same track. This time press the trick button at the top of everything that lifts the wheels — the glider ramp before the last turn, and the little ramp at the end of the outer lane on the finish straight. Watch for the flip. No flip, no boost.',
         'Same road as yesterday, different thing to think about. That is how this whole programme works.',
       ),
       session(
@@ -202,7 +222,7 @@ export const WEEKS: Week[] = [
         'ch3',
         'First cup',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'Start boost off every line, trick off every ramp.',
         'The whole cup, all four races. You have only properly driven the first one, and that is fine — the other three are a look around. Two jobs only, and ignore everything else including where you finish.',
@@ -225,7 +245,7 @@ export const WEEKS: Week[] = [
         'Three runs',
         'The outer lane after the first turn, every lap.',
         'After the first right the road splits into three lanes. Take the outer one every single lap, all three runs, until it stops feeling like a detour.',
-        'The dash panels and the coins are both out there. It is not a detour, and it feels wrong for about four laps.',
+        'The boost pads and the coins are both out there. It is not a detour, and it feels wrong for about four laps.',
       ),
       session(
         2,
@@ -260,7 +280,7 @@ export const WEEKS: Week[] = [
         'Time Trial',
         'Set one, then chase it',
         'Beat the you of twenty minutes ago.',
-        'Do one clean run with everything you have learned, and save the ghost. Then race it. Then race it again. If you beat it, save the new one.',
+        'Do one clean run with everything you have learned. Beat your best time and the game keeps that lap as your ghost by itself — there is nothing to save. Then pick your ghost on the course screen and race it. Then race it again.',
         'The only opponent in the game who is exactly your speed, and the first hard proof that any of this is working.',
       ),
       session(
@@ -310,12 +330,12 @@ export const WEEKS: Week[] = [
         3,
         3,
         'ch4',
-        'Every boost pad',
+        'Every free boost',
         WATER_PARK,
         'Time Trial',
         'Three runs',
-        'Touch every boost pad you can find.',
-        'Go out of your way. Take the ugly line. You are drawing a map tonight, not racing, so a slow lap that finds a new pad is a good lap.',
+        'Touch every free boost you can find.',
+        'Water Park gives its speed away differently: there are no boost pads here. Touch the wheels on the submarines in the anti-gravity loop and you get a boost, and the ramps give you one if you trick. Go out of your way, take the ugly line, and find all of them. A slow lap that finds a new one is a good lap.',
         'Knowing where they are is worth more than driving well over them, and knowing is a thing you can do in advance.',
       ),
       session(
@@ -358,7 +378,7 @@ export const WEEKS: Week[] = [
         'VS · 100cc · Hard',
         'Four races',
         'Never fire a single item forwards.',
-        'Everything you pick up gets held behind you instead. Yes, everything, all four races. Count how often something hits the thing you were carrying rather than hitting you.',
+        'Anything you can throw — banana, green shell, red shell — gets held behind you instead. A coin or a mushroom you simply use, and the bob-omb goes straight out the back. Count how often something hits the thing you were carrying rather than hitting you.',
         'That count is the entire lesson, and it is always higher than people expect.',
       ),
       session(
@@ -403,7 +423,7 @@ export const WEEKS: Week[] = [
         'ch2',
         'Defensive cup',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'Hold everything. Fire nothing but red shells.',
         'The full cup played defensively the whole way through. Then look at where you finished, and remember that you have not yet practised going faster.',
@@ -503,9 +523,9 @@ export const WEEKS: Week[] = [
         RUINS,
         'Time Trial',
         'Three runs',
-        'Take the middle route at the split, every lap.',
-        'Not either wall — the middle. Do it every lap of all three runs until it is the thing you do without deciding.',
-        'It is the one place in the cup where the fastest option and the easiest option are the same option.',
+        'Take the middle route at the split, every lap — and watch what turns up on lap two.',
+        'Not either wall — straight down the middle. On lap one that means through the water. From lap two a rolling boulder knocks a glide ramp into place and the middle gives you a glide as well. Every lap of all three runs, until it is the thing you do without deciding.',
+        'From lap two it is the one place in the cup where the fastest option and the easiest option are the same option.',
       ),
       session(
         6,
@@ -540,7 +560,7 @@ export const WEEKS: Week[] = [
         'Time Trial',
         'Set one, then chase it',
         'Beat the you of twenty minutes ago.',
-        'Last of the four ghosts. By now you know how this goes: one clean run, save it, then beat it.',
+        'Last of the four ghosts. By now you know how this goes: one clean run, then chase the ghost the game has kept for you.',
         'Every track in your cup now has a version of you on it that you have already beaten.',
       ),
     ],
@@ -556,7 +576,7 @@ export const WEEKS: Week[] = [
         'ch1',
         'Speed cup',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'Start boost and tricks, on all four.',
         'The whole cup with the free-speed jobs switched on and nothing else to think about. You know all four tracks now, which makes this a very different cup from week one.',
@@ -568,7 +588,7 @@ export const WEEKS: Week[] = [
         'ch5',
         'Coins cup',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'Ten coins and a tidy line, on all four.',
         'Same cup, different focus. Ten coins by the end of lap one in every race, and the wide-tight-wide line everywhere.',
@@ -580,7 +600,7 @@ export const WEEKS: Week[] = [
         'ch2',
         'Items cup',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'Hold everything. Fire only red shells.',
         'Third pass at the cup, this time watching your hands. Everything from the other two cups should still be happening underneath without you asking it to.',
@@ -591,7 +611,7 @@ export const WEEKS: Week[] = [
         4,
         'ch5',
         'Your worst track',
-        STADIUM,
+        ANY_TRACK,
         'Time Trial',
         'Four runs',
         'Whichever of the four has gone worst this week.',
@@ -601,10 +621,10 @@ export const WEEKS: Week[] = [
       session(
         7,
         5,
-        'ch4',
+        'ch8',
         'Top three',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'Everything on, and a real target: finish top three.',
         'No single focus tonight. Everything at once, and for the first time a result that counts.',
@@ -620,10 +640,10 @@ export const WEEKS: Week[] = [
       session(
         8,
         1,
-        'ch4',
+        'ch8',
         'Top three again',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'Do it a second time.',
         'Same target as Friday. If it happens again, it was not luck.',
@@ -632,22 +652,22 @@ export const WEEKS: Week[] = [
       session(
         8,
         2,
-        'ch4',
+        'ch8',
         'Go for the win',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'First place overall.',
-        'Win the Mushroom Cup against Hard computers. If it does not happen, note which race lost it — that track is tomorrow.',
+        'Win the Mushroom Cup at 100cc. If it does not happen, note which race lost it — that track is tomorrow.',
         'You now have somewhere specific to put a bad result, which is the entire point of having a plan.',
       ),
       session(
         8,
         3,
-        'ch4',
+        'ch8',
         'Win it again',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'Win it twice running.',
         'Or, if yesterday went wrong, four Time Trial runs of the race that lost it and then the cup again.',
@@ -671,7 +691,7 @@ export const WEEKS: Week[] = [
         'ch8',
         'Race {rival}',
         ALL_FOUR,
-        'Mushroom Cup · 100cc · Hard',
+        'Mushroom Cup · 100cc',
         'One full cup',
         'When it is your pick, it is your cup. Every time.',
         'No mercy picks. Hold the banana, take your ten coins, drive the boring line, and let her find out. Read the seven race-day rules before you sit down, not during.',

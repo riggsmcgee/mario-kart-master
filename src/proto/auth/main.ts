@@ -3,7 +3,7 @@ import '../../ui/proto.css';
 import { installErrorBanner } from '../../ui/error-banner';
 import {
   SIGNED_OUT,
-  cleanAuthFragmentFromUrl,
+  consumeAuthFragment,
   getAuthState,
   getProfile,
   isConfigured,
@@ -117,12 +117,11 @@ document.querySelector<HTMLInputElement>('#email')?.addEventListener('keydown', 
   if (event.key === 'Enter') document.querySelector<HTMLButtonElement>('#send')?.click();
 });
 
-// The client consumes the tokens from the magic link on load; clear them out of the address
-// bar so they do not linger in history.
-cleanAuthFragmentFromUrl();
-
+// Take the magic link's tokens out of the address bar and sign in with them. The bench does this
+// the same way the real site does, deliberately — this page is where the flow gets debugged, so a
+// bench that consumed the fragment differently would be testing something the site does not do.
 onAuthChange((next) => {
   void applyState(next);
 });
 
-void getAuthState().then(applyState);
+void consumeAuthFragment().then(() => getAuthState().then(applyState));
