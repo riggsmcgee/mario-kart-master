@@ -151,6 +151,20 @@ skip link, three non-canonical URLs, the race-day build name, all four storage k
 reopening, the leave dialogue's focus/inert/Escape/second-press behaviour, and a double-click on the
 assessment advancing exactly one question.
 
+**Deployed, and verified there rather than here.** Committed as `4bd35ed` and pushed; the Pages build
+went green in 47 seconds. Everything above was then re-run against
+`https://riggsmcgee.github.io/mario-kart-master/` rather than localhost, because a production bundle is
+a different program: minified, code-split, served from a subpath, with the Supabase values baked in at
+build time. **22/22 routes**, the full regression suite, all eight of Kayla's beats, and **766 text
+nodes at 0 contrast failures** — all clean on the live site. `intro.mp4` answers a range request with
+`206` and `video/mp4`, so it seeks rather than only plays. The anon key is in the bundle and
+`service_role` appears nowhere in it.
+
+The magic-link path got its first real test, which it had never had: the live site was loaded with a
+Supabase-shaped `#access_token=…` fragment. The router does not read it as a wrong turn, the address bar
+is clean afterwards, nothing throws, and the doorman still opens once the bad token is rejected. That is
+every part of the flow except a real token, which still needs a real inbox (gate 1f4).
+
 **Left open, and unchanged.** Nothing has ever run on macOS, which is the only platform Jodi has. And
 the link has not been sent.
 
